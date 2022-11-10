@@ -18,8 +18,7 @@ def remove_features(corpus):
             text = w.rsplit(".", 1)[1][:-1]
             corpus=corpus.replace(w, text)
         except IndexError:
-            print(f"I found an error for the text '{text}'.\n"
-                  f"The complete tag is '{w}'. Myabe it does not have a point in it?\n"
+            print(f"I found an error for the tag '{w}'. Myabe it does not have a point in it?\n"
                   f"Please check the tag and try again.")
             exit()
             continue
