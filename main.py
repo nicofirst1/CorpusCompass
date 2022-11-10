@@ -14,8 +14,15 @@ def remove_features(corpus):
     words = square_regex.findall(corpus)
 
     for w in words:
-        text = w.rsplit(".", 1)[1][:-1]
-        corpus=corpus.replace(w, text)
+        try:
+            text = w.rsplit(".", 1)[1][:-1]
+            corpus=corpus.replace(w, text)
+        except IndexError:
+            print(f"I found an error for the text '{text}'.\n"
+                  f"The complete tag is '{w}'. Myabe it does not have a point in it?\n"
+                  f"Please check the tag and try again.")
+            exit()
+            continue
 
     return corpus
 
@@ -43,8 +50,9 @@ if __name__ == '__main__':
 
 
    # ask user for path input
-    transcription_path="/Users/giulia/Downloads/Aya.txt"
+    transcription_path="/Users/giulia/Downloads/Somaya.txt"
     path = input(f'Enter transcription path, or leave blank if "{transcription_path}" is correct: ')
+    print("\n")
     if len(path) > 0:
         transcription_path = path
 
