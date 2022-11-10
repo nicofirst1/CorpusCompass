@@ -3,9 +3,14 @@ import json
 import re
 from copy import copy
 
+# REGEX used to find the tags
+square_regex=re.compile(r"(\[\$[\S ]*?\])")
+feat_regex = re.compile(r'\[\$([\S ]*?)\]')
+
+# vairalbe paths
 dependent_variable_path = './dependent_variables.json'
 independent_variable_path = './independent_variables.json'
-square_regex=re.compile(r"(\[\$[\S ]*?\])")
+
 
 def remove_features(corpus):
 
@@ -71,7 +76,6 @@ if __name__ == '__main__':
     listener=trans[1][0]
 
     # compile regex to find features
-    feat_regex = re.compile(r'\[\$([\S ]*?)\]')
 
     csv_header=list(dependent_variable.keys())
     csv_header=["text"] +csv_header +["unk"]
