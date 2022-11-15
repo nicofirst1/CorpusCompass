@@ -6,13 +6,25 @@ from copy import copy
 # REGEX used to find the tags
 square_regex=re.compile(r"(\[\$[\S ]*?\])")
 feat_regex = re.compile(r'\[\$([\S ]*?)\]')
+sequence_regex=re.compile(r"({[\S ]+})")
 
 # vairalbe paths
 dependent_variable_path = './dependent_variables.json'
 independent_variable_path = './independent_variables.json'
 
+# path for the transcription file
+transcription_path = "/Users/giulia/Downloads/Aya.txt"
+
+# separator for the csv file
+# if you are german, use '\t' instead of ','
+# Alternatives are:
+# tab: ';'
+separator = '\t'
 
 def remove_features(corpus):
+    """
+    Remove the features from the corpus
+    """
 
     corpus=copy(corpus)
 
@@ -30,7 +42,8 @@ def remove_features(corpus):
 
     return corpus
 
-
+def get_name(line):
+    return line.split(" ")[0]
 
 if __name__ == '__main__':
 
@@ -38,8 +51,8 @@ if __name__ == '__main__':
     with open(dependent_variable_path, 'r') as f:
         dependent_variable = json.load(f)
 
-        # Load the dependent variable
-    with open(dependent_variable_path, 'r') as f:
+    # Load the dependent variable
+    with open(independent_variable_path, 'r') as f:
         independent_variable = json.load(f)
 
     dependent_variable.update(independent_variable)
@@ -54,11 +67,10 @@ if __name__ == '__main__':
 
 
    # ask user for path input
-    transcription_path="/Users/giulia/Downloads/Somaya.txt"
     path = input(f'Enter transcription path, or leave blank if "{transcription_path}" is correct: ')
     print("\n")
     if len(path) > 0:
-        transcription_path = path
+        transcription_path = path.strip()
 
     output_path = transcription_path.replace('.txt', '_output.csv')
 
@@ -71,14 +83,48 @@ if __name__ == '__main__':
     trans=[x.strip() for x in trans]
     trans=[x for x in trans if x != '']
 
+
+    # ask for interviwers name
+    interviewers = input(f'Add the name(s) of the interviewer(s) (separated by comma), '
+                         f'leave empty for classical interviewer-interviewees structure: ')
+    print("\n")
+    if len(interviewers) > 0:
+        interviewers = interviewers.split(',')
+    else:
+        interviewers = trans[0][0]
+
+    # ask for previous line
+    previous_line = input(f'Do you want to include the previous line? (y/n): ')
+    print("\n")
+    if previous_line == 'y':
+        previous_line = True
+    else:
+        previous_line = False
+
     # get speak/list names
-    speaker=trans[0][0]
-    listener=trans[1][0]
+    names=[get_name(x) for x in trans]
+    names=set(names)
+
+    # remove all mention of interviwers in names
+    for i in interviewers:
+        names=[x for x in names if i not in x]
+
+    interviewees=list(names)
+
+    # notify user about names
+    print(f"I found the following names: {', '.join(interviewees)}")
+
 
     # compile regex to find features
-
     csv_header=list(dependent_variable.keys())
-    csv_header=["text"] +csv_header +["unk"]
+
+    # define the end of the csv
+    csv_end = ['sequence in sentence','unk']
+
+    if previous_line:
+        csv_end.insert(0, 'previous line')
+
+    csv_header=["text"] +csv_header +csv_end
 
     csv_file=[csv_header]
 
@@ -91,22 +137,31 @@ if __name__ == '__main__':
 
         # get the paragraph without features
 
-        if c[0] == listener:
+        if get_name(c) in interviewees:
             sp=trans[idx-1]
         else:
             continue
 
         clean_p=remove_features(c)
 
+        # capture all the sequences
+        sequences=sequence_regex.finditer(clean_p)
+        sequences=[(x.start(),x.end(),x.group()) for x in sequences]
+
         # get the features
-        words=feat_regex.findall(c)
+        tags=feat_regex.finditer(c)
 
-        # for every words with features in the paragraph
-        for w in words:
+        # for every tags with features in the paragraph
+        for t in tags:
+            # get index of result + tag
+            index=t.start()
+            t=t.group(1)
 
+            # initialize empty row
             csv_line=["" for _ in range(len(csv_header))]
 
-            feats=w.rsplit(".",1)
+            # get the features
+            feats=t.rsplit(".",1)
             text=feats[1]
             feats=feats[0]
 
@@ -123,19 +178,25 @@ if __name__ == '__main__':
 
             # add initial infos and final unk to the line
             csv_line[0]=text
-            # csv_line[1]=clean_p
-            # csv_line[2]=sp
+            if previous_line:
+                csv_line[-3]=sp
+
+            # add the sequence to the line
+            if len(sequences)!=0:
+                for s in sequences:
+                    seq_start,seq_end,seq=sequences[0]
+                    if seq_start<index<seq_end:
+                        seq=seq.replace("{","").replace("}","")
+                        csv_line[-2]=seq
+
             csv_line[-1]=csv_line[-1].strip(",")
-
-
-
             csv_file.append(csv_line)
 
 
 
     # write the csv
     with open(output_path, "w", newline="", encoding="utf16") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f,delimiter=separator)
         writer.writerows(csv_file)
 
     print(f"Done!\nFile has been saved in '{output_path}'")
