@@ -14,7 +14,7 @@ dependent_variable_path = './dependent_variables.json'
 independent_variable_path = './independent_variables.json'
 
 # path for the transcription file
-transcription_path = "/Users/giulia/Downloads/Aya.txt"
+transcription_path = ""
 
 # separator for the csv file
 # if you are german, use '\t' instead of ','
