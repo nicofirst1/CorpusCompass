@@ -104,7 +104,7 @@ def main(transcription_path):
         previous_line = False
 
     # get speak/list names
-    names = [get_name(x) for x in trans]
+    names = [get_name(x).strip() for x in trans]
     names = set(names)
 
     # remove all mention of interviwers in names
