@@ -5,7 +5,9 @@ Did it take you 3 years to annotate and need to have it all nice and clean in a 
 
 Well, despair no more, this is the tool for you!
 
-TranscriptionTagger is a tool for converting between different formats of transcriptions. It is designed to be used with the [ELAN](https://tla.mpi.nl/tools/tla-tools/elan/) annotation tool, but can be used with any other tool that uses a similar format.
+TranscriptionTagger is a tool for converting between different formats of transcriptions. 
+It is designed to be used with [ELAN](https://tla.mpi.nl/tools/tla-tools/elan/) and [Praat](https://www.fon.hum.uva.nl/praat/) annotation tools,
+but can be used with any other tool that uses a similar format.
 
 
 ![example image](example.png)
