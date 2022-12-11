@@ -1,6 +1,10 @@
 # TranscriptionTagger
 Use to convert trasnscription into csv.
 
+## COLAB
+If you know nothing about programming, I highly advise you to use the [colab notebook](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/main.ipynb).
+
+
 ## Usage
 To run the program simply write
 ```
