@@ -71,7 +71,8 @@ def main(transcription_path):
             idv[v] = k
 
     # ask user for path input
-    path = input(info(f'Enter transcription path, or leave blank if "{transcription_path}" is correct: '))
+    path = input(info(f'Drag and drop the transcription file (.txt), or leave blank if "{transcription_path}" '
+                      f'is correct: '))
     print("\n")
     if len(path) > 0:
         transcription_path = path.strip()
@@ -96,7 +97,8 @@ def main(transcription_path):
         interviewers = trans[0][0]
 
     # ask for previous line
-    previous_line = input(info(f'Do you want to include the previous line? (y/n): '))
+    previous_line = input(info(f'When generating the final cvs file, I can also include the speaker utterance.'
+                               f' Do you want me to include it? (y/n): '))
     print("\n")
     if previous_line == 'y':
         previous_line = True
