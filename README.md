@@ -10,7 +10,7 @@ It is designed to be used with [ELAN](https://tla.mpi.nl/tools/tla-tools/elan/) 
 but can be used with any other tool that uses a similar format.
 
 
-![example image](example.png)
+![example image](./includes/example.png)
 
 
 
