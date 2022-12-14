@@ -2,7 +2,7 @@ import re
 import string
 from collections import Counter
 from copy import copy
-from typing import Tuple
+from typing import Tuple, List, Dict
 
 import nltk
 nltk.download('punkt')
@@ -73,6 +73,19 @@ def get_ngram(word:str, corpus:str, ngram_params:Tuple[int, int]):
     result=" ".join( corpus.split(" ")[lower_bound:upper_bound])
 
     return result
+
+
+
+def multi_corpus_upload(corpus_list:Dict[str,bytes])->str:
+    """
+    Upload multiple corpus
+    """
+    corpus=""
+    for k,v in corpus_list.items():
+        corpus+=v.decode("utf-16")+"\n"
+
+    return corpus
+
 
 
 
