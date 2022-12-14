@@ -9,7 +9,6 @@ nltk.download('punkt')
 
 from nltk import RegexpTokenizer, word_tokenize
 
-name_regex= re.compile(r"(^[A-Z]) ")
 
 def remove_features(corpus,square_regex):
     """
@@ -28,14 +27,14 @@ def remove_features(corpus,square_regex):
 
     return corpus
 
-def get_name(line:str):
+def get_name(line:str, regex):
     """
     Use the regex to find the name of the speaker
     :param line:
     :return:
     """
 
-    name = name_regex.findall(line)
+    name = regex.findall(line)
     if len(name) > 0:
         return name[0]
     else:
@@ -86,6 +85,21 @@ def multi_corpus_upload(corpus_list:Dict[str,bytes])->str:
 
     return corpus
 
+
+def find_repetitions(corpus, token, regex):
+
+    char_ngram = (+50,  50)
+
+    wild_rep=corpus.count(f" {token} ")
+    ann_rep=regex.findall(corpus)
+
+    ann_rep=[a.replace("]","").replace(".","") for a in ann_rep ]
+    ann_rep=[a for a in ann_rep if token in a]
+    ann_rep=len(ann_rep)
+
+    wild_index=[corpus[m.start()-char_ngram[0]:m.start()+char_ngram[1]] for m in re.finditer(f" {token} ", corpus)]
+
+    return wild_rep, ann_rep, wild_index
 
 
 

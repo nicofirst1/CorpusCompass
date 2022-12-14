@@ -26,7 +26,11 @@ We have different notebooks for different tasks:
 - [Analyzing a corpus](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/transcription_analysis.ipynb).
 
 
-# Python code
+### Configuration File
+The configuration file is a python file that contains the information about the transcription format.
+You can view it [here](Configs.py). In order to change it to your needs, you need to open it in the notebook and change the values.
+
+## Python code
 If you don't like notebooks for some reason, you can also convert the notebook to a python file.
 To do this, install nbconvert with `pip install nbconvert` and run `jupyter nbconvert --to python notebook.ipynb` in the directory of the notebook.
 
