@@ -22,7 +22,13 @@ If you are not familiar with colab, check this tutorial on [how to use colab](ht
 
 We have different notebooks for different tasks:
 
-- [Converting a transcription to a csv dataset](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/main.ipynb).
+- [Converting a transcription to a csv dataset](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/dataset_creation.ipynb).
+- [Analyzing a corpus](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/transcription_analysis.ipynb).
 
 
+# Python code
+If you don't like notebooks for some reason, you can also convert the notebook to a python file.
+To do this, install nbconvert with `pip install nbconvert` and run `jupyter nbconvert --to python notebook.ipynb` in the directory of the notebook.
 
+On the other hand, if you want to convert python code to a notebook, you need to install `p2j` with `pip install p2j` 
+and run `p2j notebook.py` in the directory of the python file.

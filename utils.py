@@ -1,8 +1,14 @@
+import re
+from collections import Counter
 from copy import copy
 from typing import Tuple
 
-from nltk import RegexpTokenizer
+import nltk
+nltk.download('punkt')
 
+from nltk import RegexpTokenizer, word_tokenize
+
+name_regex= re.compile(r"(^[A-Z]) ")
 
 def remove_features(corpus,square_regex):
     """
@@ -22,7 +28,17 @@ def remove_features(corpus,square_regex):
     return corpus
 
 def get_name(line:str):
-    return line.split(" ")[0]
+    """
+    Use the regex to find the name of the speaker
+    :param line:
+    :return:
+    """
+
+    name = name_regex.findall(line)
+    if len(name) > 0:
+        return name[0]
+    else:
+        return ""
 
 def get_ngram(word:str, corpus:str, ngram_params:Tuple[int, int]):
     """
@@ -58,3 +74,22 @@ def get_ngram(word:str, corpus:str, ngram_params:Tuple[int, int]):
     return result
 
 
+
+def count_tokens(corpus:str, remove_punctuation=True):
+    """
+    Count the number of tokens in a corpus
+    :param corpus:
+    :param remove_punctuation:
+    :return:
+    """
+    corpus_words=word_tokenize(corpus)
+
+
+    corpus_words=Counter(corpus_words)
+
+    # exclude punctuation
+    if remove_punctuation:
+        corpus_words={k:v for k,v in corpus_words.items() if k not in string.punctuation}
+
+
+    return corpus_words
