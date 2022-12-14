@@ -23,12 +23,9 @@ If you are not familiar with colab, check this tutorial on [how to use colab](ht
 We have different notebooks for different tasks:
 
 - [Converting a transcription to a csv dataset](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/dataset_creation.ipynb).
-- [Analyzing a corpus](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/transcription_analysis.ipynb).
+- [Analyzing a corpus](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/corpus_analysis.ipynb).
 
 
-### Configuration File
-The configuration file is a python file that contains the information about the transcription format.
-You can view it [here](Configs.py). In order to change it to your needs, you need to open it in the notebook and change the values.
 
 ## Python code
 If you don't like notebooks for some reason, you can also convert the notebook to a python file.
