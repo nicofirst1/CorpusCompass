@@ -1,5 +1,4 @@
 {
-  "name" : [ "characteristic 1", "characteristic 2", "characteristic 3" ],
   "A": ["female","young","low"],
   "B" : ["male","old","high"]
 
