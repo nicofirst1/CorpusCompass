@@ -23,7 +23,7 @@ If you are not familiar with colab, check this tutorial on [how to use colab](ht
 We have different notebooks for different tasks:
 
 - [Converting a transcription to a csv dataset](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/dataset_creation.ipynb).
-- [Analyzing a corpus](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/corpus_analysis.ipynb).
+- An experimental [corpus analyzer](https://colab.research.google.com/github/nicofirst1/TranscriptionTagger/blob/main/corpus_analysis.ipynb) (may have some unresolved issues).
 
 
 
@@ -33,3 +33,15 @@ To do this, install nbconvert with `pip install nbconvert` and run `jupyter nbco
 
 On the other hand, if you want to convert python code to a notebook, you need to install `p2j` with `pip install p2j` 
 and run `p2j notebook.py` in the directory of the python file.
+
+# TODO
+
+List of todos:
+- Bugs and errors:
+  - [x] add default start of paragraph regex (without speaker at start)
+  - [x] check for paragraph separators such as '\r' 
+  - [ ] debug on more data
+- Features and extensions:
+  - [ ] replace interviewer/interviewee with interested speakers (or something similar)
+  - [ ] independent variables, connected to speakers
+  - [ ] add more infos during program execution

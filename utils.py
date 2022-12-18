@@ -87,6 +87,21 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes]) -> str:
 
     return corpus
 
+def split_paragraphs(corpus: str) -> List[str]:
+    """
+    Split the corpus into paragraphs
+    :param corpus:
+    :return:
+    """
+
+    res= corpus.split("\n")
+    if len(res) == 1:
+        res = corpus.split("\r")
+
+    if len(res) == 1:
+        raise ValueError("Could not split the corpus into paragraphs. Please check the format of the corpus.")
+
+    return res
 
 def find_repetitions(corpus: str, token: str, regex: re.Pattern) -> Tuple[int, int, List[str]]:
     """
