@@ -42,6 +42,6 @@ List of todos:
   - [x] check for paragraph separators such as '\r' 
   - [ ] debug on more data
 - Features and extensions:
-  - [ ] replace interviewer/interviewee with interested speakers (or something similar)
+  - [X] replace interviewer/interviewee with interested speakers (or something similar)
   - [ ] independent variables, connected to speakers
-  - [ ] add more infos during program execution
+  - [X] add more infos during program execution
