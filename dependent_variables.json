@@ -13,6 +13,9 @@
   "K/Č": ["KC", "CK"],
   "Q/G": ["QG", "GQ"],
   "Q/K" : ["QK", "KQ"],
-  "Syllable Structure": ["SS-DIF", "SS-LEV"]
+  "Syllable Structure": ["SS-DIF", "SS-LEV"],
+  "Gender": ["male","female"],
+  "Age" : ["old", "young"],
+  "Education level" : ["low", "high"]
 
 }
