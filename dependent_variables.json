@@ -1,21 +1,7 @@
 {
-  "Typ IA": "IA",
-  "Oth L" : "OTH-L",
-  "SA":  "OTH-SA",
-  "German" : ["G-SCHOOL", "G-JOB", "G-FRIE", "G-GER", "G-COV", "G-OTH"],
-  "Relig Phrase": "RELIG",
-  "Oth Variety": "OTH-DIAL",
-  "Demonstratives": ["DEM-HA-BEG", "DEM-A-END", "DEM-NO-HA-BEG", "DEM-NO-A-END", "DEM-HAL", "DEM-HAAY", "DEM-HAAYA", "DEM-HA", "DEM-I-END", "DEM-DHOOLE"],
-  "maal": ["MAAL", "NO-MAAL"],
-  "mu": "MU",
-  "Präfix" : ["DA", "JAAY", "GAAM"],
-  "Suffix": ["NO-N", "SUF-IINA", "SUF-NO-IINA"],
-  "K/Č": ["KC", "CK"],
-  "Q/G": ["QG", "GQ"],
-  "Q/K" : ["QK", "KQ"],
-  "Syllable Structure": ["SS-DIF", "SS-LEV"],
+  "Typical Iraqi-Arabic": "TYP-IA",
+  "German" : ["G-DL", "G-EDU", "G-JOB"],
+  "Question word" : "Q-WORD",
   "Gender": ["male","female"],
-  "Age" : ["old", "young"],
-  "Education level" : ["low", "high"]
-
+  "Age" : ["old", "young"]
 }
