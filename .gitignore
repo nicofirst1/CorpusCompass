@@ -6,3 +6,7 @@
 .ipynb_checkpoints/
 
 .DS_Store
+
+TranscriptionTagger.egg-info/
+
+TranscriptionTagger/
