@@ -20,11 +20,11 @@ def remove_features(corpus, square_regex):
     wrong_tags = []
     for w in words:
         try:
-            text = w.rsplit(".", 1)[1][:-1]
+            text = w.rsplit(".", 1)[1][:-1] + " "
             corpus = corpus.replace(w, text)
         except IndexError:
-            print(f"I found an error for the tag '{w}'. Myabe it does not have a point in it?\n"
-                  f"Please check the tag and try again.", "error")
+            print(f"I found an error for the tag '{w}'. Maybe it does not have a point in it?\n"
+                  f"Please check the tag and try again.")
             wrong_tags.append(w)
             continue
 
@@ -60,7 +60,7 @@ def get_ngram(word: str, corpus: str, ngram_params: Tuple[int, int]):
         words_idx = [lookup_corpus.index(word) for word in words]
     except ValueError:
         print(
-            f"Could not find the word '{word}' in the corpus:\n {corpus}.\n\n Maybe there is a problem with the annotation?\nI'm going to skip this for now, but you should check it later!\n\n")
+            f"Could not find the word '{word}' in the corpus:\n---{corpus}.\nMaybe there is a problem with the annotation?\nI'm going to skip this for now, but you should check it later!\n\n")
         return "Error"
 
     lower_bound = [w - ngram_params[0] for w in words_idx]
@@ -107,14 +107,18 @@ def split_paragraphs(corpus: str) -> List[str]:
     return res
 
 
-def find_repetitions(corpus: str, token: str, regex: re.Pattern) -> Tuple[int, int, List[str]]:
+def find_repetitions(corpus: str, token: str, annotation_regex: re.Pattern, name_regex: re.Pattern,
+                     speaker_of_interest: List[str]) -> Tuple[int, int,int, List[str]]:
     """
     Find the repetitions of a token in a corpus
     :param corpus: the corpus
     :param token: the token to look for
-    :param regex: the regex to use
+    :param annotation_regex: the regex to use
+    :param name_regex: the regex to use to find the name of the speaker
+    :param speaker_of_interest: a list of speaker of interest
     :return: Tuple with :
-    - the repetitions of not-annotated tokens
+    - the repetitions of all not-annotated tokens
+    - the repetitions of not-annotated tokens of the speaker of interest
     - the repetitions of annotated tokens
     - the context of non-annotated tokens
     """
@@ -122,12 +126,24 @@ def find_repetitions(corpus: str, token: str, regex: re.Pattern) -> Tuple[int, i
     # context n-gram
     char_ngram = (+50, 50)
 
-    custom_regex = re.compile(rf"({token}[^\]A-z][.,]?)")
+    custom_regex = re.compile(rf"( {token}[^\]A-z][.,]?)")
 
-    wild_rep = len(re.findall(custom_regex, corpus))
+    wild_rep = list(re.finditer(custom_regex, corpus))
+    total_wild_rep = len(wild_rep)
+    interested_wild_rep = 0
 
-    # wild_rep = corpus.count(f" {token} ")
-    ann_rep = regex.findall(corpus)
+    for w in wild_rep:
+        # find the speaker based on match location
+        speaker = ""
+        speak = corpus[:w.start()].split("\n")
+        speak = speak[-1]
+        speak = get_name(speak, name_regex)
+
+        if speak in speaker_of_interest:
+            interested_wild_rep += 1
+
+    # total_wild_rep = corpus.count(f" {token} ")
+    ann_rep = annotation_regex.findall(corpus)
 
     ann_rep = [a.split(".")[-1] for a in ann_rep]
     ann_rep = [a for a in ann_rep if token == a]
@@ -143,7 +159,7 @@ def find_repetitions(corpus: str, token: str, regex: re.Pattern) -> Tuple[int, i
 
         wild_index.append(corpus[lower_bound:upper_bound])
 
-    return wild_rep, ann_rep, wild_index
+    return total_wild_rep, interested_wild_rep, ann_rep, wild_index
 
 
 def count_tokens(corpus: str, remove_punctuation=True):
