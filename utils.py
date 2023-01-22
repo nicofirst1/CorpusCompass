@@ -17,6 +17,7 @@ def remove_features(corpus, square_regex):
     """
     corpus = copy(corpus)
     words = square_regex.findall(corpus)
+    wrong_tags = []
     for w in words:
         try:
             text = w.rsplit(".", 1)[1][:-1]
@@ -24,9 +25,10 @@ def remove_features(corpus, square_regex):
         except IndexError:
             print(f"I found an error for the tag '{w}'. Myabe it does not have a point in it?\n"
                   f"Please check the tag and try again.", "error")
-            exit()
+            wrong_tags.append(w)
+            continue
 
-    return corpus
+    return corpus, wrong_tags
 
 
 def get_name(line: str, regex):
@@ -58,7 +60,7 @@ def get_ngram(word: str, corpus: str, ngram_params: Tuple[int, int]):
         words_idx = [lookup_corpus.index(word) for word in words]
     except ValueError:
         print(
-            f"Could not find the word '{word}' in the corpus:\n {corpus}.\n\n Maybe there is a problem with the annotation?\nI'm going to skip this for now, but you should check it later!")
+            f"Could not find the word '{word}' in the corpus:\n {corpus}.\n\n Maybe there is a problem with the annotation?\nI'm going to skip this for now, but you should check it later!\n\n")
         return "Error"
 
     lower_bound = [w - ngram_params[0] for w in words_idx]
@@ -87,6 +89,7 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes]) -> str:
 
     return corpus
 
+
 def split_paragraphs(corpus: str) -> List[str]:
     """
     Split the corpus into paragraphs
@@ -94,7 +97,7 @@ def split_paragraphs(corpus: str) -> List[str]:
     :return:
     """
 
-    res= corpus.split("\n")
+    res = corpus.split("\n")
     if len(res) == 1:
         res = corpus.split("\r")
 
@@ -102,6 +105,7 @@ def split_paragraphs(corpus: str) -> List[str]:
         raise ValueError("Could not split the corpus into paragraphs. Please check the format of the corpus.")
 
     return res
+
 
 def find_repetitions(corpus: str, token: str, regex: re.Pattern) -> Tuple[int, int, List[str]]:
     """
@@ -118,15 +122,19 @@ def find_repetitions(corpus: str, token: str, regex: re.Pattern) -> Tuple[int, i
     # context n-gram
     char_ngram = (+50, 50)
 
-    wild_rep = corpus.count(f" {token} ")
+    custom_regex = re.compile(rf"({token}[^\]A-z][.,]?)")
+
+    wild_rep = len(re.findall(custom_regex, corpus))
+
+    # wild_rep = corpus.count(f" {token} ")
     ann_rep = regex.findall(corpus)
 
-    ann_rep = [a.replace("]", "").replace(".", "") for a in ann_rep]
-    ann_rep = [a for a in ann_rep if token in a]
+    ann_rep = [a.split(".")[-1] for a in ann_rep]
+    ann_rep = [a for a in ann_rep if token == a]
     ann_rep = len(ann_rep)
 
-    wild_index=[]
-    for group in  re.finditer(f" {token} ", corpus):
+    wild_index = []
+    for group in re.finditer(custom_regex, corpus):
         lower_bound = group.start() - char_ngram[0]
         upper_bound = group.end() + char_ngram[1]
 
@@ -134,8 +142,6 @@ def find_repetitions(corpus: str, token: str, regex: re.Pattern) -> Tuple[int, i
         upper_bound = upper_bound if upper_bound < len(corpus) else len(corpus)
 
         wild_index.append(corpus[lower_bound:upper_bound])
-
-
 
     return wild_rep, ann_rep, wild_index
 
