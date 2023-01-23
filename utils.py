@@ -108,7 +108,7 @@ def split_paragraphs(corpus: str) -> List[str]:
 
 
 def find_repetitions(corpus: str, token: str, annotation_regex: re.Pattern, name_regex: re.Pattern,
-                     speaker_of_interest: List[str]) -> Tuple[int, int,int, List[str]]:
+                     speaker_of_interest: List[str]) -> Tuple[int, int, int, List[str]]:
     """
     Find the repetitions of a token in a corpus
     :param corpus: the corpus
