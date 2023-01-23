@@ -11,6 +11,64 @@ nltk.download('punkt')
 from nltk import RegexpTokenizer, word_tokenize
 
 
+def check_correct_annotations(annotations: List[re.Match], corpus: str, verbose: bool = True) -> Tuple[
+    List[str], List[Tuple[str, str]]]:
+    """
+    Check if the annotations are correct
+
+    :param annotations: the annotations to check
+    :param corpus: the corpus
+    :return: a tuple with the correct annotations and the incorrect ones
+    """
+
+    def get_context(match: re.Match, ngram_params: Tuple[int, int]) -> str:
+        """
+        Get the context of a match
+        """
+        lower_bound = match.start() - ngram_params[0]
+        upper_bound = match.end() + ngram_params[1]
+
+        # Check if the ngram is out of the corpus
+        lower_bound = lower_bound if lower_bound > 0 else 0
+        upper_bound = upper_bound if upper_bound < len(corpus) else len(corpus)
+
+        result = " ".join(corpus.split(" ")[lower_bound:upper_bound])
+
+        return result
+
+    def custom_print(*args, **kwargs):
+        if verbose:
+            print(*args, **kwargs)
+
+    ngram_params = (+50, 50)
+    new_annotations = []
+    incorrect_annotations = []
+    for ann in annotations:
+        group = ann.group()
+        # check if there are parenthesis
+        if "(" in group or ")" in group:
+            custom_print(f"The annotation '{group}' contains parenthesis . Please remove them and try again.")
+            incorrect_annotations.append((group, get_context(ann, ngram_params)))
+            continue
+        # elif if the number of square brackets is greater than 1
+        elif len(re.findall(r"\[|\]", group)) > 2:
+            custom_print(
+                f"The annotation '{group}' contains more than one square bracket. Please remove them and try again.")
+            incorrect_annotations.append((group, get_context(ann, ngram_params)))
+            continue
+        # elif there is no point in the annotation
+        elif "." not in group:
+            custom_print(f"The annotation '{group}' does not contain a point. Please add it and try again.")
+            incorrect_annotations.append((group, get_context(ann, ngram_params)))
+            continue
+
+
+        else:
+            new_annotations.append(group)
+
+    return new_annotations, incorrect_annotations
+
+
 def remove_features(corpus, square_regex):
     """
     Remove the features from the corpus
