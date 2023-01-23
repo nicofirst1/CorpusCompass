@@ -126,7 +126,7 @@ def find_repetitions(corpus: str, token: str, annotation_regex: re.Pattern, name
     # context n-gram
     char_ngram = (+50, 50)
 
-    custom_regex = re.compile(rf"( {token}[^\]A-z][.,]?)")
+    custom_regex = re.compile(rf"( {token}[^\][A-z][.,]?)")
 
     wild_rep = list(re.finditer(custom_regex, corpus))
     total_wild_rep = len(wild_rep)
