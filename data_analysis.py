@@ -1,23 +1,29 @@
 import os
 import sys
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
-import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 analysis_path = "analysis"
 
-def kmeans_analysis(df, cluster_path=f"{analysis_path}/clusters", num_clusters=-1):
 
+def kmeans_analysis(df, kmeans_path=f"{analysis_path}/clusters", num_clusters=-1):
+    """
+    Perform a k-means analysis on the data
+    :param df: the data
+    :param kmeans_path: the path where to save the results
+    :param num_clusters: the number of clusters to use. If -1, the number of clusters is estimated
+
+    """
     # make directory for the clusters
-    if not os.path.exists(cluster_path):
-        os.mkdir(cluster_path)
-
+    if not os.path.exists(kmeans_path):
+        os.mkdir(kmeans_path)
 
     # scale the data
     scaler = StandardScaler()
@@ -37,7 +43,7 @@ def kmeans_analysis(df, cluster_path=f"{analysis_path}/clusters", num_clusters=-
         plt.plot(range(2, max_clusters), scores)
         plt.xlabel("Number of clusters")
         plt.ylabel("Silhouette score")
-        plt.savefig(f"{cluster_path}/cluster_scores.png")
+        plt.savefig(f"{kmeans_path}/cluster_scores.png")
         plt.clf()
 
         # get the best number of clusters
@@ -64,33 +70,50 @@ def kmeans_analysis(df, cluster_path=f"{analysis_path}/clusters", num_clusters=-
 
     # save the clusters
     for i in range(num_clusters):
-        with open(f"{cluster_path}/cluster_{i}.txt", "w") as f:
+        with open(f"{kmeans_path}/cluster_{i}.txt", "w") as f:
             f.write("\n".join(clusters[i]))
 
     # plot the clusters in 2D using PCA add legend with color and cluster number
     pca = PCA(n_components=2)
     pca_data = pca.fit_transform(scaled_data)
+
+    # print pca information for the user
+    print("PCA 2d information:")
+    print(f"Explained variance ratio: {pca.explained_variance_ratio_}")
+    print(f"Explained variance: {pca.explained_variance_}")
+    print(f"Singular values: {pca.singular_values_}")
+
     for i in range(num_clusters):
         plt.scatter(pca_data[labels == i, 0], pca_data[labels == i, 1], label=f"Cluster {i}")
     plt.legend()
-    plt.savefig(f"{cluster_path}/clusters_2d.png")
+    plt.savefig(f"{kmeans_path}/clusters_2d.png")
     plt.clf()
 
     # plot the clusters in 3D using PCA add legend with color and cluster number
     pca = PCA(n_components=3)
     pca_data = pca.fit_transform(scaled_data)
+
+    # print pca information for the user
+    print("PCA 3d information:")
+    print(f"Explained variance ratio: {pca.explained_variance_ratio_}")
+    print(f"Explained variance: {pca.explained_variance_}")
+    print(f"Singular values: {pca.singular_values_}")
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(pca_data[:, 0], pca_data[:, 1], pca_data[:, 2], c=labels, cmap='viridis')
-    plt.savefig(f"{cluster_path}/clusters_3d.png")
+    plt.savefig(f"{kmeans_path}/clusters_3d.png")
     plt.clf()
 
 
-
-
-
 def variable_analysis(df, variable_path=f"{analysis_path}/variables"):
+    """
+    This function performs an analysis of the variables in the dataframe.
+    It saves the covariance matrix, the correlation matrix, the highest and lowest covariance and correlation.
 
+    :param df: the dataframe to analyze
+    :param variable_path: the path where to save the results
+    """
     # make directory for the variables
     if not os.path.exists(variable_path):
         os.mkdir(variable_path)
@@ -140,12 +163,6 @@ def variable_analysis(df, variable_path=f"{analysis_path}/variables"):
     spearman.to_csv(f"{variable_path}/lowest_spearman_correlation.csv")
 
 
-
-
-
-
-
-
 if __name__ == '__main__':
 
     # read the file path given as argument
@@ -159,8 +176,9 @@ if __name__ == '__main__':
     print(df.head())
 
     # get the tokens and drop them from the dataframe
-    tokens= df['token']
-    df = df.drop(columns=['token'])
+    tokens = df['token']
+    context = df['context']
+    df = df.drop(columns=['token', 'context'])
 
     # make directory for the output files
     if not os.path.exists(analysis_path):
@@ -171,17 +189,6 @@ if __name__ == '__main__':
     variable_analysis(df)
     print("Done!")
 
-    # estimate the number of clusters
     print("Starting cluster analysis...")
-    #kmeans_analysis(df, num_clusters=70)
+    kmeans_analysis(df, num_clusters=10)
     print("Done!")
-
-
-
-
-
-
-
-
-
-    a = 1
