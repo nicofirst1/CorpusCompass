@@ -1,5 +1,7 @@
+import argparse
+import json
 import os
-import sys
+from typing import List, Dict
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -106,6 +108,40 @@ def kmeans_analysis(df, kmeans_path=f"{analysis_path}/clusters", num_clusters=-1
     plt.clf()
 
 
+def dependent_variable_count(df: pd.DataFrame, dependent_variables: List[str],
+                             custom_path: str = f"{analysis_path}/dependent_variables") -> Dict[str, Dict[str, int]]:
+    # make directory for the variables
+    if not os.path.exists(custom_path):
+        os.mkdir(custom_path)
+
+    repetition_dict = {}
+    for dv in dependent_variables:
+
+        # find columns that contain the dependent variable
+        columns = [col for col in df.columns if dv in col]
+
+        repetition_dict.update({c: [] for c in columns})
+
+        for c in columns:
+
+            # get a subset of the dataframe with only the dependent variable
+            df_subset = df[df[c] == 1]
+
+            # count repetitions of other variables
+            for col in df_subset.columns:
+                if col != c:
+                    repetition_dict[c].append([col, int(df_subset[col].sum())])
+
+    # sort the dictionary by the number of repetitions
+    for k in repetition_dict.keys():
+        repetition_dict[k] = sorted(repetition_dict[k], key=lambda x: x[1], reverse=True)
+
+    # save the dictionary
+    with open(f"{custom_path}/dependent_variable_count.json", "w") as f:
+        json.dump(repetition_dict, f, indent=4)
+
+
+
 def variable_analysis(df, variable_path=f"{analysis_path}/variables"):
     """
     This function performs an analysis of the variables in the dataframe.
@@ -165,11 +201,29 @@ def variable_analysis(df, variable_path=f"{analysis_path}/variables"):
 
 if __name__ == '__main__':
 
+    # define argparse
+    parser = argparse.ArgumentParser(description="This script performs an analysis of the data in the csv file.")
+    parser.add_argument("file_path", help="The path to the binary_dataset.csv file to analyze.")
+    # optional argument for the dependent annotation
+    parser.add_argument("-d", "--dependent_annotation",
+                        help="The dependent annotation to use for the analysis. "
+                             "They should be provided as a list of strings, e.g. ['GENDER', 'AGE'].")
+
+    args = parser.parse_args()
+
     # read the file path given as argument
-    file_path = sys.argv[1]
+
+    # read the dependent annotation given as argument to a list
+    if args.dependent_annotation:
+        args.dependent_annotation = args.dependent_annotation.strip("[]").split(",")
+        args.dependent_annotation = [x.strip() for x in args.dependent_annotation]
+    else:
+        args.dependent_annotation = []
+
+    dependent_annotation = args.dependent_annotation
 
     # open the csv file with pandas
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(args.file_path)
 
     # print the first 5 rows
     print("First 5 rows of the csv file:")
@@ -183,6 +237,12 @@ if __name__ == '__main__':
     # make directory for the output files
     if not os.path.exists(analysis_path):
         os.mkdir(analysis_path)
+
+    # analyze the dependent variables
+    if dependent_annotation:
+        print("Analyzing the dependent variables...")
+        dependent_variable_count(df, dependent_annotation)
+        print("Done!")
 
     # analyze the data
     print("Analyzing the variables...")
