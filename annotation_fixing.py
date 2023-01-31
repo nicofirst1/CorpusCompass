@@ -100,16 +100,16 @@ if __name__ == '__main__':
 
     warned_strict_rule = False
 
-    corpus_path = ["/Users/giulia/Desktop/cc_corpora/group1/Adnan.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/Ali.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/Aya.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/Bashar.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/Dunya.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/Mohanad.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/Myasar.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/Somaya.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/Suadad.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/Suham.txt"]
+    corpus_path = ["/Users/giulia/Desktop/cc_corpora/group1/SUH.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/A.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/AD.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/AL.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/BSH.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/DUN.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/M.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/MND.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/S.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/SUA.txt"]
 
     # ask the user for the dir in which the corpus is
     corpus_dir = input("Insert the path to the directory containing the corpus: ")
