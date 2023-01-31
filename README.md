@@ -62,13 +62,18 @@ pip install -e CorpusCompass/
 Now that you have all the necessary dependencies installed, you can open the Jupyter notebook and start using CorpusCompass.
 
 ### Data analysis
-We provide a python file for automatic data analysis. This analysis is based on the dataset we created previously (`binary_dataset.csv`).
+We provide a python file for automatic data analysis ([data_analysis.py](data_analysis.py)). This analysis is based on the dataset we created previously (`binary_dataset.csv`).
 The analysis provided are the following:
 - Correlation between the variables
 - Covariance between the variables
 - Pearson's correlation coefficient
 - Spearman's correlation coefficient
 - K-means clustering of the data
+
+### Annotation fixing
+We also provide a python file for fixing annotations ([annotation_fixer.py](annotation_fixer.py)). 
+This script is based on the annotation info we created previously (`annotation_info.csv`). 
+It allows the user to delete or keep annotation based on the number of times they appear in the dataset.
 
 #### Running the analysis
 To run the analysis you need to specify the path to the dataset you want to analyze, with:
