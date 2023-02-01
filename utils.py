@@ -2,7 +2,7 @@ import re
 import string
 from collections import Counter
 from copy import copy
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Optional
 
 import nltk
 
@@ -137,13 +137,13 @@ def get_ngram(word: str, corpus: str, ngram_params: Tuple[int, int]):
     return result
 
 
-def multi_corpus_upload(corpus_list: Dict[str, bytes]) -> str:
+def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16") -> str:
     """
     Upload multiple corpus
     """
     corpus = ""
     for k, v in corpus_list.items():
-        corpus += v.decode("utf-16") + "\n"
+        corpus += v.decode(encoding) + "\n"
 
     return corpus
 
