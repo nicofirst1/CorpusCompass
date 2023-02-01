@@ -1,5 +1,6 @@
 import os
 import re
+import time
 from datetime import datetime
 from typing import Dict
 
@@ -85,31 +86,33 @@ def input_loop(low_reps: pd.DataFrame, annotation_r: re.Pattern, ann_info: pd.Da
         print(f"{token=} - {annotated=} - {not_annotated=} - {not_annotated_interest=} - {speaker=} - {found=}")
 
         # ask the user if they want to keep it
-        keep = input("Do you want to keep it? (y/n): ")
+        keep = input("(To exit press [q])\nDo you want to keep it? (y/n): ")
 
         # if they want to keep it, add it to the annotation info
         if keep == "y":
             ann_info = ann_info.append(row, ignore_index=True)
 
         # if they don't want to keep it, remove it from the corpus
-        else:
+        elif keep == "n":
             remove_annotation(corpus, token, annotation_r)
+        elif keep == "q":
+            break
 
 
 if __name__ == '__main__':
 
     warned_strict_rule = False
 
-    corpus_path = ["/Users/giulia/Desktop/cc_corpora/group1/SUH.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/A.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/AD.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/AL.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/BSH.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/DUN.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/M.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/MND.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/S.txt",
-                   "/Users/giulia/Desktop/cc_corpora/group1/SUA.txt"]
+    corpus_path = ["/Users/giulia/Desktop/cc_corpora/group1/corpus/SUH.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/corpus/A.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/corpus/AD.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/corpus/AL.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/corpus/BSH.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/corpus/DUN.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/corpus/M.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/corpus/MND.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/corpus/S.txt",
+                   "/Users/giulia/Desktop/cc_corpora/group1/corpus/SUA.txt"]
 
     # ask the user for the dir in which the corpus is
     corpus_dir = input("Insert the path to the directory containing the corpus: ")
@@ -122,7 +125,12 @@ if __name__ == '__main__':
         print("The path is not correct, using the default one: ", corpus_path)
 
     # make a dict with open rb files
-    corpus_path_f = {os.path.basename(path): open(path, "rb").read() for path in corpus_path}
+    try:
+        corpus_path_f = {os.path.basename(path): open(path, "rb").read() for path in corpus_path}
+    except Exception as e:
+        input(f"Error while opening the files: {e}\nPress enter to exit")
+        exit(1)
+
     corpus = {}
     for k, v in corpus_path_f.items():
         corpus[k] = v.decode("utf-16")
@@ -132,7 +140,7 @@ if __name__ == '__main__':
 
     # if the path is not correct, use the default one
     if not os.path.exists(annotation_path):
-        annotation_path = "/Users/giulia/Desktop/cc_corpora/group1/annotation_info.csv"
+        annotation_path = "/Users/giulia/Desktop/cc_corpora/group1/post-process/annotation_info.csv"
         print("The path is not correct, using the default one: ", annotation_path)
 
     # ask the user for the  annotation to regex
@@ -147,7 +155,11 @@ if __name__ == '__main__':
     annotation_r = re.compile(annotation_r)
 
     # open the csv file with pandas, encode with utf-16
-    ann_info = pd.read_csv(annotation_path, encoding="utf-16", on_bad_lines='skip', sep=";")
+    try:
+        ann_info = pd.read_csv(annotation_path, encoding="utf-16", on_bad_lines='skip', sep=";")
+    except Exception as e:
+        input(f"Error while opening the file: {e}\nPress enter to exit")
+        exit(1)
 
     # ask user what is the lowest value of the annotation repetition to consider
     min_repetition = input("Insert the minimum number of annotation repetition to consider: ")
@@ -169,19 +181,29 @@ if __name__ == '__main__':
     try:
         input_loop(low_reps, annotation_r, ann_info, corpus)
     except KeyboardInterrupt:
-        # ask if they want to save the new annotation info and corpus
-        save = input("\nKeyboard interrupt,Do you want to save the new annotation info and corpus? (y/n): ")
-        if save == "n":
-            exit(0)
+        pass
+
+    save = input("\nDo you want to save the new annotation info and corpus? (y/n): ")
+
+    if save == "n":
+        print("Exiting without saving the new annotation info and corpus")
+        # sleep for 1 second to let the user read the message
+        time.sleep(2)
+        exit(0)
 
     # save the new annotation info
+    # create a new dir to save the new annotation info and corpus
+    new_dir = os.path.join(os.path.dirname(annotation_path), "new")
+    if not os.path.exists(new_dir):
+        os.mkdir(new_dir)
+
     # modify the path to save the new annotation info
-    annotation_path_new = annotation_path.replace(".csv", "_new.csv")
+    annotation_path_new = os.path.join(new_dir, os.path.basename(annotation_path))
     ann_info.to_csv(annotation_path_new, encoding="utf-16", sep=";", index=False)
 
     # save the new corpus
     # modify the path to save the new corpus
-    corpus_path_new = [path.replace(".txt", "_new.txt") for path in corpus_path]
+    corpus_path_new = [os.path.join(new_dir, os.path.basename(path)) for path in corpus_path]
 
     for path, text in zip(corpus_path_new, corpus.values()):
         with open(path, "w", encoding="utf-16") as f:
