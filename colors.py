@@ -10,17 +10,17 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-def error(text):
-     return bcolors.FAIL + text + bcolors.ENDC
+def error(text, *args):
+     print( bcolors.FAIL + text + bcolors.ENDC, *args)
 
-def warning(text):
-     return bcolors.WARNING + text + bcolors.ENDC
+def warning(text, *args):
+     print(bcolors.WARNING + text + bcolors.ENDC, *args)
 
-def ok(text):
-     return bcolors.OKGREEN + text + bcolors.ENDC
+def ok(text, *args):
+     print( bcolors.OKGREEN + text + bcolors.ENDC   , *args)
 
-def info(text):
-     return bcolors.OKBLUE + text + bcolors.ENDC
+def info(text, *args):
+     print( bcolors.OKBLUE + text + bcolors.ENDC, *args)
 
 def color_print(text, color):
     if color == "error":

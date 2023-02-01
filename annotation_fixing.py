@@ -3,7 +3,7 @@ import re
 import time
 from datetime import datetime
 from typing import Dict
-
+from colors import *
 import pandas as pd
 
 global warned_strict_rule
@@ -14,7 +14,7 @@ def find_annotation(corpus: Dict[str, str], token: str, annotation_regex: re.Pat
     global warned_strict_rule
 
     if not warned_strict_rule and use_strict_rule:
-        print(
+        warning(
             "Using strict rule, this works specifically for the annotation of the CorpusCompass example corpus.\n"
             "Consider using the non-strict rule if you are using a different corpus.")
         warned_strict_rule = True
@@ -46,7 +46,7 @@ def remove_annotation(corpus: Dict[str, str], token: str, annotation_regex: re.P
     found = find_annotation(corpus, token, annotation_regex, use_strict_rule)
     for k, v in found.items():
         corpus[k] = corpus[k].replace(v, token)
-        print(f"Removed annotation {v} from file {k}")
+        info(f"Removed annotation {v} from file {k}")
 
 
 def input_loop(low_reps: pd.DataFrame, annotation_r: re.Pattern, ann_info: pd.DataFrame, corpus: Dict[str, str]):
@@ -65,7 +65,7 @@ def input_loop(low_reps: pd.DataFrame, annotation_r: re.Pattern, ann_info: pd.Da
     for _, row in low_reps.iterrows():
 
         # print number of rows left and estimated time of completion
-        print(
+        info(
             f"\n{index} of {len(low_reps)} rows left ({index / len(low_reps) * 100:2f}%), estimated time of completion: {t + (datetime.now() - t) * (len(low_reps) - index)}")
         t = datetime.now()
         index += 1
@@ -83,7 +83,7 @@ def input_loop(low_reps: pd.DataFrame, annotation_r: re.Pattern, ann_info: pd.Da
         found = find_annotation(corpus, token, annotation_r)
 
         # print the info in one line
-        print(f"{token=} - {annotated=} - {not_annotated=} - {not_annotated_interest=} - {speaker=} - {found=}")
+        info(f"{token=} - {annotated=} - {not_annotated=} - {not_annotated_interest=} - {speaker=} - {found=}")
 
         # ask the user if they want to keep it
         keep = input("(To exit press [q])\nDo you want to keep it? (y/n): ")
@@ -120,15 +120,15 @@ if __name__ == '__main__':
     # check all the files in the dir that end with .txt
     if os.path.exists(corpus_dir):
         corpus_path = [os.path.join(corpus_dir, f) for f in os.listdir(corpus_dir) if f.endswith(".txt")]
-        print("The path is correct, using the files in the directory: ", corpus_path)
+        info(f"The path is correct, using the files in the directory: ","\n".join(corpus_path), "\n")
     else:
-        print("The path is not correct, using the default one: ", corpus_path)
+        warning(f"The path is not correct, using the default one:","\n".join(corpus_path), "\n")
 
     # make a dict with open rb files
     try:
         corpus_path_f = {os.path.basename(path): open(path, "rb").read() for path in corpus_path}
     except Exception as e:
-        input(f"Error while opening the files: {e}\nPress enter to exit")
+        error(f"Error while opening the files: {e}\nPress enter to exit")
         exit(1)
 
     corpus = {}
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     # if the path is not correct, use the default one
     if not os.path.exists(annotation_path):
         annotation_path = "/Users/giulia/Desktop/cc_corpora/group1/post-process/annotation_info.csv"
-        print("The path is not correct, using the default one: ", annotation_path)
+        warning(f"The path is not correct, using the default one: {annotation_path}\n")
 
     # ask the user for the  annotation to regex
     annotation_r = input("Insert the annotation to regex, (use X for the token): ")
@@ -149,16 +149,22 @@ if __name__ == '__main__':
     # if the annotation is not correct, use the default one
     if annotation_r == "":
         annotation_r = r"(\[\$[\S ]*?\])"
-        print("The annotation is not correct, using the default one: ", annotation_r)
+        warning(f"The annotation is not correct, using the default one: {annotation_r}\n")
 
     # compile the regex
-    annotation_r = re.compile(annotation_r)
+    try:
+        annotation_r = re.compile(annotation_r)
+    except Exception as e:
+        error(f"Error while compiling the regex: {e}\nPress enter to exit")
+        input()
+        exit(1)
 
     # open the csv file with pandas, encode with utf-16
     try:
         ann_info = pd.read_csv(annotation_path, encoding="utf-16", on_bad_lines='skip', sep=";")
     except Exception as e:
-        input(f"Error while opening the file: {e}\nPress enter to exit")
+        error(f"Error while opening the file: {e}\nPress enter to exit")
+        input()
         exit(1)
 
     # ask user what is the lowest value of the annotation repetition to consider
@@ -167,7 +173,7 @@ if __name__ == '__main__':
     # if the value is not correct, use the default one
     if min_repetition == "":
         min_repetition = 1
-        print("The value is not correct, using the default one: ", min_repetition)
+        warning(f"The value is not correct, using the default one: {min_repetition}\n")
     else:
         min_repetition = int(min_repetition)
 
@@ -186,7 +192,7 @@ if __name__ == '__main__':
     save = input("\nDo you want to save the new annotation info and corpus? (y/n): ")
 
     if save == "n":
-        print("Exiting without saving the new annotation info and corpus")
+        error("Exiting without saving the new annotation info and corpus")
         # sleep for 1 second to let the user read the message
         time.sleep(2)
         exit(0)
