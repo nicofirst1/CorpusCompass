@@ -1,5 +1,5 @@
 import argparse
-import json
+import csv
 import os
 from typing import List, Dict
 
@@ -108,38 +108,46 @@ def kmeans_analysis(df, kmeans_path=f"{analysis_path}/clusters", num_clusters=-1
     plt.clf()
 
 
-def dependent_variable_count(df: pd.DataFrame, dependent_variables: List[str],
+def dependent_variable_count(df: pd.DataFrame, dependent_variables: List[str], speakers: List[str],
                              custom_path: str = f"{analysis_path}/dependent_variables") -> Dict[str, Dict[str, int]]:
     # make directory for the variables
     if not os.path.exists(custom_path):
         os.mkdir(custom_path)
 
-    repetition_dict = {}
-    for dv in dependent_variables:
+    columns = []
+    for c in df.columns:
+        c1 = c.split(":")[1]
+        if any([x in c for x in dependent_variables]) or c1 in speakers:
+            columns.append(c)
 
-        # find columns that contain the dependent variable
-        columns = [col for col in df.columns if dv in col]
+    # get all the other columns in the df
+    other_columns = sorted([c for c in df.columns if c not in columns])
+    csv_lines = ['speaker/independent variable'] + other_columns
+    csv_lines = [csv_lines]
 
-        repetition_dict.update({c: [] for c in columns})
+    for c in columns:
 
-        for c in columns:
+        csv_row = [c]
 
-            # get a subset of the dataframe with only the dependent variable
-            df_subset = df[df[c] == 1]
+        # get a subset of the dataframe with only the dependent variable
+        df_subset = df[df[c] == 1]
 
-            # count repetitions of other variables
-            for col in df_subset.columns:
-                if col != c:
-                    repetition_dict[c].append([col, int(df_subset[col].sum())])
+        for oc in other_columns:
+            rep = int(df_subset[oc].sum())
+            csv_row.append(rep)
 
-    # sort the dictionary by the number of repetitions
-    for k in repetition_dict.keys():
-        repetition_dict[k] = sorted(repetition_dict[k], key=lambda x: x[1], reverse=True)
+        # add the repetition to the dictionary
+        csv_lines.append(csv_row)
 
-    # save the dictionary
-    with open(f"{custom_path}/dependent_variable_count.json", "w") as f:
-        json.dump(repetition_dict, f, indent=4)
+    # get the total number of repetitions for other columns
+    total_repetitions = df[other_columns].sum().to_dict()
+    csv_row = ["total"] + [total_repetitions[oc] for oc in other_columns]
+    csv_lines.append(csv_row)
 
+    # save the csv
+    with open(f"{custom_path}/dependent_variable_count.csv", "w") as f:
+        writer = csv.writer(f)
+        writer.writerows(csv_lines)
 
 
 def variable_analysis(df, variable_path=f"{analysis_path}/variables"):
@@ -205,22 +213,32 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="This script performs an analysis of the data in the csv file.")
     parser.add_argument("file_path", help="The path to the binary_dataset.csv file to analyze.")
     # optional argument for the dependent annotation
-    parser.add_argument("-d", "--dependent_annotation",
-                        help="The dependent annotation to use for the analysis. "
-                             "They should be provided as a list of strings, e.g. ['GENDER', 'AGE'].")
+    parser.add_argument("-i", "--independent_variables",
+                        help="The independent variables to use for the analysis. "
+                             "They should be provided as a list of strings, e.g. [GENDER,AGE].")
+
+    parser.add_argument("-s", "--speaker",
+                        help="The speaker to use for the analysis. "
+                             "They should be provided as a list of strings, e.g. [A,B,C,D].")
 
     args = parser.parse_args()
 
     # read the file path given as argument
 
     # read the dependent annotation given as argument to a list
-    if args.dependent_annotation:
-        args.dependent_annotation = args.dependent_annotation.strip("[]").split(",")
-        args.dependent_annotation = [x.strip() for x in args.dependent_annotation]
+    if args.independent_variables:
+        args.independent_variables = args.independent_variables.strip("[]").split(",")
+        args.independent_variables = [x.strip() for x in args.independent_variables]
     else:
-        args.dependent_annotation = []
+        args.independent_variables = []
 
-    dependent_annotation = args.dependent_annotation
+    if args.speaker:
+        args.speaker = args.speaker.strip("[]").split(",")
+        args.speaker = [x.strip() for x in args.speaker]
+    else:
+        args.speaker = []
+
+    independent_variables = args.independent_variables
 
     # open the csv file with pandas
     df = pd.read_csv(args.file_path)
@@ -239,9 +257,9 @@ if __name__ == '__main__':
         os.mkdir(analysis_path)
 
     # analyze the dependent variables
-    if dependent_annotation:
+    if independent_variables or args.speaker:
         print("Analyzing the dependent variables...")
-        dependent_variable_count(df, dependent_annotation)
+        dependent_variable_count(df, independent_variables, args.speaker)
         print("Done!")
 
     # analyze the data
