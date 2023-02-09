@@ -6,6 +6,8 @@ from typing import List, Dict
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
@@ -207,6 +209,52 @@ def variable_analysis(df, variable_path=f"{analysis_path}/variables"):
     spearman.to_csv(f"{variable_path}/lowest_spearman_correlation.csv")
 
 
+def poisson_regression(df: pd.DataFrame, independent_vars: List[str], speakers: List[str],
+                       custom_path=f"{analysis_path}/poisson"):
+    """
+    This function performs a poisson regression on the dataframe.
+
+    :param df: the dataframe to analyze
+    :param independent_vars: the independent variables to use
+    :param speakers: the speakers to use
+    """
+
+    # make directory for the variables
+    if not os.path.exists(custom_path):
+        os.mkdir(custom_path)
+
+    independent_variables = []
+    for c in df.columns:
+        c1 = c.split(":")[1]
+        if any([x in c for x in independent_vars]) or c1 in speakers:
+            independent_variables.append(c)
+
+    # get all the other columns in the df
+    dependent_variables = sorted([c for c in df.columns if c not in independent_variables])
+
+    fix_name = lambda x: x.replace(" ", "_").replace(":", "_").replace("-", "_").replace("/", "_")
+
+    # replace the spaces in the column names with underscores
+    df.columns = [fix_name(c) for c in df.columns]
+    # do the same for the independent variables and dependent variables
+    independent_variables = [fix_name(c) for c in independent_variables]
+    dependent_variables = [fix_name(c) for c in dependent_variables]
+
+    for dv in dependent_variables:
+
+        # get the poisson regression results
+        try:
+            poisson_results = smf.glm(formula=f"{dv} ~ {' + '.join(independent_variables)}", data=df,
+                                      family=sm.families.Poisson()).fit()
+            # save the results
+            csv_file = poisson_results.summary().as_csv()
+
+            with open(f"{custom_path}/poisson_regression_results_{dv}.csv", "w") as f:
+                f.write(csv_file)
+        except Exception as e:
+            print(f"Error in poisson regression for {dv}: {e}")
+
+
 if __name__ == '__main__':
 
     # define argparse
@@ -255,6 +303,12 @@ if __name__ == '__main__':
     # make directory for the output files
     if not os.path.exists(analysis_path):
         os.mkdir(analysis_path)
+
+    # analyze the with regression
+    if independent_variables or args.speaker:
+        print("Analyzing the variables with regression...")
+        poisson_regression(df, independent_variables, args.speaker)
+        print("Done!")
 
     # analyze the dependent variables
     if independent_variables or args.speaker:

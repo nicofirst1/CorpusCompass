@@ -16,3 +16,5 @@ CorpusCompass/
 analysis/
 
 dataset_creation.py
+
+__pycache__/

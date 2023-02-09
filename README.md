@@ -23,6 +23,15 @@ If you are not familiar with colab, check this tutorial on [how to use colab](ht
 We have a [notebook for creating the dataset](https://colab.research.google.com/github/nicofirst1/CorpusCompass/blob/main/dataset_creation.ipynb), 
 and a python file for [dataset analysis](./data_analysis.py) (check the local installation section for more info on how to use it).
 
+#### Troubleshooting
+
+If you get an error like this:
+```
+UnicodeDecodeError: 'utf-16-le' codec can't decode byte 0x0a in position 21530: truncated data
+```
+It may be because the file you are trying to open has an odd number of bytes. 
+Add one space at the end of the file and try again.
+
 ### Using CorpusCompass
 
 To use CorpusCompass, you will need to define your own variables and annotation rules using JSON files. 
