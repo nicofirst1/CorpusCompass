@@ -18,3 +18,5 @@ analysis/
 dataset_creation.py
 
 __pycache__/
+
+annotation_fixer/.annotation_fixer/
