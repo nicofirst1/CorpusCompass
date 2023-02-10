@@ -4,6 +4,7 @@ from qtpy import QtWidgets
 
 from annotation_fixer.common import Memory
 from annotation_fixer.windows import AnnotationFixer, AskLoading, LoadFilesPopup
+from annotation_fixer.windows.Settings import AskSettings
 
 
 def main():
@@ -50,6 +51,11 @@ def main():
     corpus_text = preloaded["corpus_text"]
     annotation_info_csv = preloaded["annotation_info_csv"]
     missing_annotations_csv = preloaded["missing_annotations_csv"]
+
+    # ask for settings
+    window = AskSettings(mem)
+    window.show()
+    app.exec_()
 
     # open new window
     window2 = AnnotationFixer(mem, corpus_text, annotation_info_csv, missing_annotations_csv)

@@ -67,6 +67,8 @@ class Memory:
             "separator": ";",
             "use_loaded": False,
             "window_size": (500, 500),
+            "minimum_repetitions": 1,
+            "annotation_regex":r"(\[\$[\S ]*?\])"
         }
 
         # update settings with the default if not exists
@@ -82,8 +84,9 @@ class Memory:
             if isinstance(value, pd.DataFrame):
                 value.to_csv(os.path.join(self.preloaded_dir, file_name + ".csv"))
             else:
-                with open(os.path.join(self.preloaded_dir, file_name + ".txt"), "w") as f:
-                    f.write(value)
+                # it is a dict of strings, to save it as json
+                with open(os.path.join(self.preloaded_dir, file_name + ".json"), "w") as f:
+                    f.write(json.dumps(value))
 
     def load_all_preloaded(self):
         """
@@ -94,6 +97,9 @@ class Memory:
         for p in os.listdir(self.preloaded_dir):
             if p.endswith(".csv"):
                 loaded[p.replace(".csv", "")] = pd.read_csv(os.path.join(self.preloaded_dir, p))
+            elif p.endswith(".json"):
+                with open(os.path.join(self.preloaded_dir, p), "r") as f:
+                    loaded[p.replace(".json", "")] = json.load(f)
             else:
                 with open(os.path.join(self.preloaded_dir, p), "r") as f:
                     loaded[p.replace(".txt", "")] = f.read()

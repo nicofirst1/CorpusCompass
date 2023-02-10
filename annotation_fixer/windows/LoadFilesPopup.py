@@ -22,7 +22,7 @@ class LoadFilesPopup(GeneralWindow):
         super().__init__(mem)
 
         self.corpus_files = None
-        self.corpus_text = ""
+        self.corpus_text = {}
         self.annotation_info = None
         self.annotation_info_csv = ""
         self.missing_annotations = None
@@ -51,8 +51,9 @@ class LoadFilesPopup(GeneralWindow):
         self.message_scroll.setWidget(self.message)
         self.message_scroll.setWidgetResizable(True)
 
-        self.corpus_message = QtWidgets.QLabel("")
+        self.corpus_message = QtWidgets.QTextEdit("")
         self.corpus_message.setStyleSheet("color: white; background-color: black")
+
 
         self.corpus_message_scroll = QScrollArea()
         self.corpus_message_scroll.setWidget(self.corpus_message)
@@ -110,7 +111,7 @@ class LoadFilesPopup(GeneralWindow):
             for p in self.corpus_files:
                 try:
                     with open(p, "rb") as f:
-                        self.corpus_text += f.read().decode(self.encoding) + "\n"
+                        self.corpus_text[p] = f.read().decode(self.encoding)
                 except Exception as e:
                     err_msg = f"Error loading corpus files ({p}):\n{e}\n Please try again"
                     self.corpus_message.setText(err_msg)
@@ -127,7 +128,7 @@ class LoadFilesPopup(GeneralWindow):
             # change color to green
             self.corpus_message.setStyleSheet("color: green; background-color: black")
             self.corpus_message.setText(
-                "Corpus files loaded:\n" + "\n".join(self.corpus_text.split("\n")[:10] + ["..."]))
+                "Corpus files loaded:\n" + "\n".join(list(self.corpus_text.values())[:10]) + "...")
 
             if self.annotation_info and self.missing_annotations:
                 self.finish_button.setEnabled(True)
@@ -154,12 +155,12 @@ class LoadFilesPopup(GeneralWindow):
             self.message.setText("Please upload corpus and annotation:\n"
                                  "- Corpus file loaded:\n\t--" +
                                  "\n\t--".join(self.corpus_files) +
-                                 "\n- Annotation file loaded:" + self.annotation_info + "\n"
+                                 "\n- Annotation file loaded:\n\t--" + self.annotation_info + "\n"
                                                                                         "- Missing annotation not uploaded")
             # change color to green
             self.corpus_message.setStyleSheet("color: green; background-color: black")
             self.corpus_message.setText(
-                "Corpus files loaded:\n" + "\n".join(self.corpus_text.split("\n")[:10] + ["..."]))
+                "Corpus files loaded:\n" + "\n".join(list(self.corpus_text.values())[:10]) + "...")
 
             if self.corpus_files and self.missing_annotations:
                 self.finish_button.setEnabled(True)
@@ -188,8 +189,8 @@ class LoadFilesPopup(GeneralWindow):
         self.message.setText("Please upload corpus and annotation:\n"
                              "- Corpus file loaded:\n\t--" +
                              "\n\t--".join(self.corpus_files) +
-                             "\n- Annotation file loaded:" + self.annotation_info
-                             + "\n- Missing annotation file loaded:" + self.missing_annotations)
+                             "\n- Annotation file loaded:\n\t--" + self.annotation_info
+                             + "\n- Missing annotation file loaded:\n\t--" + self.missing_annotations)
 
         if self.corpus_files and self.annotation_info:
             self.finish_button.setEnabled(True)
