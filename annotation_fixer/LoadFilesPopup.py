@@ -2,6 +2,7 @@ import pandas as pd
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog, QComboBox, QScrollArea
 
+from annotation_fixer.GeneralWindow import GeneralWindow
 from annotation_fixer.Memory import Memory
 
 
@@ -17,11 +18,10 @@ def load_csv2pandas(path: str, encoding: str, sep: str) -> pd.DataFrame:
     return content
 
 
-class LoadFilesPopup(QtWidgets.QWidget):
+class LoadFilesPopup(GeneralWindow):
     def __init__(self, mem: Memory):
-        super().__init__()
+        super().__init__(mem)
 
-        self.mem = mem
         self.corpus_files = None
         self.corpus_text = ""
         self.annotation_info = None
@@ -32,7 +32,6 @@ class LoadFilesPopup(QtWidgets.QWidget):
         self.encodings = ["UTF-8", "UTF-16"]
         enc_idx = self.mem.lfp.get("encoding") or 0
         self.encoding = self.encodings[enc_idx]
-        self.setFixedSize(500, 500)
 
         self.separator = self.mem.lfp.get("separator") or ";"
         self.mem.lfp["separator"] = self.separator
@@ -40,6 +39,7 @@ class LoadFilesPopup(QtWidgets.QWidget):
         self.setWindowTitle("Load Files")
 
         self.create_widgets()
+        self.has_finished = False
 
     def create_widgets(self):
         self.message = QtWidgets.QLabel("Please upload corpus and annotation:\n"
@@ -197,5 +197,6 @@ class LoadFilesPopup(QtWidgets.QWidget):
 
     def finish(self):
         if self.corpus_text and self.annotation_info and self.missing_annotations:
+            self.has_finished = True
             # close window
             self.close()

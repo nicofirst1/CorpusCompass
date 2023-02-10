@@ -1,6 +1,8 @@
 import json
 import os
-from typing import Dict
+from typing import Dict, Any
+
+import pandas as pd
 
 
 class SavingDict(dict):
@@ -9,7 +11,6 @@ class SavingDict(dict):
         super().__init__(*args, **kwargs)
         self._save_fn = save_fn
         self._attr = attr
-
 
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
@@ -43,6 +44,11 @@ class Memory:
         if not os.path.exists(self.dir):
             os.mkdir(self.dir)
 
+        self.preloaded_dir = os.path.join(self.dir, "preloaded")
+
+        if not os.path.exists(self.preloaded_dir):
+            os.mkdir(self.preloaded_dir)
+
         # create the files
         self.file_lfp = os.path.join(self.dir, "lfp.json")
         self.file_settings = os.path.join(self.dir, "settings.json")
@@ -53,6 +59,52 @@ class Memory:
 
         # load the memory
         self.load_memory()
+
+        self.init_default_settings()
+
+    def init_default_settings(self):
+        default = {
+            "separator": ";",
+            "use_loaded": False,
+            "window_size": (500, 500),
+        }
+
+        # update settings with the default if not exists
+        for k, v in default.items():
+            if k not in self.settings:
+                self.settings[k] = v
+
+    def save_preloaded(self, files: Dict[str, Any]):
+        """
+        Save the preloaded files
+        """
+        for file_name, value in files.items():
+            if isinstance(value, pd.DataFrame):
+                value.to_csv(os.path.join(self.preloaded_dir, file_name + ".csv"))
+            else:
+                with open(os.path.join(self.preloaded_dir, file_name + ".txt"), "w") as f:
+                    f.write(value)
+
+    def load_all_preloaded(self):
+        """
+        Load all the preloaded files
+        """
+
+        loaded = {}
+        for p in os.listdir(self.preloaded_dir):
+            if p.endswith(".csv"):
+                loaded[p.replace(".csv", "")] = pd.read_csv(os.path.join(self.preloaded_dir, p))
+            else:
+                with open(os.path.join(self.preloaded_dir, p), "r") as f:
+                    loaded[p.replace(".txt", "")] = f.read()
+
+        return loaded
+
+    def exist_preloaded(self) -> bool:
+        """
+        Check if the file is preloaded
+        """
+        return len(os.listdir(self.preloaded_dir)) > 0
 
     def load_memory(self):
         """
@@ -104,3 +156,12 @@ class Memory:
 
         self._lfp.update(value)
         self.save_memory("file_lfp")
+
+    @property
+    def settings(self):
+        return self._settings
+
+    @settings.setter
+    def settings(self, value: Dict[str, Any]):
+        self._settings.update(value)
+        self.save_memory("file_settings")
