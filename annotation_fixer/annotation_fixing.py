@@ -9,31 +9,6 @@ import pandas as pd
 global warned_strict_rule
 
 
-def find_annotation(corpus: Dict[str, str], token: str, annotation_regex: re.Pattern, use_strict_rule: bool = True) -> \
-        Dict[str, str]:
-    global warned_strict_rule
-
-    if not warned_strict_rule and use_strict_rule:
-        warning(
-            "Using strict rule, this works specifically for the annotation of the CorpusCompass example corpus.\n"
-            "Consider using the non-strict rule if you are using a different corpus.")
-        warned_strict_rule = True
-
-    found = {}
-    # for all the lines in the corpus find the annotation  with the regex
-    for k, line in corpus.items():
-        matches = annotation_regex.findall(line)
-        matches = [m for m in matches if token in m]
-
-        if use_strict_rule:
-            matches = [m for m in matches if m.split(".")[-1].replace("]", "") == token]
-
-        if len(matches) > 0:
-            for m in matches:
-                found[k] = m
-
-    return found
-
 
 def remove_annotation(corpus: Dict[str, str], token: str, annotation_regex: re.Pattern, use_strict_rule: bool = True):
     """
