@@ -1,7 +1,7 @@
 from PySide6 import QtWidgets, QtCore
 
-from annotation_fixer.GeneralWindow import GeneralWindow
-from annotation_fixer.Memory import Memory
+from annotation_fixer.common import Memory, GeneralWindow
+
 
 
 class AskLoading(GeneralWindow):

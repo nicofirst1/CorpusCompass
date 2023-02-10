@@ -2,8 +2,7 @@ import pandas as pd
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog, QComboBox, QScrollArea
 
-from annotation_fixer.GeneralWindow import GeneralWindow
-from annotation_fixer.Memory import Memory
+from annotation_fixer.common import Memory, GeneralWindow
 
 
 def load_csv2pandas(path: str, encoding: str, sep: str) -> pd.DataFrame:

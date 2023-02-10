@@ -1,7 +1,6 @@
 from PySide6 import QtWidgets, QtGui
 
-from annotation_fixer.GeneralWindow import GeneralWindow
-from annotation_fixer.Memory import Memory
+from annotation_fixer.common import Memory, GeneralWindow
 
 
 class AnnotationFixer(GeneralWindow):

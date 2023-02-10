@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets
 
-from annotation_fixer.Memory import Memory
+from annotation_fixer.common import Memory
 
 
 class GeneralWindow(QtWidgets.QWidget):

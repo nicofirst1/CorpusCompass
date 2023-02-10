@@ -2,17 +2,16 @@ import sys
 
 from qtpy import QtWidgets
 
-from annotation_fixer.App import AnnotationFixer
-from annotation_fixer.AskLoaded import AskLoading
-from annotation_fixer.LoadFilesPopup import LoadFilesPopup
-from annotation_fixer.Memory import Memory
+from annotation_fixer.common import Memory
+from annotation_fixer.windows import AnnotationFixer, AskLoading, LoadFilesPopup
 
-if __name__ == '__main__':
+
+def main():
     mem = Memory()
 
     app = QtWidgets.QApplication(sys.argv)
 
-    # set size of window
+    # set  the application params
     app.setApplicationName("Annotation Fixer")
     app.setApplicationVersion("0.1")
     app.setOrganizationName("University of Sapienza")
@@ -23,9 +22,12 @@ if __name__ == '__main__':
         ask = AskLoading(mem)
         ask.show()
         app.exec_()
+        load = ask.load
+    else:
+        load = False
 
     # if the user wants to load the files
-    if not ask.load:
+    if not load:
         loader = LoadFilesPopup(mem)
         loader.show()
         app.exec_()
@@ -55,4 +57,6 @@ if __name__ == '__main__':
 
     app.exec_()
 
-    a = 1
+
+if __name__ == "__main__":
+    main()
