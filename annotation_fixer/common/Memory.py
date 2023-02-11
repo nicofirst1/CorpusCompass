@@ -52,17 +52,19 @@ class Memory:
         # create the files
         self.file_lfp = os.path.join(self.dir, "lfp.json")
         self.file_settings = os.path.join(self.dir, "settings.json")
+        self.file_postprocess_paths = os.path.join(self.dir, "postprocess_paths.json")
 
         # create the attributes
         self._lfp = SavingDict(self.save_memory, attr="file_lfp")
         self._settings = SavingDict(self.save_memory, attr="file_settings")
+        self._postprocess_paths = SavingDict(self.save_memory, attr="file_postprocess_paths")
+
+        self.postprocess_names = ["annotation_info.csv", "binary_dataset.csv", "dataset.csv", "not_annotated_log.csv"]
 
         # load the memory
         self.load_memory()
 
         self.init_default_settings()
-
-        self.postprocess_names = ["annotation_info.csv", "binary_dataset.csv", "dataset.csv", "not_annotated_log.csv"]
 
     def init_default_settings(self):
         default = {
@@ -72,7 +74,8 @@ class Memory:
             "minimum_repetitions": 1,
             "annotation_regex": r"(\[\$[\S ]*?\])",
             "use_strict_rule": True,
-            "data_source": "info", #missing
+            "data_source": "info",  # missing
+            "encoding": "utf-8",
 
         }
 
@@ -176,3 +179,12 @@ class Memory:
     def settings(self, value: Dict[str, Any]):
         self._settings.update(value)
         self.save_memory("file_settings")
+
+    @property
+    def postprocess_paths(self):
+        return self._postprocess_paths
+
+    @postprocess_paths.setter
+    def postprocess_paths(self, value: Dict[str, str]):
+        self._postprocess_paths.update(value)
+        self.save_memory("file_postprocess_paths")

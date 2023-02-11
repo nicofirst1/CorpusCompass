@@ -3,7 +3,7 @@ import sys
 from qtpy import QtWidgets
 
 from annotation_fixer.common import Memory
-from annotation_fixer.windows import AnnotationFixer, AskLoading, LoadFilesPopup
+from annotation_fixer.windows import AnnotationFixer, AskLoading, LoadFiles
 from annotation_fixer.windows.Settings import AskSettings
 
 
@@ -29,7 +29,7 @@ def main():
 
     # if the user wants to load the files
     if not load:
-        loader = LoadFilesPopup(mem)
+        loader = LoadFiles(mem)
         loader.show()
         app.exec_()
 

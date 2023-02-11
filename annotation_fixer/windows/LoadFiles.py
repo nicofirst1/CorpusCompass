@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QFileDialog, QComboBox, QScrollArea
 from annotation_fixer.common import Memory, GeneralWindow, open_postprocess
 
 
-class LoadFilesPopup(GeneralWindow):
+class LoadFiles(GeneralWindow):
     def __init__(self, mem: Memory):
         super().__init__(mem)
 
@@ -19,6 +19,7 @@ class LoadFilesPopup(GeneralWindow):
         self.encodings = ["UTF-8", "UTF-16"]
         enc_idx = self.mem.lfp.get("encoding") or 0
         self.encoding = self.encodings[enc_idx]
+        self.mem.settings["encoding"] = self.encoding
 
         self.separator = self.mem.lfp.get("separator") or ";"
 
@@ -76,6 +77,8 @@ class LoadFilesPopup(GeneralWindow):
     def handle_encoding_change(self, index):
         self.encoding = self.encodings[index]
         self.mem.lfp["encoding"] = index
+        self.mem.settings["encoding"] = self.encoding
+
 
     def load_corpus(self):
         """
@@ -161,6 +164,7 @@ class LoadFilesPopup(GeneralWindow):
 
         self.annotation_info_csv = postprocess_files
         self.annotation_info = found
+        self.mem.postprocess_paths={os.path.basename(f).split(".")[0]:f for f in found}
 
         msg = "Please upload corpus and annotation:\n"
 

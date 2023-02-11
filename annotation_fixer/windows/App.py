@@ -21,6 +21,7 @@ class AnnotationFixer(GeneralWindow):
 
         self.list_to_fix = []
         self.queue = []
+        self.queue_index = 0
         self.current_index = 0
         self.low_reps = None
         self.current_match = None
@@ -32,6 +33,7 @@ class AnnotationFixer(GeneralWindow):
         self.text_area = QtWidgets.QTextEdit(self)
         self.text_area.setText(corpus_dict2text(self.corpus_dict))
         self.text_area.setReadOnly(False)
+        self.text_area.textChanged.connect(self.on_text_changed)
 
         # create the dropdown menu
         self.dropdown = QtWidgets.QComboBox(self)
@@ -40,8 +42,6 @@ class AnnotationFixer(GeneralWindow):
 
         # add logic to the dropdown menu
         self.dropdown.currentIndexChanged.connect(self.update_list_to_fix)
-
-
 
         # create the buttons
         self.prev_button = QtWidgets.QPushButton("Prev", self)
@@ -78,10 +78,17 @@ class AnnotationFixer(GeneralWindow):
         layout = QtWidgets.QHBoxLayout()
         right_layout = QtWidgets.QVBoxLayout()
         right_layout.addWidget(self.dropdown)
-        right_layout.addWidget(self.prev_button)
-        right_layout.addWidget(self.next_button)
-        right_layout.addWidget(self.deannotate_button)
-        right_layout.addWidget(self.ignore_button)
+
+        prev_next_layout = QtWidgets.QHBoxLayout()
+        prev_next_layout.addWidget(self.prev_button)
+        prev_next_layout.addWidget(self.next_button)
+        right_layout.addLayout(prev_next_layout)
+
+        ignore_deannotate_layout = QtWidgets.QHBoxLayout()
+        ignore_deannotate_layout.addWidget(self.deannotate_button)
+        ignore_deannotate_layout.addWidget(self.ignore_button)
+        right_layout.addLayout(ignore_deannotate_layout)
+
         right_layout.addWidget(self.save_button)
 
         layout.addWidget(self.info_text_scroll)
@@ -90,6 +97,9 @@ class AnnotationFixer(GeneralWindow):
         self.setLayout(layout)
 
         self.update_list_to_fix()
+
+    def on_text_changed(self):
+        self.save_button.setEnabled(True)
 
     def update_list_to_fix(self):
         # get checked checkboxes
@@ -108,7 +118,7 @@ class AnnotationFixer(GeneralWindow):
             self.mem.settings["data_source"] = "missing"
             self.list_to_fix = pd.DataFrame()
 
-        if len(self.list_to_fix)==0:
+        if len(self.list_to_fix) == 0:
             self.change_button_status(False)
             self.next_button.setEnabled(False)
             self.prev_button.setEnabled(False)
@@ -118,21 +128,6 @@ class AnnotationFixer(GeneralWindow):
             self.next_button.setEnabled(True)
             self.prev_button.setEnabled(True)
             self.highlight_current_word()
-
-    def go_to_prev(self):
-        while self.current_index > 0:
-            self.current_index -= 1
-            if self.highlight_current_word():
-                break
-        self.change_button_status(True)
-
-    def go_to_next(self):
-        while self.current_index < len(self.list_to_fix) - 1:
-            self.current_index += 1
-            if self.highlight_current_word():
-                break
-
-        self.change_button_status(True)
 
     def ignore(self):
 
@@ -146,18 +141,10 @@ class AnnotationFixer(GeneralWindow):
             except KeyError:
                 print(f"Row not found: {row.name}")
                 pass
+            if self.queue_index > 0:
+                self.queue_index = 0
 
         self.change_button_status(False)
-
-    def change_button_status(self, prev_next: bool):
-
-        if prev_next:
-            self.deannotate_button.setEnabled(True)
-            self.ignore_button.setEnabled(True)
-
-        else:
-            self.deannotate_button.setEnabled(False)
-            self.ignore_button.setEnabled(False)
 
     def deannotate(self):
         """
@@ -189,8 +176,15 @@ class AnnotationFixer(GeneralWindow):
 
         # update the annotation info dropping the row
         if len(self.queue) == 0:
-            self.annotation_info_df = self.annotation_info_df.drop(row.name)
-            print(f"Dropped row: {row.name}")
+            try:
+                self.annotation_info_df = self.annotation_info_df.drop(row.name)
+                print(f"Dropped row: {row.name}")
+            except KeyError:
+                print(f"Row not found: {row.name}")
+                pass
+
+            if self.queue_index > 0:
+                self.queue_index = 0
 
         # update the text area
         self.text_area.setText(corpus_dict2text(self.corpus_dict))
@@ -208,12 +202,13 @@ class AnnotationFixer(GeneralWindow):
     def highlight_current_word(self) -> bool:
 
         if len(self.queue) > 0:
-            found = self.queue.pop(0)
+            found = self.queue[self.queue_index % len(self.queue)]
+            self.queue_index += 1
             found, row = found
         else:
 
             if len(self.list_to_fix) == 0:
-                note="No more words to annotate"
+                note = "No more words to annotate"
                 self.info_text.setText(note)
                 return False
 
@@ -221,7 +216,8 @@ class AnnotationFixer(GeneralWindow):
             row = row[row != 0]
 
             word = row['token']
-            found = find_annotation(self.corpus_dict, word, self.annotation_regex, use_strict_rule=False)
+            found = find_annotation(self.corpus_dict, word, self.annotation_regex,
+                                    use_strict_rule=self.mem.settings['use_strict_rule'])
 
             if len(found) == 0:
                 print(f"Could not find {word} in corpus text")
@@ -264,4 +260,51 @@ class AnnotationFixer(GeneralWindow):
         return True
 
     def save_corpus_dict(self):
-        pass
+
+        # save the corpus dict
+        for path, text in self.corpus_dict.items():
+            # use encoding in mem
+            with open(path, "w", encoding=self.mem.settings['encoding']) as f:
+                f.write(text)
+
+        # save the annotation info
+
+        self.annotation_info_df.to_csv(self.mem.postprocess_paths['annotation_info'], index=False)
+        self.missing_annotations_df.to_csv(self.mem.postprocess_paths['not_annotated_log'], index=False)
+
+        # display message
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setText("Corpus saved")
+        msg.setWindowTitle("Corpus saved")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg.exec_()
+
+        # disable the save button
+        self.save_button.setEnabled(False)
+
+    def change_button_status(self, prev_next: bool):
+
+        if prev_next:
+            self.deannotate_button.setEnabled(True)
+            self.ignore_button.setEnabled(True)
+
+        else:
+            self.deannotate_button.setEnabled(False)
+            self.ignore_button.setEnabled(False)
+
+    def go_to_prev(self):
+        while self.current_index > 0:
+            self.current_index -= 1
+
+            if self.highlight_current_word():
+                break
+        self.change_button_status(True)
+
+    def go_to_next(self):
+        while self.current_index < len(self.list_to_fix) - 1:
+            self.current_index += 1
+            if self.highlight_current_word():
+                break
+
+        self.change_button_status(True)
