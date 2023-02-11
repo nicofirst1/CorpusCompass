@@ -1,6 +1,9 @@
+import os.path
 import re
 from collections import OrderedDict
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any, Optional
+
+import pandas as pd
 
 
 def corpus_dict2text(corpus_list: Dict[str, str], skip_last=False) -> str:
@@ -53,8 +56,37 @@ def find_annotation(corpus: Dict[str, str], token: str, annotation_regex: re.Pat
 
         if len(matches) > 0:
             for m in matches:
-                ft = corpus_dict2text(full_text,skip_last=True)
+                ft = corpus_dict2text(full_text, skip_last=True)
                 m = CustomMatch(m, ft)
                 found.append((k, m))
 
     return found
+
+
+def open_postprocess(paths: List[str], encoding: str, separator: str) -> Tuple[List[Any], Optional[str]]:
+    """
+    Open the file and return the content
+    :param paths: list of paths
+    :return: the content of the file
+    """
+    content = {}
+    encoding= encoding.lower()
+    for path in paths:
+        file_name = os.path.basename(path).split(".")[0]
+        try:
+            content[file_name] = pd.read_csv(path, encoding=encoding, on_bad_lines="skip", sep=separator)
+        except UnicodeError as e:
+            if encoding == "utf-8":
+                encoding = "utf-16"
+            elif encoding == "utf-16":
+                encoding = "utf-8"
+            else:
+                error = f"Error while opening the file {path}\n{repr(e)}"
+                return content, error
+
+            content[file_name] = pd.read_csv(path, encoding=encoding, on_bad_lines="skip", sep=separator)
+        except Exception as e:
+            error = f"Error while opening the file {path}\n{repr(e)}"
+            return content, error
+
+    return content, None

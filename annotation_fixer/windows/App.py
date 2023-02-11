@@ -1,6 +1,6 @@
 import re
 from collections import OrderedDict
-from typing import Dict
+from typing import Dict, Any
 
 import pandas as pd
 from PySide6 import QtWidgets, QtGui
@@ -9,14 +9,16 @@ from annotation_fixer.common import Memory, GeneralWindow, corpus_dict2text, fin
 
 
 class AnnotationFixer(GeneralWindow):
-    def __init__(self, mem: Memory, corpus_dict: Dict[str, str], annotation_info_df: pd.DataFrame,
-                 missing_annotations_df: pd.DataFrame):
+    def __init__(self, mem: Memory, postprocess_data: Dict[str, Any]):
         super().__init__(mem)
 
-        self.corpus_dict = OrderedDict(corpus_dict)
-        self.corpus_text = corpus_dict2text(corpus_dict)
-        self.annotation_info_df = annotation_info_df
-        self.missing_annotations_df = missing_annotations_df
+        self.corpus_dict = OrderedDict(postprocess_data["corpus_text"])
+        self.corpus_text = corpus_dict2text(self.corpus_dict)
+        self.annotation_info_df = postprocess_data["annotation_info"]
+        self.missing_annotations_df = postprocess_data["not_annotated_log"]
+        self.dataset_df = postprocess_data["dataset"]
+        self.binary_dataset_df = postprocess_data["binary_dataset"]
+
         self.list_to_fix = []
         self.queue = []
         self.current_index = 0
@@ -31,12 +33,15 @@ class AnnotationFixer(GeneralWindow):
         self.text_area.setText(corpus_dict2text(self.corpus_dict))
         self.text_area.setReadOnly(False)
 
-        # create the checkboxes
-        self.annotation_info_checkbox = QtWidgets.QCheckBox("Use Annotation Info", self)
-        self.missing_annotations_checkbox = QtWidgets.QCheckBox("Use Missing Annotations", self)
-        # add logic to the checkboxes
-        self.annotation_info_checkbox.stateChanged.connect(self.update_list_to_fix)
-        self.missing_annotations_checkbox.stateChanged.connect(self.update_list_to_fix)
+        # create the dropdown menu
+        self.dropdown = QtWidgets.QComboBox(self)
+        self.dropdown.addItem("Use Annotation Info")
+        self.dropdown.addItem("Use Missing Annotations")
+
+        # add logic to the dropdown menu
+        self.dropdown.currentIndexChanged.connect(self.update_list_to_fix)
+
+
 
         # create the buttons
         self.prev_button = QtWidgets.QPushButton("Prev", self)
@@ -50,6 +55,10 @@ class AnnotationFixer(GeneralWindow):
         self.save_button = QtWidgets.QPushButton("Save", self)
         self.save_button.clicked.connect(self.save_corpus_dict)
 
+        # start with ignore and deannotate disabled
+        self.deannotate_button.setEnabled(False)
+        self.ignore_button.setEnabled(False)
+
         # create the info text area
         self.info_text = QtWidgets.QLabel("Info", self)
         self.info_text_scroll = QtWidgets.QScrollArea(self)
@@ -59,14 +68,20 @@ class AnnotationFixer(GeneralWindow):
         self.info_text_scroll.setMaximumWidth(self.width() * 0.2)
         self.info_text_scroll.setMinimumHeight(self.height() * 0.5)
 
+        # set the dropdown menu to the settings
+        if self.mem.settings["data_source"] == "info":
+            self.dropdown.setCurrentIndex(0)
+        else:
+            self.dropdown.setCurrentIndex(1)
+
         # layout
         layout = QtWidgets.QHBoxLayout()
         right_layout = QtWidgets.QVBoxLayout()
-        right_layout.addWidget(self.annotation_info_checkbox)
-        right_layout.addWidget(self.missing_annotations_checkbox)
+        right_layout.addWidget(self.dropdown)
         right_layout.addWidget(self.prev_button)
         right_layout.addWidget(self.next_button)
         right_layout.addWidget(self.deannotate_button)
+        right_layout.addWidget(self.ignore_button)
         right_layout.addWidget(self.save_button)
 
         layout.addWidget(self.info_text_scroll)
@@ -78,22 +93,38 @@ class AnnotationFixer(GeneralWindow):
 
     def update_list_to_fix(self):
         # get checked checkboxes
-        checked = []
-        if self.annotation_info_checkbox.isChecked():
-            checked.append("annotation_info")
-        if self.missing_annotations_checkbox.isChecked():
-            checked.append("missing_annotations")
 
-        min_reps = self.mem.settings['minimum_repetitions']
-        # get the rows where 'annotated' is less than the minimum repetition
-        low_reps = self.annotation_info_df[self.annotation_info_df['annotated'] <= min_reps]
-        self.list_to_fix = low_reps
+        index = self.dropdown.currentIndex()
+        if index == 0:
+            # save settings
+            self.mem.settings["data_source"] = "info"
+            min_reps = self.mem.settings['minimum_repetitions']
+            # get the rows where 'annotated' is less than the minimum repetition
+            low_reps = self.annotation_info_df[self.annotation_info_df['annotated'] <= min_reps]
+            self.list_to_fix = low_reps
+
+        else:
+            # save settings
+            self.mem.settings["data_source"] = "missing"
+            self.list_to_fix = pd.DataFrame()
+
+        if len(self.list_to_fix)==0:
+            self.change_button_status(False)
+            self.next_button.setEnabled(False)
+            self.prev_button.setEnabled(False)
+            self.info_text.setText("No more annotations to fix")
+        else:
+            self.change_button_status(True)
+            self.next_button.setEnabled(True)
+            self.prev_button.setEnabled(True)
+            self.highlight_current_word()
 
     def go_to_prev(self):
         while self.current_index > 0:
             self.current_index -= 1
             if self.highlight_current_word():
                 break
+        self.change_button_status(True)
 
     def go_to_next(self):
         while self.current_index < len(self.list_to_fix) - 1:
@@ -101,12 +132,32 @@ class AnnotationFixer(GeneralWindow):
             if self.highlight_current_word():
                 break
 
+        self.change_button_status(True)
+
     def ignore(self):
 
         row = self.current_match["row"]
 
-        # drop the row from the dataframe
-        self.annotation_info_df = self.annotation_info_df.drop(row.name)
+        # drop the row from the dataframe based on index
+        if len(self.queue) == 0:
+            try:
+                self.annotation_info_df = self.annotation_info_df.drop(row.name)
+                print(f"Dropped row: {row.name}")
+            except KeyError:
+                print(f"Row not found: {row.name}")
+                pass
+
+        self.change_button_status(False)
+
+    def change_button_status(self, prev_next: bool):
+
+        if prev_next:
+            self.deannotate_button.setEnabled(True)
+            self.ignore_button.setEnabled(True)
+
+        else:
+            self.deannotate_button.setEnabled(False)
+            self.ignore_button.setEnabled(False)
 
     def deannotate(self):
         """
@@ -137,7 +188,9 @@ class AnnotationFixer(GeneralWindow):
         self.corpus_dict[path] = c
 
         # update the annotation info dropping the row
-        self.annotation_info_df = self.annotation_info_df.drop(row.name)
+        if len(self.queue) == 0:
+            self.annotation_info_df = self.annotation_info_df.drop(row.name)
+            print(f"Dropped row: {row.name}")
 
         # update the text area
         self.text_area.setText(corpus_dict2text(self.corpus_dict))
@@ -150,14 +203,20 @@ class AnnotationFixer(GeneralWindow):
 
         # move the scroll bar
         self.text_area.ensureCursorVisible()
+        self.change_button_status(False)
 
     def highlight_current_word(self) -> bool:
 
-        # todo: add queue support
         if len(self.queue) > 0:
             found = self.queue.pop(0)
             found, row = found
         else:
+
+            if len(self.list_to_fix) == 0:
+                note="No more words to annotate"
+                self.info_text.setText(note)
+                return False
+
             row = self.list_to_fix.iloc[self.current_index]
             row = row[row != 0]
 
@@ -196,25 +255,13 @@ class AnnotationFixer(GeneralWindow):
                f"Specific:\n"
 
         for col in row.index:
-            note += f"\t-{col}: {row[col]}\n"
+            note += f"-{col}: {row[col]}\n"
 
-        note += f"\t-File: {file}"
+        note += f"-File: {file}"
 
         # set note
         self.info_text.setText(note)
         return True
-
-    def next_word(self):
-        self.current_index += 1
-        if self.current_index >= len(self.list_to_fix):
-            self.current_index = 0
-        self.highlight_current_word()
-
-    def prev_word(self):
-        self.current_index -= 1
-        if self.current_index < 0:
-            self.current_index = len(self.list_to_fix) - 1
-        self.highlight_current_word()
 
     def save_corpus_dict(self):
         pass

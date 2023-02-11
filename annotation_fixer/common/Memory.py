@@ -62,13 +62,18 @@ class Memory:
 
         self.init_default_settings()
 
+        self.postprocess_names = ["annotation_info.csv", "binary_dataset.csv", "dataset.csv", "not_annotated_log.csv"]
+
     def init_default_settings(self):
         default = {
             "separator": ";",
             "use_loaded": False,
             "window_size": (500, 500),
             "minimum_repetitions": 1,
-            "annotation_regex":r"(\[\$[\S ]*?\])"
+            "annotation_regex": r"(\[\$[\S ]*?\])",
+            "use_strict_rule": True,
+            "data_source": "info", #missing
+
         }
 
         # update settings with the default if not exists

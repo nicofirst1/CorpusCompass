@@ -1,20 +1,9 @@
-import pandas as pd
+import os
+
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog, QComboBox, QScrollArea
 
-from annotation_fixer.common import Memory, GeneralWindow
-
-
-def load_csv2pandas(path: str, encoding: str, sep: str) -> pd.DataFrame:
-    """
-    Load a csv file into a pandas dataframe
-    """
-    with open(path, "rb") as f:
-        content = f.read().decode(encoding)
-    # find the separator by counting the number of most common separator
-    content = pd.read_csv(path, encoding=encoding, sep=sep, on_bad_lines='skip')
-
-    return content
+from annotation_fixer.common import Memory, GeneralWindow, open_postprocess
 
 
 class LoadFilesPopup(GeneralWindow):
@@ -24,16 +13,14 @@ class LoadFilesPopup(GeneralWindow):
         self.corpus_files = None
         self.corpus_text = {}
         self.annotation_info = None
-        self.annotation_info_csv = ""
-        self.missing_annotations = None
-        self.missing_annotations_csv = ""
+        self.annotation_info_csv = {}
         self.message = None
+
         self.encodings = ["UTF-8", "UTF-16"]
         enc_idx = self.mem.lfp.get("encoding") or 0
         self.encoding = self.encodings[enc_idx]
 
         self.separator = self.mem.lfp.get("separator") or ";"
-        self.mem.lfp["separator"] = self.separator
 
         self.setWindowTitle("Load Files")
 
@@ -43,8 +30,7 @@ class LoadFilesPopup(GeneralWindow):
     def create_widgets(self):
         self.message = QtWidgets.QLabel("Please upload corpus and annotation:\n"
                                         "- Corpus not uploaded\n"
-                                        "- Annotation not uploaded\n"
-                                        "- Missing annotation not uploaded\n")
+                                        "- Post-process files not uploaded\n")
         self.message.setStyleSheet("color: white; background-color: black")
 
         self.message_scroll = QScrollArea()
@@ -54,7 +40,6 @@ class LoadFilesPopup(GeneralWindow):
         self.corpus_message = QtWidgets.QTextEdit("")
         self.corpus_message.setStyleSheet("color: white; background-color: black")
 
-
         self.corpus_message_scroll = QScrollArea()
         self.corpus_message_scroll.setWidget(self.corpus_message)
         self.corpus_message_scroll.setWidgetResizable(True)
@@ -62,11 +47,8 @@ class LoadFilesPopup(GeneralWindow):
         self.corpus_button = QtWidgets.QPushButton("Load Corpus Files")
         self.corpus_button.clicked.connect(self.load_corpus)
 
-        self.annotation_info_button = QtWidgets.QPushButton("Load Annotation Info")
-        self.annotation_info_button.clicked.connect(self.load_annotation_info)
-
-        self.missing_annotation_info_button = QtWidgets.QPushButton("Load Missing Annotation Info")
-        self.missing_annotation_info_button.clicked.connect(self.load_missing_annotation_info)
+        self.postprocess_button = QtWidgets.QPushButton("Load Pos-Processed data")
+        self.postprocess_button.clicked.connect(self.load_postporcess_files)
 
         self.encoding_label = QtWidgets.QLabel("Encoding:")
         self.encoding_combo_box = QComboBox()
@@ -84,8 +66,7 @@ class LoadFilesPopup(GeneralWindow):
         layout.addWidget(self.encoding_label)
         layout.addWidget(self.encoding_combo_box)
         layout.addWidget(self.corpus_button)
-        layout.addWidget(self.annotation_info_button)
-        layout.addWidget(self.missing_annotation_info_button)
+        layout.addWidget(self.postprocess_button)
         layout.addWidget(self.message_scroll)
         layout.addWidget(self.corpus_message_scroll)
         layout.addWidget(self.finish_button)
@@ -120,83 +101,84 @@ class LoadFilesPopup(GeneralWindow):
 
                     return
 
-            self.message.setText("Please upload corpus and annotation:\n"
-                                 "- Corpus file loaded:\n\t--" +
-                                 "\n\t--".join(self.corpus_files) +
-                                 "\n- Annotation not uploaded\n"
-                                 "- Missing annotation not uploaded\n")
+            msg = "Please upload corpus and annotation:\n"
+            msg += "- Corpus file loaded:\n\t--" + "\n\t--".join(self.corpus_files) + "\n"
+
+            if self.annotation_info:
+                msg += "- Post-process files loaded:\n\t--" + "\n\t--".join(self.annotation_info) + "\n"
+            else:
+                msg += "- Post-process files not uploaded\n"
+            self.message.setText(msg)
+
             # change color to green
             self.corpus_message.setStyleSheet("color: green; background-color: black")
             self.corpus_message.setText(
                 "Corpus files loaded:\n" + "\n".join(list(self.corpus_text.values())[:10]) + "...")
 
-            if self.annotation_info and self.missing_annotations:
+            if self.annotation_info_csv:
                 self.finish_button.setEnabled(True)
 
-    def load_annotation_info(self):
-        dir = self.mem.lfp.get("annotation_dir") or ""
-        self.annotation_info = QFileDialog.getOpenFileName(
-            self, "Select Annotation Info CSV", dir, "CSV Files (*.csv)"
-        )[0]
+    def load_postporcess_files(self):
+        dir = self.mem.lfp.get("postprocess_dir") or ""
+        dir = QFileDialog.getExistingDirectory(
+            self, "Select Annotation Folder", dir
+        )
 
-        if self.annotation_info:
-            self.mem.lfp["annotation_dir"] = self.annotation_info.rsplit("/", 1)[0]
+        if not dir:
+            err_msg = f"Error loading post-process files:\nPlease select a folder and try again"
+            self.corpus_message.setText(err_msg)
+            # change color to red
+            self.corpus_message.setStyleSheet("color: red; background-color: black")
 
-            # read annotation info file
-            try:
-                self.annotation_info_csv = load_csv2pandas(self.annotation_info, self.encoding, self.separator)
-            except Exception as e:
-                err_msg = f"Error loading annotation file ({self.annotation_info}):\n{e}\n Please try again"
-                self.corpus_message.setText(err_msg)
-                # change color to red
-                self.corpus_message.setStyleSheet("color: red; background-color: black")
-                return
+            return
 
-            self.message.setText("Please upload corpus and annotation:\n"
-                                 "- Corpus file loaded:\n\t--" +
-                                 "\n\t--".join(self.corpus_files) +
-                                 "\n- Annotation file loaded:\n\t--" + self.annotation_info + "\n"
-                                                                                        "- Missing annotation not uploaded")
-            # change color to green
-            self.corpus_message.setStyleSheet("color: green; background-color: black")
-            self.corpus_message.setText(
-                "Corpus files loaded:\n" + "\n".join(list(self.corpus_text.values())[:10]) + "...")
+        # save dir
+        self.mem.lfp["postprocess_dir"] = dir
 
-            if self.corpus_files and self.missing_annotations:
-                self.finish_button.setEnabled(True)
+        # list all the files in the folder
+        files = [os.path.join(dir, f) for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
 
-    def load_missing_annotation_info(self):
-        dir = self.mem.lfp.get("missing_annotation_dir") or ""
-        self.missing_annotations = QFileDialog.getOpenFileName(
-            self, "Select Missing Annotation Info CSV", dir, "CSV Files (*.csv)"
-        )[0]
+        # check that all files in self.mem.postprocess_names are in the folder
+        found = [f for f in files if os.path.basename(f) in self.mem.postprocess_names]
 
-        if self.missing_annotations:
-            self.mem.lfp["missing_annotation_dir"] = self.missing_annotations.rsplit("/", 1)[0]
+        if len(found) != len(self.mem.postprocess_names):
+            # get missing
+            missing = [f for f in self.mem.postprocess_names if f not in [os.path.basename(x) for x in files]]
+            err_msg = f"Error loading post-process files:\nCould not find the following files:\n\t--" + "\n\t--".join(
+                missing) + "\n Please try again"
+            self.corpus_message.setText(err_msg)
+            # change color to red
+            self.corpus_message.setStyleSheet("color: red; background-color: black")
+            return
 
-            # read annotation info file
-            try:
-                self.missing_annotations_csv = load_csv2pandas(self.missing_annotations, encoding=self.encoding,
-                                                               sep=self.separator)
+        postprocess_files, erro_msg = open_postprocess(found, self.encoding, self.separator)
 
-            except Exception as e:
-                err_msg = f"Error loading missing annotation file ({self.missing_annotations}):\n{e}\n Please try again"
-                self.corpus_message.setText(err_msg)
-                # change color to red
-                self.corpus_message.setStyleSheet("color: red; background-color: black")
-                return
+        if erro_msg:
+            self.corpus_message.setText(erro_msg)
+            # change color to red
+            self.corpus_message.setStyleSheet("color: red; background-color: black")
+            return
 
-        self.message.setText("Please upload corpus and annotation:\n"
-                             "- Corpus file loaded:\n\t--" +
-                             "\n\t--".join(self.corpus_files) +
-                             "\n- Annotation file loaded:\n\t--" + self.annotation_info
-                             + "\n- Missing annotation file loaded:\n\t--" + self.missing_annotations)
+        self.annotation_info_csv = postprocess_files
+        self.annotation_info = found
 
-        if self.corpus_files and self.annotation_info:
+        msg = "Please upload corpus and annotation:\n"
+
+        if self.corpus_files:
+            msg += "- Corpus file loaded:\n\t--" + "\n\t--".join(self.corpus_files) + "\n"
+        else:
+            msg += "- Corpus file not uploaded\n"
+        msg += "- Post-process files loaded:\n\t--" + "\n\t--".join(found)
+        self.message.setText(msg)
+
+        # change color to green
+        self.corpus_message.setStyleSheet("color: green; background-color: black")
+
+        if self.corpus_files:
             self.finish_button.setEnabled(True)
 
     def finish(self):
-        if self.corpus_text and self.annotation_info and self.missing_annotations:
+        if self.corpus_text and self.annotation_info_csv:
             self.has_finished = True
             # close window
             self.close()

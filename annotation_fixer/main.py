@@ -37,20 +37,15 @@ def main():
             raise Exception("The user closed the window without loading the files")
 
         # save the loader values
-        preloaded = dict(
+        postprocess_data = dict(
             corpus_text=loader.corpus_text,
-            annotation_info_csv=loader.annotation_info_csv,
-            missing_annotations_csv=loader.missing_annotations_csv
         )
-        mem.save_preloaded(preloaded)
+        postprocess_data.update(loader.annotation_info_csv)
+        mem.save_preloaded(postprocess_data)
 
 
     else:
-        preloaded = mem.load_all_preloaded()
-
-    corpus_text = preloaded["corpus_text"]
-    annotation_info_csv = preloaded["annotation_info_csv"]
-    missing_annotations_csv = preloaded["missing_annotations_csv"]
+        postprocess_data = mem.load_all_preloaded()
 
     # ask for settings
     window = AskSettings(mem)
@@ -58,7 +53,7 @@ def main():
     app.exec_()
 
     # open new window
-    window2 = AnnotationFixer(mem, corpus_text, annotation_info_csv, missing_annotations_csv)
+    window2 = AnnotationFixer(mem, postprocess_data)
     window2.show()
 
     app.exec_()
