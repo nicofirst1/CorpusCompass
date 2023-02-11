@@ -261,9 +261,9 @@ class AnnotationFixer(GeneralWindow):
         # move the scroll bar
         self.text_area.ensureCursorVisible()
         self.change_button_status(False)
-        self.queue=[]
+        self.queue = []
         self.queue_index = 0
-        self.index-=1
+        self.index -= 1
 
     def fill_notes(self, row: pd.Series) -> str:
         """
@@ -332,6 +332,9 @@ class AnnotationFixer(GeneralWindow):
             # if there are dependent variables, add them to the note as suggestions
             if len(dependent_var) > 0:
                 note += f"-- Suggestions: {'.'.join(dependent_var)}\n"
+            else:
+                note += f"-- Suggestions: Data is too variable for suggestion\n"
+                self.annotate_button.setEnabled(False)
 
         if len(self.queue) > 0:
             note += f"-- {len(self.queue)} words left in queue\n"
@@ -339,6 +342,8 @@ class AnnotationFixer(GeneralWindow):
         return note
 
     def highlight_current_word(self) -> bool:
+
+        self.annotate_button.setEnabled(True)
 
         if len(self.queue) > 0:
             found = self.queue[self.queue_index % len(self.queue)]
@@ -437,8 +442,13 @@ class AnnotationFixer(GeneralWindow):
     def change_button_status(self, prev_next: bool):
 
         if prev_next:
+
             self.annotate_button.setEnabled(True)
             self.ignore_button.setEnabled(True)
+            if self.current_match is not None and \
+                    "suggest_annotation" in self.current_match.keys() and \
+                    len(self.current_match['suggest_annotation']) == 0:
+                self.annotate_button.setEnabled(False)
 
         else:
             self.annotate_button.setEnabled(False)
