@@ -41,6 +41,7 @@ def main():
             corpus_text=loader.corpus_text,
         )
         postprocess_data.update(loader.annotation_info_csv)
+        postprocess_data.update(loader.variables_csv)
         mem.save_preloaded(postprocess_data)
 
 
