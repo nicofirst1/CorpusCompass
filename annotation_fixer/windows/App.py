@@ -8,6 +8,7 @@ from PySide6 import QtWidgets, QtGui
 
 from annotation_fixer.common import Memory, GeneralWindow, corpus_dict2text, find_annotation_regex, \
     find_annotation_context, remove_independent_vars
+from annotation_fixer.windows.Settings import Settings
 
 
 class AnnotationFixer(GeneralWindow):
@@ -33,7 +34,6 @@ class AnnotationFixer(GeneralWindow):
         self.current_match = None
 
         super().__init__(mem)
-
 
     def create_widgets(self):
         self.annotation_regex = self.mem.settings["annotation_regex"]
@@ -66,6 +66,9 @@ class AnnotationFixer(GeneralWindow):
         self.ignore_all_button.clicked.connect(self.ignore_all)
         self.save_button = QtWidgets.QPushButton("Save", self)
         self.save_button.clicked.connect(self.save_corpus_dict)
+
+        self.settings_button = QtWidgets.QPushButton("Settings", self)
+        self.settings_button.clicked.connect(self.open_settings)
 
         # set annotation button based on the dropdown menu
         if self.dropdown.currentIndex() == 0:
@@ -112,7 +115,10 @@ class AnnotationFixer(GeneralWindow):
         trio_layout.addWidget(self.ignore_all_button)
         right_layout.addLayout(trio_layout)
 
-        right_layout.addWidget(self.save_button)
+        save_settings_layout = QtWidgets.QHBoxLayout()
+        save_settings_layout.addWidget(self.save_button)
+        save_settings_layout.addWidget(self.settings_button)
+        right_layout.addLayout(save_settings_layout)
 
         layout.addWidget(self.info_text_scroll)
         layout.addWidget(self.text_area)
@@ -120,6 +126,10 @@ class AnnotationFixer(GeneralWindow):
         self.setLayout(layout)
 
         self.update_list_to_fix()
+
+    def open_settings(self):
+        self.settings_window = Settings(self.mem)
+        self.settings_window.show()
 
     def on_text_changed(self):
         self.save_button.setEnabled(True)

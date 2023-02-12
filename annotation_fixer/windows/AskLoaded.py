@@ -16,14 +16,11 @@ class AskLoading(GeneralWindow):
     def create_widgets(self):
         self.message = QtWidgets.QLabel("Found loaded files from previous session. Do you want to use them?")
         self.message.setAlignment(QtCore.Qt.AlignCenter)
-        self.message.setStyleSheet("color: white;")
 
         self.yes = QtWidgets.QPushButton("Yes")
-        self.yes.setStyleSheet("background-color: #388e3c; color: white; padding: 10px 20px;")
         self.yes.clicked.connect(self.use_loaded)
 
         self.no = QtWidgets.QPushButton("No")
-        self.no.setStyleSheet("background-color: #d32f2f; color: white; padding: 10px 20px;")
         self.no.clicked.connect(self.load_files)
 
         layout = QtWidgets.QVBoxLayout()

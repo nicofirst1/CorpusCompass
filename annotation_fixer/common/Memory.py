@@ -97,7 +97,6 @@ class Memory:
 
         self.init_default_settings()
 
-
     def init_default_settings(self):
         setting_values = {
             "separator": ";",
@@ -108,8 +107,7 @@ class Memory:
             "data_source": "info",
             "auto_annotation_thr": 0.5,
             "use_loaded": False,
-            "background_color": "#ffffff",
-            "text_color": "#000000",
+            "style": "s1",
             "text_font": "Arial",
             "text_size": 12,
             "window_size": (500, 500),
@@ -119,15 +117,14 @@ class Memory:
             "separator": ("Separator used in the csv files", [",", ";"]),
             "encoding": ("Encoding used in the csv files", ["utf-8", "utf-16"]),
             "minimum_repetitions": (
-            "Minimum number of repetitions to be considered when using the annotation info", []),
+                "Minimum number of repetitions to be considered when using the annotation info", []),
             "annotation_regex": ("Regex to extract the annotations from the text", []),
             "use_strict_rule": ("Use the strict rule to extract the annotations with the regex", [True, False]),
             "data_source": (
-            "Data source to use for the annotation info, available options: info, missing", ["info", "missing"]),
+                "Data source to use for the annotation info, available options: info, missing", ["info", "missing"]),
             "auto_annotation_thr": ("Threshold to use for the auto annotation", []),
             "use_loaded": ("Use the loaded data instead of the loading it from scratch", [True, False]),
-            "background_color": ("Window background color", []),
-            "text_color": ("Text color", []),
+            "style": ("Style for the colors", [f"s{i}" for i in range(10)]),
             "text_font": ("Text font", []),
             "text_size": ("Text size", []),
             "window_size": ("Window Size", []),
