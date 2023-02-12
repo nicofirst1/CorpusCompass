@@ -12,7 +12,6 @@ from annotation_fixer.common import Memory, GeneralWindow, corpus_dict2text, fin
 
 class AnnotationFixer(GeneralWindow):
     def __init__(self, mem: Memory, postprocess_data: Dict[str, Any]):
-        super().__init__(mem)
 
         self.corpus_dict = OrderedDict(postprocess_data["corpus_text"])
         self.corpus_text = corpus_dict2text(self.corpus_dict)
@@ -33,6 +32,10 @@ class AnnotationFixer(GeneralWindow):
         self.low_reps = None
         self.current_match = None
 
+        super().__init__(mem)
+
+
+    def create_widgets(self):
         self.annotation_regex = self.mem.settings["annotation_regex"]
         self.annotation_regex = re.compile(self.annotation_regex)
 

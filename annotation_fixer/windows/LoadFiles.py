@@ -27,7 +27,6 @@ class LoadFiles(GeneralWindow):
 
         self.setWindowTitle("Load Files")
 
-        self.create_widgets()
         self.has_finished = False
 
     def create_widgets(self):

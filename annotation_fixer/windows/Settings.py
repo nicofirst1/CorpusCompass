@@ -1,70 +1,97 @@
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore, QtGui
 
 from annotation_fixer.common import Memory, GeneralWindow
 
 
-class AskSettings(GeneralWindow):
+class Settings(GeneralWindow):
     def __init__(self, mem: Memory):
         super().__init__(mem)
-        self.minimum_repetitions = self.mem.settings.get("minimum_repetitions") or 1
-        self.annotation_regex = self.mem.settings.get("annotation_regex") or ""
+        self.mem = mem
 
-        self.create_widgets()
+        self.setWindowTitle("Settings")
+
 
     def create_widgets(self):
-        self.setStyleSheet("background-color: #212121;")
-        self.minimum_repetitions_label = QtWidgets.QLabel("Minimum Repetitions:")
-        self.minimum_repetitions_label.setAlignment(QtCore.Qt.AlignRight)
-        self.minimum_repetitions_label.setStyleSheet("color: white;")
-
-        self.minimum_repetitions_input = QtWidgets.QLineEdit()
-        self.minimum_repetitions_input.setPlaceholderText("Enter an integer")
-        self.minimum_repetitions_input.setText(str(self.minimum_repetitions))
-        self.minimum_repetitions_input.setStyleSheet("background-color: white;")
-
-
-        self.name_regex_label = QtWidgets.QLabel("Name Regex:")
-        self.name_regex_label.setAlignment(QtCore.Qt.AlignRight)
-        self.name_regex_label.setStyleSheet("color: white;")
-
-
-        self.name_regex_input = QtWidgets.QLineEdit()
-        self.name_regex_input.setPlaceholderText("Enter a string, or leave empty for default")
-        self.name_regex_input.setText(self.annotation_regex)
-        self.name_regex_input.setStyleSheet("background-color: white;")
-
-
-        self.ok = QtWidgets.QPushButton("OK")
-        self.ok.setStyleSheet("background-color: #388e3c; color: white; padding: 10px 20px;")
-        self.ok.clicked.connect(self.accept_settings)
 
         form_layout = QtWidgets.QFormLayout()
-        form_layout.addRow(self.minimum_repetitions_label, self.minimum_repetitions_input)
-        form_layout.addRow(self.name_regex_label, self.name_regex_input)
+        form_layout.setAlignment(QtCore.Qt.AlignCenter)
+
+        for name, setting in self.mem.settings.items():
+            label = QtWidgets.QLabel(name.capitalize() + ":")
+            label.setAlignment(QtCore.Qt.AlignRight)
+            label.setStyleSheet("color: white;")
+            form_layout.addRow(label, self.create_input(name, setting))
 
         layout = QtWidgets.QVBoxLayout()
         layout.setAlignment(QtCore.Qt.AlignCenter)
         layout.addLayout(form_layout)
+
+        self.ok = QtWidgets.QPushButton("Save")
+        self.ok.setStyleSheet("background-color: #388e3c; color: white; padding: 10px 20px;")
+        self.ok.clicked.connect(self.accept_settings)
         layout.addWidget(self.ok)
 
         self.setLayout(layout)
 
+    def create_input(self, name, setting):
+        metadata = self.mem.settings_metadata[name]
+        description, choices = metadata
+
+        if isinstance(setting, str):
+            setting = setting.lower()
+
+        if len(choices) > 0:
+            widget = QtWidgets.QComboBox()
+            widget.setObjectName(name)
+            widget.addItems([str(x) for x in choices])
+            widget.setStyleSheet("background-color: white; color: black;")
+            widget.setCurrentIndex(choices.index(setting))
+
+            # Find the width of the largest item text
+            width = 0
+            font = widget.font()
+            for item in choices:
+                fm = QtGui.QFontMetrics(font)
+                width = max(width, fm.horizontalAdvance(str(item)))
+
+            # Set the minimum width of the QComboBox
+            widget.setMinimumWidth(width + 30)
+        else:
+            widget = QtWidgets.QLineEdit()
+            widget.setObjectName(name)
+            widget.setPlaceholderText("Enter an integer")
+            widget.setText(str(setting))
+            widget.setStyleSheet("background-color: white;")
+
+        timer = QtCore.QTimer(self)
+        timer.setSingleShot(True)
+        timer.timeout.connect(lambda: widget.setToolTip(description))
+        widget.enterEvent = lambda _: timer.start(2)
+        widget.leaveEvent = lambda _: timer.stop()
+
+        return widget
+
     def accept_settings(self):
-        try:
-            self.minimum_repetitions = int(self.minimum_repetitions_input.text())
-        except ValueError:
-            self.minimum_repetitions_input.setStyleSheet("background-color: #d32f2f;")
-            self.minimum_repetitions_input.setPlaceholderText("Invalid input, enter an integer")
-            return
+        for name, setting in self.mem.settings.items():
 
-        self.annotation_regex = self.name_regex_input.text()
-        if not self.annotation_regex:
-            self.name_regex_input.setStyleSheet("background-color: #d32f2f;")
-            self.name_regex_input.setPlaceholderText("Invalid input, enter a string")
-            return
+            # get choices
+            metadata = self.mem.settings_metadata[name]
+            description, choices = metadata
 
-        # Save settings
-        self.mem.settings["minimum_repetitions"] = self.minimum_repetitions
-        self.mem.settings["annotation_regex"] = self.annotation_regex
+            if len(choices) > 0:
+                val = self.findChild(QtWidgets.QComboBox, name).currentText()
+            else:
+                val = self.findChild(QtWidgets.QLineEdit, name).text()
+
+            # cast to type
+            old_val = self.mem.settings[name]
+            t = type(old_val)
+
+            if isinstance(old_val, tuple) or isinstance(old_val, list):
+                val = eval(val)
+            else:
+                val = t(val)
+
+            self.mem.settings[name] = val
 
         self.close()

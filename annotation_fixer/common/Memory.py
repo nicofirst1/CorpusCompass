@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Optional, List
 
 import pandas as pd
 
@@ -31,6 +31,37 @@ class SavingDict(dict):
     def popitem(self, *args, **kwargs):
         super().popitem(*args, **kwargs)
         self._save_fn(self._attr)
+
+
+class SettingValue:
+
+    def __init__(self, value: Any, description: Optional[str] = "", choices: Optional[List[Any]] = None):
+
+        if choices is not None:
+            assert value in choices, f"Value {value} not in the choices {choices}"
+
+        self._value = value
+        self.description = description
+        self.choices = choices
+
+    def __class__(self):
+        return type(self.value)
+
+    def __call__(self, *args, **kwargs):
+        return self.value
+
+    def __str__(self):
+        return str(self.value)
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        if self.choices is not None:
+            assert value in self.choices, f"Value {value} not in the choices {self.choices}"
+        self._value = value
 
 
 class Memory:
@@ -66,22 +97,44 @@ class Memory:
 
         self.init_default_settings()
 
+
     def init_default_settings(self):
-        default = {
+        setting_values = {
             "separator": ";",
-            "use_loaded": False,
-            "window_size": (500, 500),
+            "encoding": "utf-8",
             "minimum_repetitions": 1,
             "annotation_regex": r"(\[\$[\S ]*?\])",
             "use_strict_rule": True,
-            "data_source": "info",  # missing
-            "encoding": "utf-8",
+            "data_source": "info",
             "auto_annotation_thr": 0.5,
+            "use_loaded": False,
+            "background_color": "#ffffff",
+            "text_color": "#000000",
+            "text_font": "Arial",
+            "text_size": 12,
+            "window_size": (500, 500),
+        }
 
+        self.settings_metadata = {
+            "separator": ("Separator used in the csv files", [",", ";"]),
+            "encoding": ("Encoding used in the csv files", ["utf-8", "utf-16"]),
+            "minimum_repetitions": (
+            "Minimum number of repetitions to be considered when using the annotation info", []),
+            "annotation_regex": ("Regex to extract the annotations from the text", []),
+            "use_strict_rule": ("Use the strict rule to extract the annotations with the regex", [True, False]),
+            "data_source": (
+            "Data source to use for the annotation info, available options: info, missing", ["info", "missing"]),
+            "auto_annotation_thr": ("Threshold to use for the auto annotation", []),
+            "use_loaded": ("Use the loaded data instead of the loading it from scratch", [True, False]),
+            "background_color": ("Window background color", []),
+            "text_color": ("Text color", []),
+            "text_font": ("Text font", []),
+            "text_size": ("Text size", []),
+            "window_size": ("Window Size", []),
         }
 
         # update settings with the default if not exists
-        for k, v in default.items():
+        for k, v in setting_values.items():
             if k not in self.settings:
                 self.settings[k] = v
 

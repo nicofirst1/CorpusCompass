@@ -12,10 +12,8 @@ class AskLoading(GeneralWindow):
         self.mem.lfp["separator"] = self.separator
         self.load = False
 
-        self.create_widgets()
 
     def create_widgets(self):
-        self.setStyleSheet("background-color: #212121;")
         self.message = QtWidgets.QLabel("Found loaded files from previous session. Do you want to use them?")
         self.message.setAlignment(QtCore.Qt.AlignCenter)
         self.message.setStyleSheet("color: white;")
