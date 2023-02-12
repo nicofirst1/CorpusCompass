@@ -75,6 +75,7 @@ def find_annotation_regex(corpus: Dict[str, str], token: str, annotation_regex: 
     for k, line in corpus.items():
         full_text[k] = line
         matches = annotation_regex.finditer(line)
+        matches=list(matches)
         matches = [m for m in matches if token in m.group()]
 
         if use_strict_rule:
@@ -83,7 +84,7 @@ def find_annotation_regex(corpus: Dict[str, str], token: str, annotation_regex: 
         if len(matches) > 0:
             for m in matches:
                 ft = corpus_dict2text(full_text, skip_last=True)
-                m = CustomMatch(m.start(), m.end(), ft, token, m)
+                m = CustomMatch(m.start(), m.end(),  token, ft, m)
                 found.append((k, m))
 
     return found

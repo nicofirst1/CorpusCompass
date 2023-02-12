@@ -8,7 +8,6 @@ from annotation_fixer.common import Memory, GeneralWindow, open_postprocess, ope
 
 class LoadFiles(GeneralWindow):
     def __init__(self, mem: Memory):
-        super().__init__(mem)
 
         self.corpus_files = None
         self.corpus_text = {}
@@ -19,19 +18,21 @@ class LoadFiles(GeneralWindow):
         self.variables_csv = {}
 
         self.encodings = ["UTF-8", "UTF-16"]
-        enc_idx = self.mem.lfp.get("encoding") or 0
+        enc_idx = mem.lfp.get("encoding") or 0
         self.encoding = self.encodings[enc_idx]
-        self.mem.settings["encoding"] = self.encoding
+        mem.settings["encoding"] = self.encoding
 
-        self.separator = self.mem.lfp.get("separator") or ";"
+        self.separator = mem.lfp.get("separator") or ";"
 
-        self.setWindowTitle("Load Files")
 
         self.has_finished = False
+        super().__init__(mem)
+        self.setWindowTitle("Load Files")
+
+
 
     def create_widgets(self):
         self.message = QtWidgets.QLabel("")
-        self.message.setStyleSheet("color: white; background-color: black")
         self.loading_message()
 
         self.message_scroll = QScrollArea()
@@ -39,7 +40,6 @@ class LoadFiles(GeneralWindow):
         self.message_scroll.setWidgetResizable(True)
 
         self.corpus_message = QtWidgets.QTextEdit("")
-        self.corpus_message.setStyleSheet("color: white; background-color: black")
 
         self.corpus_message_scroll = QScrollArea()
         self.corpus_message_scroll.setWidget(self.corpus_message)
@@ -118,14 +118,14 @@ class LoadFiles(GeneralWindow):
                     err_msg = f"Error loading corpus files ({p}):\n{e}\n Please try again"
                     self.corpus_message.setText(err_msg)
                     # change color to red
-                    self.corpus_message.setStyleSheet("color: red; background-color: black")
+                    self.corpus_message.setStyleSheet("color: red")
 
                     return
 
             self.loading_message()
 
             # change color to green
-            self.corpus_message.setStyleSheet("color: green; background-color: black")
+            self.corpus_message.setStyleSheet("color: green")
             self.corpus_message.setText(
                 "Corpus files loaded:\n" + "\n".join(list(self.corpus_text.values())[:10]) + "...")
 
@@ -141,7 +141,7 @@ class LoadFiles(GeneralWindow):
             err_msg = f"Error loading post-process files:\nPlease select a folder and try again"
             self.corpus_message.setText(err_msg)
             # change color to red
-            self.corpus_message.setStyleSheet("color: red; background-color: black")
+            self.corpus_message.setStyleSheet("color: red")
 
             return
 
@@ -161,7 +161,7 @@ class LoadFiles(GeneralWindow):
                 missing) + "\n Please try again"
             self.corpus_message.setText(err_msg)
             # change color to red
-            self.corpus_message.setStyleSheet("color: red; background-color: black")
+            self.corpus_message.setStyleSheet("color: red")
             return
 
         postprocess_files, erro_msg = open_postprocess(found, self.encoding, self.separator)
@@ -169,7 +169,7 @@ class LoadFiles(GeneralWindow):
         if erro_msg:
             self.corpus_message.setText(erro_msg)
             # change color to red
-            self.corpus_message.setStyleSheet("color: red; background-color: black")
+            self.corpus_message.setStyleSheet("color: red")
             return
 
         self.annotation_info_csv = postprocess_files
@@ -179,7 +179,7 @@ class LoadFiles(GeneralWindow):
         self.loading_message()
 
         # change color to green
-        self.corpus_message.setStyleSheet("color: green; background-color: black")
+        self.corpus_message.setStyleSheet("color: green")
 
         self.enable_finish()
 
@@ -209,7 +209,7 @@ class LoadFiles(GeneralWindow):
                     missing) + "\n Please try again"
                 self.corpus_message.setText(err_msg)
                 # change color to red
-                self.corpus_message.setStyleSheet("color: red; background-color: black")
+                self.corpus_message.setStyleSheet("color: red")
                 return
 
             variables_files, erro_msg = open_variables(found, self.encoding)
@@ -217,7 +217,7 @@ class LoadFiles(GeneralWindow):
             if erro_msg:
                 self.corpus_message.setText(erro_msg)
                 # change color to red
-                self.corpus_message.setStyleSheet("color: red; background-color: black")
+                self.corpus_message.setStyleSheet("color: red")
                 return
 
             self.variables_csv = variables_files
@@ -227,7 +227,7 @@ class LoadFiles(GeneralWindow):
             self.loading_message()
 
             # change color to green
-            self.corpus_message.setStyleSheet("color: green; background-color: black")
+            self.corpus_message.setStyleSheet("color: green")
 
             self.enable_finish()
 

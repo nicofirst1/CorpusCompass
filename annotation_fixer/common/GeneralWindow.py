@@ -136,7 +136,6 @@ class GeneralWindow(QtWidgets.QWidget):
         self.setStyleSheet(self.styleSheet() + ";" + sheet)
 
         self.repaint()
-        self.window().update()
 
     # listen to resize event
     def resizeEvent(self, event):

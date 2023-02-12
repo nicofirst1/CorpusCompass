@@ -4,7 +4,6 @@ from qtpy import QtWidgets
 
 from annotation_fixer.common import Memory
 from annotation_fixer.windows import AnnotationFixer, AskLoading, LoadFiles
-from annotation_fixer.windows.Settings import Settings
 
 
 def main():
@@ -47,11 +46,6 @@ def main():
 
     else:
         postprocess_data = mem.load_all_preloaded()
-
-    # ask for settings
-    window = Settings(mem)
-    window.show()
-    app.exec_()
 
     # open new window
     window2 = AnnotationFixer(mem, postprocess_data)

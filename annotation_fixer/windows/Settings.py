@@ -4,6 +4,8 @@ from annotation_fixer.common import Memory, GeneralWindow
 
 
 class Settings(GeneralWindow):
+    settingsChanged = QtCore.Signal()
+
     def __init__(self, mem: Memory):
         super().__init__(mem)
         self.mem = mem
@@ -33,9 +35,6 @@ class Settings(GeneralWindow):
     def create_input(self, name, setting):
         metadata = self.mem.settings_metadata[name]
         description, choices = metadata
-
-        if isinstance(setting, str):
-            setting = setting.lower()
 
         if len(choices) > 0:
             widget = QtWidgets.QComboBox()
@@ -69,9 +68,11 @@ class Settings(GeneralWindow):
 
         return widget
 
-    def save_setting(self):
-        sender = self.sender()
-        name = sender.objectName()
+    def save_setting(self, name=None):
+
+        if name is None or not isinstance(name, str):
+            sender = self.sender()
+            name = sender.objectName()
 
         metadata = self.mem.settings_metadata[name]
         description, choices = metadata
@@ -91,28 +92,11 @@ class Settings(GeneralWindow):
             val = t(val)
 
         self.mem.settings[name] = val
+        self.set_style()
+        self.settingsChanged.emit()
 
     def accept_settings(self):
-        for name, setting in self.mem.settings.items():
-
-            # get choices
-            metadata = self.mem.settings_metadata[name]
-            description, choices = metadata
-
-            if len(choices) > 0:
-                val = self.findChild(QtWidgets.QComboBox, name).currentText()
-            else:
-                val = self.findChild(QtWidgets.QLineEdit, name).text()
-
-            # cast to type
-            old_val = self.mem.settings[name]
-            t = type(old_val)
-
-            if isinstance(old_val, tuple) or isinstance(old_val, list):
-                val = eval(val)
-            else:
-                val = t(val)
-
-            self.mem.settings[name] = val
+        for name, _ in self.mem.settings.items():
+            self.save_setting(name)
 
         self.close()

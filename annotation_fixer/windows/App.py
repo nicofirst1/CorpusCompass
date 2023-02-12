@@ -87,7 +87,7 @@ class AnnotationFixer(GeneralWindow):
         self.info_text_scroll.setWidget(self.info_text)
         self.info_text_scroll.setWidgetResizable(True)
         # set size policy to not be more than 20% of the window
-        self.info_text_scroll.setMaximumWidth(self.width() * 0.2)
+        self.info_text_scroll.setMaximumWidth(self.width() * 0.25)
         self.info_text_scroll.setMinimumHeight(self.height() * 0.5)
 
         # set the dropdown menu to the settings
@@ -130,6 +130,7 @@ class AnnotationFixer(GeneralWindow):
     def open_settings(self):
         self.settings_window = Settings(self.mem)
         self.settings_window.show()
+        self.settings_window.settingsChanged.connect(self.set_style)
 
     def on_text_changed(self):
         self.save_button.setEnabled(True)
@@ -147,7 +148,7 @@ class AnnotationFixer(GeneralWindow):
             self.list_to_fix = low_reps
 
             # change the text of the deannotate button
-            self.annotate_button.setText("De-annotate")
+            self.annotate_button.setText("Deannotate")
 
         else:
             # save settings
@@ -155,6 +156,10 @@ class AnnotationFixer(GeneralWindow):
             self.list_to_fix = self.missing_annotations_df
             # change the text of the deannotate button
             self.annotate_button.setText("Annotate")
+
+        self.queue = []
+        self.queue_index = 0
+        self.general_index = 0
 
         if len(self.list_to_fix) == 0:
             self.change_button_status(False)
@@ -166,6 +171,8 @@ class AnnotationFixer(GeneralWindow):
             self.next_button.setEnabled(True)
             self.prev_button.setEnabled(True)
             self.highlight_current_word()
+
+
 
     def ignore_all(self):
         row = self.current_match["row"]
@@ -208,7 +215,7 @@ class AnnotationFixer(GeneralWindow):
         match = self.current_match["match"]
         row = self.current_match["row"]
 
-        def replaceincorpus(replacement):
+        def replaceincorpus(replacement,original):
             """
             Replace the current word in the corpus with the replacement
             """
@@ -221,8 +228,7 @@ class AnnotationFixer(GeneralWindow):
             sub_string = c[n_gram[0]:n_gram[1]]
 
             # replace match
-            annotation = match.token
-            sub_string = sub_string.replace(annotation, replacement)
+            sub_string = sub_string.replace(original, replacement)
 
             # update c
             c = c[:n_gram[0]] + sub_string + c[n_gram[1]:]
@@ -234,17 +240,17 @@ class AnnotationFixer(GeneralWindow):
             suggestion = self.current_match["suggest_annotation"]
 
             annotation = f" [${'.'.join(suggestion)}.{match.token}] "
-            replaceincorpus(annotation)
+            replaceincorpus(annotation,match.token)
 
         def deannotate():
             """
             De-annotate the current word
             """
-            annotation = match.token
+            annotation = match.match.group()
             not_annotated_w = annotation.split(".")[-1].split("]")[0]
             not_annotated_w = f" {not_annotated_w} "
 
-            replaceincorpus(not_annotated_w)
+            replaceincorpus(not_annotated_w, annotation)
 
         if self.dropdown.currentIndex() == 0:
             deannotate()
