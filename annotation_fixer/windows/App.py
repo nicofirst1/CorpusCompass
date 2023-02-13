@@ -64,6 +64,8 @@ class AnnotationFixer(GeneralWindow):
         self.ignore_button.clicked.connect(self.ignore)
         self.ignore_all_button = QtWidgets.QPushButton("Ignore All", self)
         self.ignore_all_button.clicked.connect(self.ignore_all)
+        self.annotate_all_button = QtWidgets.QPushButton("", self)
+        self.annotate_all_button.clicked.connect(self.ignore_all)
         self.save_button = QtWidgets.QPushButton("Save", self)
         self.save_button.clicked.connect(self.save_corpus_dict)
 
@@ -73,13 +75,16 @@ class AnnotationFixer(GeneralWindow):
         # set annotation button based on the dropdown menu
         if self.dropdown.currentIndex() == 0:
             self.annotate_button.setText("Deannotate")
+            self.annotate_all_button.setText("Deannotate All")
         else:
             self.annotate_button.setText("Annotate")
+            self.annotate_all_button.setText("Annotate All")
 
         # start with ignore and deannotate disabled
         self.annotate_button.setEnabled(False)
         self.ignore_button.setEnabled(False)
         self.ignore_all_button.setEnabled(False)
+        self.annotate_all_button.setEnabled(False)
 
         # create the info text area
         self.info_text = QtWidgets.QLabel("Info", self)
@@ -110,10 +115,14 @@ class AnnotationFixer(GeneralWindow):
         ignore_deannotate_layout.addWidget(self.annotate_button)
         ignore_deannotate_layout.addWidget(self.ignore_button)
 
-        trio_layout = QtWidgets.QVBoxLayout()
-        trio_layout.addLayout(ignore_deannotate_layout)
-        trio_layout.addWidget(self.ignore_all_button)
-        right_layout.addLayout(trio_layout)
+        ignore_deannotate_all_layout = QtWidgets.QHBoxLayout()
+        ignore_deannotate_all_layout.addWidget(self.annotate_all_button)
+        ignore_deannotate_all_layout.addWidget(self.ignore_all_button)
+
+        quatro_layout = QtWidgets.QVBoxLayout()
+        quatro_layout.addLayout(ignore_deannotate_layout)
+        quatro_layout.addLayout(ignore_deannotate_all_layout)
+        right_layout.addLayout(quatro_layout)
 
         save_settings_layout = QtWidgets.QHBoxLayout()
         save_settings_layout.addWidget(self.save_button)
@@ -149,6 +158,7 @@ class AnnotationFixer(GeneralWindow):
 
             # change the text of the deannotate button
             self.annotate_button.setText("Deannotate")
+            self.annotate_all_button.setText("Deannotate All")
 
         else:
             # save settings
@@ -156,6 +166,7 @@ class AnnotationFixer(GeneralWindow):
             self.list_to_fix = self.missing_annotations_df
             # change the text of the deannotate button
             self.annotate_button.setText("Annotate")
+            self.annotate_all_button.setText("Annotate All")
 
         self.queue = []
         self.queue_index = 0
@@ -171,8 +182,6 @@ class AnnotationFixer(GeneralWindow):
             self.next_button.setEnabled(True)
             self.prev_button.setEnabled(True)
             self.highlight_current_word()
-
-
 
     def ignore_all(self):
         row = self.current_match["row"]
@@ -215,7 +224,7 @@ class AnnotationFixer(GeneralWindow):
         match = self.current_match["match"]
         row = self.current_match["row"]
 
-        def replaceincorpus(replacement,original):
+        def replaceincorpus(replacement, original):
             """
             Replace the current word in the corpus with the replacement
             """
@@ -240,7 +249,7 @@ class AnnotationFixer(GeneralWindow):
             suggestion = self.current_match["suggest_annotation"]
 
             annotation = f" [${'.'.join(suggestion)}.{match.token}] "
-            replaceincorpus(annotation,match.token)
+            replaceincorpus(annotation, match.token)
 
         def deannotate():
             """

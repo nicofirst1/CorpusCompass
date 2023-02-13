@@ -17,7 +17,7 @@ class LoadFiles(GeneralWindow):
         self.variables_files = None
         self.variables_csv = {}
 
-        self.encodings = ["UTF-8", "UTF-16"]
+        self.encodings = ["utf-8", "utf-16"]
         enc_idx = mem.lfp.get("encoding") or 0
         self.encoding = self.encodings[enc_idx]
         mem.settings["encoding"] = self.encoding

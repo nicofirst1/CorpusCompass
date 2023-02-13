@@ -123,15 +123,15 @@ class GeneralWindow(QtWidgets.QWidget):
         for widget_type in types:
             widgets = self.findChildren(widget_type)
             for widget in widgets:
-                s = f"{widget.styleSheet()};{sheet}"
+                s = f"{widget.styleSheet()};{sheet};"
 
-                if isinstance(widget, QComboBox):
-                    a=1
+                # if isinstance(widget, QPushButton):
+                #     s += "QPushButton:disabled { background-color: lightgray; color: darkgray; }"
 
                 widget.setStyleSheet(s)
 
-
         # set selected style for self
+       # sheet += ";QPushButton:disabled { background-color: lightgray; color: darkgray; }"
 
         self.setStyleSheet(self.styleSheet() + ";" + sheet)
 
