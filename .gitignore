@@ -7,16 +7,11 @@
 
 .DS_Store
 
-TranscriptionTagger.egg-info/
-
-TranscriptionTagger/
-
 CorpusCompass/
-
-analysis/
 
 dataset_creation.py
 
 __pycache__/
+!/postprocessed/
 
 annotation_fixer/.annotation_fixer/
