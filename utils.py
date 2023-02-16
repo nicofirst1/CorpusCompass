@@ -141,9 +141,48 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] =
     """
     Upload multiple corpus
     """
+
+    alternative_encodings = [encoding] + ["utf-8", "utf-16", "latin-1", "ascii", "cp1252", "cp1250", "cp1251",
+                                          "cp1253", ]
+
+    def decode(to_decode) -> str:
+        idx = 0
+        dec = ""
+        success = False
+        while idx < len(alternative_encodings):
+            encoding = alternative_encodings[idx]
+
+            if idx > 0:
+                print(f"Trying with the encoding {encoding}.\n")
+
+            try:
+                dec = to_decode.decode(encoding) + "\n"
+
+                if " " not in dec:
+                    print(
+                        f"The corpus {k} has been read with the encoding {encoding}, but it seems that it did not work.\n")
+                    idx += 1
+                    continue
+
+            except UnicodeDecodeError as e:
+                print(f"Could not decode the corpus {k} with the encoding {encoding}.\n"
+                      f"The error is: {e}\n")
+                idx += 1
+                continue
+            success = True
+            break
+
+        if not success:
+            raise ValueError(f"Could not decode the corpus {k} with any of the encodings {alternative_encodings}.\n"
+                             f"Please check the encoding of the corpus and try again.\n")
+        else:
+            print(f"The corpus {k} has been read with the encoding {encoding}.\n")
+        return dec
+
     corpus = ""
+
     for k, v in corpus_list.items():
-        corpus += v.decode(encoding) + "\n"
+        corpus += decode(v) + "\n"
 
     return corpus
 
