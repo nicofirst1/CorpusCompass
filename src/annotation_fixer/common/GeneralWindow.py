@@ -2,18 +2,9 @@ from typing import Optional
 
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtWidgets import QPushButton, QTextEdit, QComboBox, QLabel, QLineEdit, QScrollArea, QMessageBox
-
 from annotation_fixer.common import Memory
 
 STYLES = [
-    {
-        "color": "#000000",
-        "background-color": "#ffffff",
-        "border-style": "solid",
-        "border-width": "1px",
-        "border-color": "#000000",
-    },
-
     {
         "color": "#ffffff",
         "background-color": "#000000",
@@ -21,6 +12,13 @@ STYLES = [
         "border-width": "2px",
         "border-color": "#ffffff",
 
+    },
+    {
+        "color": "#000000",
+        "background-color": "#ffffff",
+        "border-style": "solid",
+        "border-width": "1px",
+        "border-color": "#000000",
     },
 
     {

@@ -14,4 +14,5 @@ dataset_creation.py
 __pycache__/
 !/postprocessed/
 
-annotation_fixer/.annotation_fixer/
+build/
+.annotation_fixer/

@@ -8,5 +8,5 @@ setup(name='CorpusCompass',
       author="Nicolo' Brandizzi",
       author_email='brandizzi@diag.uniroma1.it',
       url='https://github.com/nicofirst1/CorpusCompass',
-      requires= ['nltk',"pandas","scikit-learn","matplotlib","numpy"],
-     )
+      requires=['nltk', "pandas", "matplotlib", "numpy"],
+      )
