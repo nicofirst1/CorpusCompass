@@ -6,7 +6,7 @@ from annotation_fixer.common import Memory, GeneralWindow
 
 class AskLoading(GeneralWindow):
     def __init__(self, mem: Memory):
-        super().__init__(mem)
+        super().__init__(mem, "Use loaded files?")
 
         self.separator = self.mem.lfp.get("separator") or ";"
         self.mem.lfp["separator"] = self.separator

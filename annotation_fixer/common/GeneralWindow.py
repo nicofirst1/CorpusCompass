@@ -1,3 +1,5 @@
+from typing import Optional
+
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtWidgets import QPushButton, QTextEdit, QComboBox, QLabel, QLineEdit, QScrollArea, QMessageBox
 
@@ -86,13 +88,16 @@ STYLES = [
 
 
 class GeneralWindow(QtWidgets.QWidget):
-    def __init__(self, mem: Memory):
+    def __init__(self, mem: Memory, title: Optional[str] = ""):
         super().__init__()
 
         self.mem = mem
 
         # apply the window size setting
         self.resize(*self.mem.settings.get("window_size", (640, 480)))
+
+        # set the window title
+        self.setWindowTitle(title)
 
         # apply the background color setting
         self.setAutoFillBackground(True)
@@ -122,16 +127,19 @@ class GeneralWindow(QtWidgets.QWidget):
 
         for widget_type in types:
             widgets = self.findChildren(widget_type)
+            # get the class name
+            class_name = widget_type.__name__
             for widget in widgets:
-                s = f"{widget.styleSheet()};{sheet};"
+                # s = f"{class_name}{widget.styleSheet()};{sheet}"
+                s = class_name + " { " + widget.styleSheet() + ";" + sheet + " }"
 
-                # if isinstance(widget, QPushButton):
-                #     s += "QPushButton:disabled { background-color: lightgray; color: darkgray; }"
+                if isinstance(widget, QPushButton):
+                    s += "QPushButton:disabled { background-color: lightgray; color: darkgray; }"
 
                 widget.setStyleSheet(s)
 
         # set selected style for self
-       # sheet += ";QPushButton:disabled { background-color: lightgray; color: darkgray; }"
+        # sheet += ";QPushButton:disabled { background-color: lightgray; color: darkgray; }"
 
         self.setStyleSheet(self.styleSheet() + ";" + sheet)
 

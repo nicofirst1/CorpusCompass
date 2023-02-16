@@ -43,25 +43,49 @@ class CustomMatch:
 
 def find_annotation_context(corpus: Dict[str, str], token: str, contexts: List[str]) -> \
         List[Tuple[CustomMatch]]:
+    def save_match(word_idx):
+        start = context_idx + word_idx
+        end = start + len(token)
+
+        ft = corpus_dict2text(full_text, skip_last=True)
+        m = CustomMatch(start, end, token, ft)
+        found.append((k, m))
+
     found = []
+    found_context = []
     # for all the lines in the corpus find the annotation  with the regex
     full_text = OrderedDict()
     for k, line in corpus.items():
         full_text[k] = line
 
-        for c in contexts:
+        contexts = [c for c in contexts if c not in found_context]
+
+        idx = 0
+        while idx < len(contexts):
+            c = contexts[idx]
             if c not in line:
+                idx+=1
                 continue
 
+
             context_idx = line.index(c)
-            word_idx = c.index(token)
 
-            start = context_idx + word_idx
-            end = start + len(token)
+            token_present = sum([token in x for x in c.split(" ")])
+            if token_present <= 1:
+                word_idx = c.index(token)
+                save_match(word_idx)
+                found_context.append(c)
 
-            ft = corpus_dict2text(full_text, skip_last=True)
-            m = CustomMatch(start, end, token, ft)
-            found.append((k, m))
+            else:
+                prev_idx = 0
+                for i in range(token_present):
+                    word_idx = c.index(token, prev_idx)
+                    save_match(word_idx)
+
+                    prev_idx = word_idx + len(token)
+                    found_context.append(contexts[idx +i])
+                idx += token_present-1
+            idx += 1
 
     return found
 
@@ -75,7 +99,7 @@ def find_annotation_regex(corpus: Dict[str, str], token: str, annotation_regex: 
     for k, line in corpus.items():
         full_text[k] = line
         matches = annotation_regex.finditer(line)
-        matches=list(matches)
+        matches = list(matches)
         matches = [m for m in matches if token in m.group()]
 
         if use_strict_rule:
@@ -84,7 +108,7 @@ def find_annotation_regex(corpus: Dict[str, str], token: str, annotation_regex: 
         if len(matches) > 0:
             for m in matches:
                 ft = corpus_dict2text(full_text, skip_last=True)
-                m = CustomMatch(m.start(), m.end(),  token, ft, m)
+                m = CustomMatch(m.start(), m.end(), token, ft, m)
                 found.append((k, m))
 
     return found

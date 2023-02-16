@@ -26,8 +26,7 @@ class LoadFiles(GeneralWindow):
 
 
         self.has_finished = False
-        super().__init__(mem)
-        self.setWindowTitle("Load Files")
+        super().__init__(mem, "Load Files")
 
 
 

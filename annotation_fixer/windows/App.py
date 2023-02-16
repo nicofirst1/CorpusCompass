@@ -33,7 +33,7 @@ class AnnotationFixer(GeneralWindow):
         self.low_reps = None
         self.current_match = None
 
-        super().__init__(mem)
+        super().__init__(mem, "Annotation Fixer")
 
     def create_widgets(self):
         self.annotation_regex = self.mem.settings["annotation_regex"]
@@ -50,6 +50,12 @@ class AnnotationFixer(GeneralWindow):
         self.dropdown.addItem("Use Annotation Info")
         self.dropdown.addItem("Use Missing Annotations")
 
+        # set the dropdown menu to the settings
+        if self.mem.settings["data_source"] == "info":
+            self.dropdown.setCurrentIndex(0)
+        else:
+            self.dropdown.setCurrentIndex(1)
+
         # add logic to the dropdown menu
         self.dropdown.currentIndexChanged.connect(self.update_list_to_fix)
 
@@ -65,7 +71,7 @@ class AnnotationFixer(GeneralWindow):
         self.ignore_all_button = QtWidgets.QPushButton("Ignore All", self)
         self.ignore_all_button.clicked.connect(self.ignore_all)
         self.annotate_all_button = QtWidgets.QPushButton("", self)
-        self.annotate_all_button.clicked.connect(self.ignore_all)
+        self.annotate_all_button.clicked.connect(self.annotate_all)
         self.save_button = QtWidgets.QPushButton("Save", self)
         self.save_button.clicked.connect(self.save_corpus_dict)
 
@@ -94,12 +100,6 @@ class AnnotationFixer(GeneralWindow):
         # set size policy to not be more than 20% of the window
         self.info_text_scroll.setMaximumWidth(self.width() * 0.25)
         self.info_text_scroll.setMinimumHeight(self.height() * 0.5)
-
-        # set the dropdown menu to the settings
-        if self.mem.settings["data_source"] == "info":
-            self.dropdown.setCurrentIndex(0)
-        else:
-            self.dropdown.setCurrentIndex(1)
 
         # layout
         layout = QtWidgets.QHBoxLayout()
@@ -178,7 +178,7 @@ class AnnotationFixer(GeneralWindow):
             self.prev_button.setEnabled(False)
             self.info_text.setText("No more annotations to fix")
         else:
-            self.change_button_status(True)
+            # self.change_button_status(True)
             self.next_button.setEnabled(True)
             self.prev_button.setEnabled(True)
             self.highlight_current_word()
@@ -196,7 +196,7 @@ class AnnotationFixer(GeneralWindow):
         self.queue = []
         self.queue_index = 0
 
-        self.ignore_all_button.setEnabled(False)
+        self.change_button_status(False)
 
     def ignore(self):
 
@@ -217,7 +217,32 @@ class AnnotationFixer(GeneralWindow):
 
         self.change_button_status(False)
 
-    def annotation_rule(self):
+    def annotate_all(self):
+
+        suggestes = self.current_match.get("suggest_annotation", None)
+        for found in reversed(self.queue):
+            found, row = found
+            self.current_match = dict(path=found[0], match=found[1], row=row, suggest_annotation=suggestes)
+
+            match = found[1]
+            # print(f"match start {match.fc_start} match end {match.fc_end}")
+            self.annotation_rule(wait_refresh=True)
+
+        self.text_area.setText(corpus_dict2text(self.corpus_dict))
+        start = match.fc_start
+        end = match.fc_end
+        self.text_cursor.setPosition(end)
+        self.text_cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
+
+        self.text_area.setTextCursor(self.text_cursor)
+        # move the scroll bar
+        self.text_area.ensureCursorVisible()
+
+        self.queue = []
+        self.queue_index = 0
+        self.change_button_status(False)
+
+    def annotation_rule(self, wait_refresh=False):
 
         # get the current highlighted word based on the cursor position
         path = self.current_match["path"]
@@ -229,7 +254,7 @@ class AnnotationFixer(GeneralWindow):
             Replace the current word in the corpus with the replacement
             """
             c = self.corpus_dict[path]
-            n_gram = (-20, 20)
+            n_gram = (-10, 10)
             n_gram = (n_gram[0] + match.start, n_gram[1] + match.end)
             n_gram = (max(0, n_gram[0]), min(len(c), n_gram[1]))
 
@@ -237,34 +262,27 @@ class AnnotationFixer(GeneralWindow):
             sub_string = c[n_gram[0]:n_gram[1]]
 
             # replace match
-            sub_string = sub_string.replace(original, replacement)
+            sub_string = sub_string.replace(original, replacement,1)
 
             # update c
             c = c[:n_gram[0]] + sub_string + c[n_gram[1]:]
             self.corpus_dict[path] = c
 
-        def annotate():
-            # get the row in data_df that corresponds to the current word
-            data = self.dataset_df.loc[row.name]
-            suggestion = self.current_match["suggest_annotation"]
-
-            annotation = f" [${'.'.join(suggestion)}.{match.token}] "
-            replaceincorpus(annotation, match.token)
-
-        def deannotate():
-            """
-            De-annotate the current word
-            """
-            annotation = match.match.group()
-            not_annotated_w = annotation.split(".")[-1].split("]")[0]
-            not_annotated_w = f" {not_annotated_w} "
-
-            replaceincorpus(not_annotated_w, annotation)
 
         if self.dropdown.currentIndex() == 0:
-            deannotate()
+            # deannotate
+            original = match.match.group()
+            replacement = original.split(".")[-1].split("]")[0]
+            replacement = f" {replacement} "
+
+            replaceincorpus(replacement, original)
         else:
-            annotate()
+            # annotate
+            suggestion = self.current_match["suggest_annotation"]
+            original = match.token
+
+            replacement = f" [${'.'.join(suggestion)}.{original}] "
+            replaceincorpus(replacement, original)
 
         # update the annotation info dropping the row
         if len(self.queue) == 0:
@@ -277,21 +295,39 @@ class AnnotationFixer(GeneralWindow):
 
             if self.queue_index > 0:
                 self.queue_index = 0
+        else:
+            size_diff= len(replacement) - len(original)
+            self.queue.pop(self.queue_index % len(self.queue))
+            self.queue_index -=1
+
+            # update match in queue
+            for i in range(len(self.queue)):
+                found, row = self.queue[i]
+                m = found[1]
+                m.start += size_diff
+                m.end += size_diff
+                m.fc_start += size_diff
+                m.fc_end += size_diff
+                self.queue[i] = (found, row)
+
+
 
         # update the text area
-        self.text_area.setText(corpus_dict2text(self.corpus_dict))
-        start = match.fc_start
-        end = match.fc_end
-        self.text_cursor.setPosition(end)
-        self.text_cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
+        if not wait_refresh:
+            self.text_area.setText(corpus_dict2text(self.corpus_dict))
+            start = match.fc_start
+            end = match.fc_end
+            self.text_cursor.setPosition(end)
+            self.text_cursor.setPosition(start, QtGui.QTextCursor.KeepAnchor)
 
-        self.text_area.setTextCursor(self.text_cursor)
-        # move the scroll bar
-        self.text_area.ensureCursorVisible()
-        self.change_button_status(False)
-        self.queue = []
-        self.queue_index = 0
-        self.index -= 1
+            self.text_area.setTextCursor(self.text_cursor)
+            # move the scroll bar
+            self.text_area.ensureCursorVisible()
+            self.change_button_status(False)
+
+        # self.queue = []
+        # self.queue_index = 0
+        # self.index -= 1
 
     def fill_notes(self, row: pd.Series) -> str:
         """
@@ -371,8 +407,6 @@ class AnnotationFixer(GeneralWindow):
 
     def highlight_current_word(self) -> bool:
 
-        self.annotate_button.setEnabled(True)
-
         if len(self.queue) > 0:
             found = self.queue[self.queue_index % len(self.queue)]
             found, row = found
@@ -409,6 +443,7 @@ class AnnotationFixer(GeneralWindow):
                 found = found[0]
 
                 self.ignore_all_button.setEnabled(True)
+                self.annotate_all_button.setEnabled(True)
             else:
                 found = found[0]
 
@@ -439,6 +474,8 @@ class AnnotationFixer(GeneralWindow):
 
         # set note
         self.info_text.setText(note)
+        self.change_button_status(True)
+
         return True
 
     def save_corpus_dict(self):
@@ -473,14 +510,22 @@ class AnnotationFixer(GeneralWindow):
 
             self.annotate_button.setEnabled(True)
             self.ignore_button.setEnabled(True)
+            self.ignore_all_button.setEnabled(True)
+            self.annotate_all_button.setEnabled(True)
             if self.current_match is not None and \
                     "suggest_annotation" in self.current_match.keys() and \
                     len(self.current_match['suggest_annotation']) == 0:
                 self.annotate_button.setEnabled(False)
+                self.annotate_all_button.setEnabled(False)
+            if len(self.queue) == 0:
+                self.ignore_all_button.setEnabled(False)
+                self.annotate_all_button.setEnabled(False)
 
         else:
             self.annotate_button.setEnabled(False)
             self.ignore_button.setEnabled(False)
+            self.ignore_all_button.setEnabled(False)
+            self.annotate_all_button.setEnabled(False)
 
     def go_to_prev(self):
 

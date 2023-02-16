@@ -7,10 +7,8 @@ class Settings(GeneralWindow):
     settingsChanged = QtCore.Signal()
 
     def __init__(self, mem: Memory):
-        super().__init__(mem)
-        self.mem = mem
+        super().__init__(mem, "Settings")
 
-        self.setWindowTitle("Settings")
 
     def create_widgets(self):
 
