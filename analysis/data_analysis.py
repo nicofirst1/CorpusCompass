@@ -14,7 +14,7 @@ from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
-analysis_path = "analysis"
+analysis_path = "analysis_results"
 
 
 def kmeans_analysis(df, kmeans_path=f"{analysis_path}/clusters", num_clusters=-1):
