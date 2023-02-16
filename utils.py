@@ -153,14 +153,14 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] =
             encoding = alternative_encodings[idx]
 
             if idx > 0:
-                print(f"Trying with the encoding {encoding}.\n")
+                print(f"Trying with the encoding {encoding}.")
 
             try:
                 dec = to_decode.decode(encoding) + "\n"
 
                 if " " not in dec:
                     print(
-                        f"The corpus {k} has been read with the encoding {encoding}, but it seems that it did not work.\n")
+                        f"The corpus {k} has been read with the encoding {encoding}, but it seems that it did not work.")
                     idx += 1
                     continue
 
@@ -174,9 +174,9 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] =
 
         if not success:
             raise ValueError(f"Could not decode the corpus {k} with any of the encodings {alternative_encodings}.\n"
-                             f"Please check the encoding of the corpus and try again.\n")
+                             f"Please check the encoding of the corpus and try again.")
         else:
-            print(f"The corpus {k} has been read with the encoding {encoding}.\n")
+            print(f"The corpus {k} has been read with the encoding {encoding}.")
         return dec
 
     corpus = ""

@@ -18,3 +18,4 @@ analysis/
 dataset_creation.py
 
 __pycache__/
+!/postprocessed/
