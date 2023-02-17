@@ -8,7 +8,7 @@ import nltk
 
 nltk.download('punkt')
 
-from nltk import RegexpTokenizer, word_tokenize
+from nltk import word_tokenize
 
 
 def check_correct_annotations(annotations: List[re.Match], corpus: str, verbose: bool = True) -> Tuple[
@@ -103,36 +103,29 @@ def get_name(line: str, regex):
         return ""
 
 
-def get_ngram(word: str, corpus: str, ngram_params: Tuple[int, int]):
+def get_ngram(word: str, corpus: str, ngram_params: Tuple[int, int], index: int, square_regex):
     """
     Get the ngram of a word in a corpus
     """
 
-    tokenizer = RegexpTokenizer(r'\w+')
+    prev = corpus[:index]
+    next = corpus[index:]
 
-    words = tokenizer.tokenize(word)
+    prev = prev.split(" ")
+    next = next.split(" ")
 
-    lookup_corpus = tokenizer.tokenize(corpus)
-
-    try:
-        words_idx = [lookup_corpus.index(word) for word in words]
-    except ValueError:
-        print(
-            f"Could not find the word '{word}' in the corpus:\n---{corpus}.\nMaybe there is a problem with the annotation?\nI'm going to skip this for now, but you should check it later!\n\n")
-        return "Error"
-
-    lower_bound = [w - ngram_params[0] for w in words_idx]
-    upper_bound = [w + ngram_params[1] for w in words_idx]
-
-    # get min and max
-    lower_bound = min(lower_bound)
-    upper_bound = max(upper_bound)
-
+    lower_bound = ngram_params[0]
+    upper_bound = ngram_params[1]
     # Check if the ngram is out of the corpus
     lower_bound = lower_bound if lower_bound > 0 else 0
     upper_bound = upper_bound if upper_bound < len(corpus) else len(corpus)
 
-    result = " ".join(corpus.split(" ")[lower_bound:upper_bound])
+    prev = prev[-lower_bound:]
+    next = next[:upper_bound]
+
+    result = prev + next
+    result = " ".join(result)
+    result,_ = remove_features(result, square_regex)
 
     return result
 

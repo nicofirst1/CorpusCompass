@@ -90,7 +90,7 @@ class Memory:
         self._settings = SavingDict(self.save_memory, attr="file_settings")
         self._postprocess_paths = SavingDict(self.save_memory, attr="file_postprocess_paths")
 
-        self.postprocess_names = ["annotation_info.csv", "binary_dataset.csv", "dataset.csv", "not_annotated_log.csv"]
+        self.postprocess_names = ["annotation_info.csv", "binary_dataset.csv", "dataset.csv", "missed_annotations.csv"]
         self.variables_names = ["independent_variables.json", "dependent_variables.json"]
         # load the memory
         self.load_memory()
@@ -107,7 +107,7 @@ class Memory:
             "data_source": "info",
             "auto_annotation_thr": 0.5,
             "use_loaded": False,
-            "style": "s1",
+            "style": "s0",
             "text_font": "Arial",
             "text_size": 12,
             "window_size": (500, 500),

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtWidgets import QPushButton, QTextEdit, QComboBox, QLabel, QLineEdit, QScrollArea, QMessageBox
 from annotation_fixer.common import Memory
 
@@ -106,8 +106,29 @@ class GeneralWindow(QtWidgets.QWidget):
         # apply the text font and size setting
 
         self.create_widgets()
+        self.connect_all_buttons()
 
         self.set_style()
+
+    def connect_all_buttons(self):
+        for button in self.findChildren(QtWidgets.QPushButton):
+            button.clicked.connect(self.button_clicked)
+
+    def button_clicked(self):
+        sender = self.sender()
+
+        # get original style sheet of the button
+        original_style = sender.styleSheet()
+
+        # change button color to gray
+        sender.setStyleSheet("background-color: gray;")
+
+        # use a timer to restore the original color after 0.5 seconds
+        timer = QtCore.QTimer()
+        timer.setSingleShot(True)
+        timer.timeout.connect(lambda: sender.setStyleSheet(original_style))
+        timer.timeout.connect(lambda: timer.deleteLater())
+        timer.start(50)  
 
     def set_style(self):
 

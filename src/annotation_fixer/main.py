@@ -2,8 +2,8 @@ import sys
 
 from qtpy import QtWidgets
 
-from annotation_fixer.common import Memory
-from annotation_fixer.windows import AnnotationFixer, AskLoading, LoadFiles
+from src.annotation_fixer.common import Memory
+from src.annotation_fixer.windows import AskLoading, LoadFiles, AnnotationFixer
 
 
 def main():

@@ -64,9 +64,8 @@ def find_annotation_context(corpus: Dict[str, str], token: str, contexts: List[s
         while idx < len(contexts):
             c = contexts[idx]
             if c not in line:
-                idx+=1
+                idx += 1
                 continue
-
 
             context_idx = line.index(c)
 
@@ -83,8 +82,8 @@ def find_annotation_context(corpus: Dict[str, str], token: str, contexts: List[s
                     save_match(word_idx)
 
                     prev_idx = word_idx + len(token)
-                    found_context.append(contexts[idx +i])
-                idx += token_present-1
+                    found_context.append(contexts[idx + i])
+                idx += token_present - 1
             idx += 1
 
     return found
@@ -196,3 +195,61 @@ def remove_independent_vars(dependent: Dict[str, Any], independent: Dict[str, An
                     break
 
     return dependent
+
+
+def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16") -> Tuple[
+    Dict[str, str], List[str]]:
+    """
+    Upload multiple corpus
+    """
+
+    alternative_encodings = [encoding] + ["utf-8", "utf-16", "latin-1", "ascii", "cp1252", "cp1250", "cp1251",
+                                          "cp1253", ]
+
+    def decode(to_decode) -> Tuple[str, str]:
+        idx = 0
+        dec = ""
+        success = False
+        while idx < len(alternative_encodings):
+            encoding = alternative_encodings[idx]
+
+            if idx > 0:
+                print(f"Trying with the encoding {encoding}.")
+
+            try:
+                dec = to_decode.decode(encoding) + "\n"
+
+                if " " not in dec:
+                    print(
+                        f"The corpus {k} has been read with the encoding {encoding}, but it seems that it did not work.")
+                    idx += 1
+                    continue
+
+                dec = re.sub(r'\s+', ' ', dec)
+
+
+            except UnicodeDecodeError as e:
+                print(f"Could not decode the corpus {k} with the encoding {encoding}.\n"
+                      f"The error is: {e}\n")
+                idx += 1
+                continue
+            success = True
+            break
+
+        if not success:
+            msg = f"Could not decode the corpus {k} with any of the encodings {alternative_encodings}.\n"
+            f"Please check the encoding of the corpus and try again."
+            return "", msg
+        else:
+            print(f"The corpus {k} has been read with the encoding {encoding}.")
+        return dec, ""
+
+    corpus = {}
+    errs = []
+    for k, v in corpus_list.items():
+        corpus[k], err = decode(v)
+        errs.append(err)
+
+    errs = [e for e in errs if e != ""]
+
+    return corpus, errs

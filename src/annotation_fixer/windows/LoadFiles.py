@@ -2,8 +2,9 @@ import os
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog, QComboBox, QScrollArea
-
 from annotation_fixer.common import Memory, GeneralWindow, open_postprocess, open_variables
+
+from src.annotation_fixer.common import multi_corpus_upload
 
 
 class LoadFiles(GeneralWindow):
@@ -24,11 +25,8 @@ class LoadFiles(GeneralWindow):
 
         self.separator = mem.lfp.get("separator") or ";"
 
-
         self.has_finished = False
         super().__init__(mem, "Load Files")
-
-
 
     def create_widgets(self):
         self.message = QtWidgets.QLabel("")
@@ -109,17 +107,17 @@ class LoadFiles(GeneralWindow):
         if self.corpus_files:
             self.mem.lfp["corpus_dir"] = self.corpus_files[0].rsplit("/", 1)[0]
 
-            for p in self.corpus_files:
-                try:
-                    with open(p, "rb") as f:
-                        self.corpus_text[p] = f.read().decode(self.encoding)
-                except Exception as e:
-                    err_msg = f"Error loading corpus files ({p}):\n{e}\n Please try again"
-                    self.corpus_message.setText(err_msg)
-                    # change color to red
-                    self.corpus_message.setStyleSheet("color: red")
+            corpus_text = {p: open(p, "rb").read() for p in self.corpus_files}
+            self.corpus_text, errors = multi_corpus_upload(corpus_text, self.encoding)
 
-                    return
+            if len(errors) > 0:
+                err_msg = ""
+                for e in errors:
+                    err_msg += f"Error loading corpus files ({e[0]}):\n{e[1]}\n Please try again\n"
+
+                self.corpus_message.append(err_msg)
+                self.corpus_message.setStyleSheet("color: red")
+                return
 
             self.loading_message()
 
@@ -181,7 +179,6 @@ class LoadFiles(GeneralWindow):
         self.corpus_message.setStyleSheet("color: green")
 
         self.enable_finish()
-
 
     def load_variables(self):
         """

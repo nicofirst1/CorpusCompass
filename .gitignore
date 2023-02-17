@@ -16,3 +16,5 @@ __pycache__/
 
 build/
 .annotation_fixer/
+
+src/CorpusCompass.egg-info/

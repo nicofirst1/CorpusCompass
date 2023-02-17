@@ -17,7 +17,7 @@ class AnnotationFixer(GeneralWindow):
         self.corpus_dict = OrderedDict(postprocess_data["corpus_text"])
         self.corpus_text = corpus_dict2text(self.corpus_dict)
         self.annotation_info_df = postprocess_data["annotation_info"]
-        self.missing_annotations_df = postprocess_data["not_annotated_log"]
+        self.missing_annotations_df = postprocess_data["missed_annotations"]
         self.dataset_df = postprocess_data["dataset"]
         self.binary_dataset_df = postprocess_data["binary_dataset"]
 
@@ -391,6 +391,9 @@ class AnnotationFixer(GeneralWindow):
             dependent_var = [x.keys() for x in dependent_var]
             dependent_var = [list(x)[0] for x in dependent_var]
 
+            # cast to str
+            dependent_var = [str(x) for x in dependent_var]
+
             self.current_match['suggest_annotation'] = dependent_var
 
             # if there are dependent variables, add them to the note as suggestions
@@ -401,7 +404,7 @@ class AnnotationFixer(GeneralWindow):
                 self.annotate_button.setEnabled(False)
 
         if len(self.queue) > 0:
-            note += f"-- {len(self.queue)} words left in queue\n"
+            note += f"-- {len(self.queue)} words in queue\n"
 
         return note
 
@@ -438,7 +441,7 @@ class AnnotationFixer(GeneralWindow):
                 return False
             elif len(found) > 1:
                 print(f"Found more than one instance of {word} in corpus text, adding to queue")
-                self.queue += [(x, row) for x in found[1:]]
+                self.queue += [(x, row) for x in found]
                 self.queue_index = 0
                 found = found[0]
 
@@ -490,7 +493,7 @@ class AnnotationFixer(GeneralWindow):
 
         self.annotation_info_df.to_csv(self.mem.postprocess_paths['annotation_info'], index=False,
                                        sep=self.mem.settings['separator'])
-        self.missing_annotations_df.to_csv(self.mem.postprocess_paths['not_annotated_log'], index=False,
+        self.missing_annotations_df.to_csv(self.mem.postprocess_paths['missed_annotations'], index=False,
                                            sep=self.mem.settings['separator'])
 
         # display message
