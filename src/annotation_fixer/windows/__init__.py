@@ -1,4 +1,4 @@
-from .App import AnnotationFixer
+from .AnnotationFixer import AnnotationFixer
 from .AskLoaded import AskLoading
 from .LoadFiles import LoadFiles
 

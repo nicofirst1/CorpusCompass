@@ -128,7 +128,7 @@ class GeneralWindow(QtWidgets.QWidget):
         timer.setSingleShot(True)
         timer.timeout.connect(lambda: sender.setStyleSheet(original_style))
         timer.timeout.connect(lambda: timer.deleteLater())
-        timer.start(50)  
+        timer.start(50)
 
     def set_style(self):
 

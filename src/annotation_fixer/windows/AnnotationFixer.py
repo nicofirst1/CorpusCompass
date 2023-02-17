@@ -8,6 +8,7 @@ from PySide6 import QtWidgets, QtGui
 
 from annotation_fixer.common import Memory, GeneralWindow, corpus_dict2text, find_annotation_regex, \
     find_annotation_context, remove_independent_vars
+from annotation_fixer.common.AppLogger import AppLogger
 from annotation_fixer.windows.Settings import Settings
 
 
@@ -27,11 +28,16 @@ class AnnotationFixer(GeneralWindow):
         self.dependent_variables = remove_independent_vars(self.dependent_variables, self.independent_variables)
 
         self.list_to_fix = []
+        self.saved_lists = []
+        self.mode_idx = 0
+
         self.queue = []
         self.queue_index = 0
         self.general_index = 0
         self.low_reps = None
         self.current_match = None
+
+        self.logger=AppLogger(".annotation_fixer/annotation_fixer.log")
 
         super().__init__(mem, "Annotation Fixer")
 
@@ -53,8 +59,10 @@ class AnnotationFixer(GeneralWindow):
         # set the dropdown menu to the settings
         if self.mem.settings["data_source"] == "info":
             self.dropdown.setCurrentIndex(0)
+            self.mode_idx = 0
         else:
             self.dropdown.setCurrentIndex(1)
+            self.mode_idx = 1
 
         # add logic to the dropdown menu
         self.dropdown.currentIndexChanged.connect(self.update_list_to_fix)
@@ -134,7 +142,7 @@ class AnnotationFixer(GeneralWindow):
         layout.addLayout(right_layout)
         self.setLayout(layout)
 
-        self.update_list_to_fix()
+        self.init_list_to_fix()
 
     def open_settings(self):
         self.settings_window = Settings(self.mem)
@@ -144,26 +152,40 @@ class AnnotationFixer(GeneralWindow):
     def on_text_changed(self):
         self.save_button.setEnabled(True)
 
+    def init_list_to_fix(self):
+        index = self.dropdown.currentIndex()
+
+        # save settings
+        min_reps = self.mem.settings['minimum_repetitions']
+        # get the rows where 'annotated' is less than the minimum repetition
+        low_reps = self.annotation_info_df[self.annotation_info_df['annotated'] <= min_reps]
+        self.saved_lists.append(low_reps)
+
+        # save settings
+        self.saved_lists.append(self.missing_annotations_df)
+
+        self.list_to_fix = self.saved_lists[index]
+
+        self.update_list_to_fix()
+
     def update_list_to_fix(self):
         # get checked checkboxes
 
         index = self.dropdown.currentIndex()
-        if index == 0:
-            # save settings
-            self.mem.settings["data_source"] = "info"
-            min_reps = self.mem.settings['minimum_repetitions']
-            # get the rows where 'annotated' is less than the minimum repetition
-            low_reps = self.annotation_info_df[self.annotation_info_df['annotated'] <= min_reps]
-            self.list_to_fix = low_reps
 
+        self.saved_lists[self.mode_idx] = copy.deepcopy(self.list_to_fix)
+        self.list_to_fix = self.saved_lists[index]
+        self.mode_idx = index
+
+        if index == 0:
+            self.mem.settings["data_source"] = "info"
             # change the text of the deannotate button
             self.annotate_button.setText("Deannotate")
             self.annotate_all_button.setText("Deannotate All")
 
         else:
-            # save settings
             self.mem.settings["data_source"] = "missing"
-            self.list_to_fix = self.missing_annotations_df
+
             # change the text of the deannotate button
             self.annotate_button.setText("Annotate")
             self.annotate_all_button.setText("Annotate All")
@@ -186,12 +208,7 @@ class AnnotationFixer(GeneralWindow):
     def ignore_all(self):
         row = self.current_match["row"]
 
-        try:
-            self.annotation_info_df = self.annotation_info_df.drop(row.name)
-            print(f"Dropped row: {row.name}")
-        except KeyError:
-            print(f"Row not found: {row.name}")
-            pass
+        self.drop_row(row)
 
         self.queue = []
         self.queue_index = 0
@@ -201,19 +218,15 @@ class AnnotationFixer(GeneralWindow):
     def ignore(self):
 
         row = self.current_match["row"]
-
+        if len(self.queue) > 0:
+            # remove the found from the queue
+            self.queue.pop(self.queue_index % len(self.queue))
         # drop the row from the dataframe based on index
         if len(self.queue) == 0:
-            try:
-                self.annotation_info_df = self.annotation_info_df.drop(row.name)
-                print(f"Dropped row: {row.name}")
-            except KeyError:
-                print(f"Row not found: {row.name}")
-                pass
+            self.drop_row(row)
             if self.queue_index > 0:
                 self.queue_index = 0
-        else:
-            self.queue.pop(self.queue_index % len(self.queue))
+
 
         self.change_button_status(False)
 
@@ -225,7 +238,6 @@ class AnnotationFixer(GeneralWindow):
             self.current_match = dict(path=found[0], match=found[1], row=row, suggest_annotation=suggestes)
 
             match = found[1]
-            # print(f"match start {match.fc_start} match end {match.fc_end}")
             self.annotation_rule(wait_refresh=True)
 
         self.text_area.setText(corpus_dict2text(self.corpus_dict))
@@ -262,12 +274,11 @@ class AnnotationFixer(GeneralWindow):
             sub_string = c[n_gram[0]:n_gram[1]]
 
             # replace match
-            sub_string = sub_string.replace(original, replacement,1)
+            sub_string = sub_string.replace(original, replacement, 1)
 
             # update c
             c = c[:n_gram[0]] + sub_string + c[n_gram[1]:]
             self.corpus_dict[path] = c
-
 
         if self.dropdown.currentIndex() == 0:
             # deannotate
@@ -286,19 +297,14 @@ class AnnotationFixer(GeneralWindow):
 
         # update the annotation info dropping the row
         if len(self.queue) == 0:
-            try:
-                self.annotation_info_df = self.annotation_info_df.drop(row.name)
-                print(f"Dropped row: {row.name}")
-            except KeyError:
-                print(f"Row not found: {row.name}")
-                pass
+            self.drop_row(row)
 
             if self.queue_index > 0:
                 self.queue_index = 0
         else:
-            size_diff= len(replacement) - len(original)
+            size_diff = len(replacement) - len(original)
             self.queue.pop(self.queue_index % len(self.queue))
-            self.queue_index -=1
+            self.queue_index -= 1
 
             # update match in queue
             for i in range(len(self.queue)):
@@ -309,8 +315,6 @@ class AnnotationFixer(GeneralWindow):
                 m.fc_start += size_diff
                 m.fc_end += size_diff
                 self.queue[i] = (found, row)
-
-
 
         # update the text area
         if not wait_refresh:
@@ -328,6 +332,15 @@ class AnnotationFixer(GeneralWindow):
         # self.queue = []
         # self.queue_index = 0
         # self.index -= 1
+
+    def drop_row(self, row):
+
+        try:
+            self.list_to_fix = self.list_to_fix.drop(row.name)
+            self.logger.info(f"Dropped row: {row.name}\n{row}\n")
+        except KeyError:
+            self.logger.warning(f"Row not found: {row.name}\n{row}\n")
+            pass
 
     def fill_notes(self, row: pd.Series) -> str:
         """
