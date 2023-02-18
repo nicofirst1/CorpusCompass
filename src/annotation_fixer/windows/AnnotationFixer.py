@@ -9,6 +9,7 @@ from PySide6 import QtWidgets, QtGui, QtCore
 from annotation_fixer.common import Memory, GeneralWindow, corpus_dict2text, find_annotation_regex, \
     find_annotation_context, remove_independent_vars
 from annotation_fixer.common.AppLogger import AppLogger
+from annotation_fixer.windows.Find import FindDialog
 from annotation_fixer.windows.Settings import Settings
 
 
@@ -165,23 +166,27 @@ class AnnotationFixer(GeneralWindow):
         key = event.key()
 
         # Handle Command key for macOS
-        if modifiers & QtCore.Qt.MetaModifier:
+        if modifiers & QtCore.Qt.MetaModifier or modifiers & QtCore.Qt.ControlModifier:
             if key == QtCore.Qt.Key_Z:
                 self.history.undo()
             elif key == QtCore.Qt.Key_Z and modifiers & QtCore.Qt.ShiftModifier:
                 self.history.redo()
+            elif event.key() == QtCore.Qt.Key_F:
+                self.show_find_dialog()
             # Handle Control key for other platforms
-        elif modifiers & QtCore.Qt.ControlModifier:
-            if key == QtCore.Qt.Key_Z:
-                self.history.undo()
-            elif key == QtCore.Qt.Key_Z and modifiers & QtCore.Qt.ShiftModifier:
-                self.history.redo()
+
         else:
             super().keyPressEvent(event)
+
     def open_settings(self):
         self.settings_window = Settings(self.mem)
         self.settings_window.show()
         self.settings_window.settingsChanged.connect(self.set_style)
+
+    def show_find_dialog(self):
+        self.find_dialog = FindDialog(self)
+        self.find_dialog.show()
+
 
     def on_text_changed(self):
         self.save_button.setEnabled(True)
