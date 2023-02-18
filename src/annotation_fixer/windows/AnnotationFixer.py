@@ -4,7 +4,7 @@ from collections import OrderedDict, Counter
 from typing import Dict, Any
 
 import pandas as pd
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtWidgets, QtGui, QtCore
 
 from annotation_fixer.common import Memory, GeneralWindow, corpus_dict2text, find_annotation_regex, \
     find_annotation_context, remove_independent_vars
@@ -37,9 +37,13 @@ class AnnotationFixer(GeneralWindow):
         self.low_reps = None
         self.current_match = None
 
-        self.logger=AppLogger(".annotation_fixer/annotation_fixer.log")
+        self.logger = AppLogger(".annotation_fixer/annotation_fixer.log")
+        self.history = History(self)
 
         super().__init__(mem, "Annotation Fixer")
+
+        self.history.add_buttons(self.undo_button, self.redo_button)
+        self.history.save_state()
 
     def create_widgets(self):
         self.annotation_regex = self.mem.settings["annotation_regex"]
@@ -86,6 +90,11 @@ class AnnotationFixer(GeneralWindow):
         self.settings_button = QtWidgets.QPushButton("Settings", self)
         self.settings_button.clicked.connect(self.open_settings)
 
+        self.undo_button = QtWidgets.QPushButton("Undo", self)
+        self.undo_button.clicked.connect(self.history.undo)
+        self.redo_button = QtWidgets.QPushButton("Redo", self)
+        self.redo_button.clicked.connect(self.history.redo)
+
         # set annotation button based on the dropdown menu
         if self.dropdown.currentIndex() == 0:
             self.annotate_button.setText("Deannotate")
@@ -113,6 +122,11 @@ class AnnotationFixer(GeneralWindow):
         layout = QtWidgets.QHBoxLayout()
         right_layout = QtWidgets.QVBoxLayout()
         right_layout.addWidget(self.dropdown)
+
+        undo_redo_layout = QtWidgets.QHBoxLayout()
+        undo_redo_layout.addWidget(self.undo_button)
+        undo_redo_layout.addWidget(self.redo_button)
+        right_layout.addLayout(undo_redo_layout)
 
         prev_next_layout = QtWidgets.QHBoxLayout()
         prev_next_layout.addWidget(self.prev_button)
@@ -144,6 +158,26 @@ class AnnotationFixer(GeneralWindow):
 
         self.init_list_to_fix()
 
+        # Override keyPressEvent to handle key events
+
+    def keyPressEvent(self, event: QtGui.QKeyEvent):
+        modifiers = event.modifiers()
+        key = event.key()
+
+        # Handle Command key for macOS
+        if modifiers & QtCore.Qt.MetaModifier:
+            if key == QtCore.Qt.Key_Z:
+                self.history.undo()
+            elif key == QtCore.Qt.Key_Z and modifiers & QtCore.Qt.ShiftModifier:
+                self.history.redo()
+            # Handle Control key for other platforms
+        elif modifiers & QtCore.Qt.ControlModifier:
+            if key == QtCore.Qt.Key_Z:
+                self.history.undo()
+            elif key == QtCore.Qt.Key_Z and modifiers & QtCore.Qt.ShiftModifier:
+                self.history.redo()
+        else:
+            super().keyPressEvent(event)
     def open_settings(self):
         self.settings_window = Settings(self.mem)
         self.settings_window.show()
@@ -214,6 +248,7 @@ class AnnotationFixer(GeneralWindow):
         self.queue_index = 0
 
         self.change_button_status(False)
+        self.history.save_state()
 
     def ignore(self):
 
@@ -227,8 +262,8 @@ class AnnotationFixer(GeneralWindow):
             if self.queue_index > 0:
                 self.queue_index = 0
 
-
         self.change_button_status(False)
+        self.history.save_state()
 
     def annotate_all(self):
 
@@ -253,6 +288,7 @@ class AnnotationFixer(GeneralWindow):
         self.queue = []
         self.queue_index = 0
         self.change_button_status(False)
+        self.history.save_state()
 
     def annotation_rule(self, wait_refresh=False):
 
@@ -328,6 +364,7 @@ class AnnotationFixer(GeneralWindow):
             # move the scroll bar
             self.text_area.ensureCursorVisible()
             self.change_button_status(False)
+            self.history.save_state()
 
         # self.queue = []
         # self.queue_index = 0
@@ -573,3 +610,60 @@ class AnnotationFixer(GeneralWindow):
             self.queue_index = value
         else:
             self.general_index = value
+
+    def update_gui(self):
+        self.text_area.setText(corpus_dict2text(self.corpus_dict))
+        self.highlight_current_word()
+        self.change_button_status(True)
+
+
+class History:
+
+    def __init__(self, ann_fixer: AnnotationFixer):
+        self.ann_fixer = ann_fixer
+        self.history = []
+        self.index = 0
+
+        self.save_attributes = ['corpus_dict', 'annotation_info_df', 'missing_annotations_df', 'list_to_fix',
+                                'general_index', 'queue', 'queue_index']
+
+    def add_buttons(self, undo_button: QtWidgets.QPushButton, redo_button: QtWidgets.QPushButton):
+        self.undo_button = undo_button
+        self.redo_button = redo_button
+
+    def save_state(self):
+        state = {}
+        for attr in self.save_attributes:
+            state[attr] = copy.deepcopy(getattr(self.ann_fixer, attr))
+        self.history.append(state)
+        self.index = len(self.history) - 1
+
+        # keep only the last 10 states
+        if len(self.history) > 10:
+            self.history = self.history[-10:]
+
+        self.undo_button.setEnabled(True)
+
+    def undo(self):
+        if self.index > 0:
+            self.index -= 1
+            self.restore_state()
+
+        if self.index == 0:
+            self.undo_button.setEnabled(False)
+        self.redo_button.setEnabled(True)
+
+    def redo(self):
+        if self.index < len(self.history) - 1:
+            self.index += 1
+            self.restore_state()
+
+        if self.index == len(self.history) - 1:
+            self.redo_button.setEnabled(False)
+        self.undo_button.setEnabled(True)
+
+    def restore_state(self):
+        state = self.history[self.index]
+        for attr in self.save_attributes:
+            setattr(self.ann_fixer, attr, state[attr])
+        self.ann_fixer.update_gui()
