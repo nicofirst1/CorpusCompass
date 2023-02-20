@@ -20,8 +20,7 @@ If you find a bug or have a feature request, please open an issue on the [issue 
 This tool is designed to be used with a Jupyter notebook in an online environment.
 If you are not familiar with colab, check this tutorial on [how to use colab](https://colab.research.google.com/notebooks/intro.ipynb).
 
-We have a [notebook for creating the dataset](https://colab.research.google.com/github/nicofirst1/CorpusCompass/blob/main/src/dataset_creator/dataset_creation.ipynb), 
-and a python file for [dataset analysis](./data_analysis.py) (check the local installation section for more info on how to use it).
+We have a [notebook for creating the dataset](https://colab.research.google.com/github/nicofirst1/CorpusCompass/blob/main/src/dataset_creator/dataset_creation.ipynb).
 
 #### Troubleshooting
 

@@ -98,7 +98,7 @@ def get_name(line: str, regex):
 
     name = regex.findall(line)
     if len(name) > 0:
-        return name[0].lower()
+        return name[0].lower().strip()
     else:
         return ""
 
@@ -130,7 +130,7 @@ def get_ngram(word: str, corpus: str, ngram_params: Tuple[int, int], index: int,
     return result
 
 
-def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16") -> str:
+def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16") -> Dict[str, str]:
     """
     Upload multiple corpus
     """
@@ -172,10 +172,10 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] =
             print(f"The corpus {k} has been read with the encoding {encoding}.")
         return dec
 
-    corpus = ""
+    corpus = {}
 
     for k, v in corpus_list.items():
-        corpus += decode(v) + "\n"
+        corpus[k] = decode(v)
 
     return corpus
 
