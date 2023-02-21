@@ -198,7 +198,7 @@ def split_paragraphs(corpus: str) -> List[str]:
 
 
 def find_repetitions(corpus: str, token: str, annotation_regex: re.Pattern, name_regex: re.Pattern,
-                     speaker_of_interest: List[str]) -> Tuple[int, int, int, List[str]]:
+                     speaker_of_interest: List[str], check_annotated:Optional[bool]=True) -> Tuple[int, int, int, List[str]]:
     """
     Find the repetitions of a token in a corpus
     :param corpus: the corpus
@@ -222,32 +222,35 @@ def find_repetitions(corpus: str, token: str, annotation_regex: re.Pattern, name
     total_wild_rep = len(wild_rep)
     interested_wild_rep = 0
 
+    # total_wild_rep = corpus.count(f" {token} ")
+    if check_annotated:
+        ann_rep = annotation_regex.findall(corpus)
+
+        ann_rep = [a.split(".")[-1] for a in ann_rep]
+        ann_rep = [a for a in ann_rep if token == a]
+        ann_rep = len(ann_rep)
+    else:
+        ann_rep = 0
+
+    wild_index = []
+    speakers=[]
     for w in wild_rep:
+        lower_bound = w.start() - char_ngram[0]
+        upper_bound = w.end() + char_ngram[1]
+
+        lower_bound = lower_bound if lower_bound > 0 else 0
+        upper_bound = upper_bound if upper_bound < len(corpus) else len(corpus)
+
+        wild_index.append(corpus[lower_bound:upper_bound])
+
         # find the speaker based on match location
-        speaker = ""
         speak = corpus[:w.start()].split("\n")
         speak = speak[-1]
         speak = get_name(speak, name_regex)
 
         if speak in speaker_of_interest:
             interested_wild_rep += 1
-
-    # total_wild_rep = corpus.count(f" {token} ")
-    ann_rep = annotation_regex.findall(corpus)
-
-    ann_rep = [a.split(".")[-1] for a in ann_rep]
-    ann_rep = [a for a in ann_rep if token == a]
-    ann_rep = len(ann_rep)
-
-    wild_index = []
-    for group in re.finditer(custom_token_regex, corpus):
-        lower_bound = group.start() - char_ngram[0]
-        upper_bound = group.end() + char_ngram[1]
-
-        lower_bound = lower_bound if lower_bound > 0 else 0
-        upper_bound = upper_bound if upper_bound < len(corpus) else len(corpus)
-
-        wild_index.append(corpus[lower_bound:upper_bound])
+            speakers.append(speak)
 
     return total_wild_rep, interested_wild_rep, ann_rep, wild_index
 
