@@ -11,7 +11,7 @@ nltk.download('punkt')
 from nltk import word_tokenize
 
 
-def check_correct_annotations(annotations: List[re.Match], corpus: str, verbose: bool = True) -> Tuple[
+def check_correct_annotations(annotations: List[re.Match], corpus: str, corpus_path:str, verbose: bool = True) -> Tuple[
     List[str], List[Tuple[str, str]]]:
     """
     Check if the annotations are correct
@@ -38,6 +38,7 @@ def check_correct_annotations(annotations: List[re.Match], corpus: str, verbose:
 
     def custom_print(*args, **kwargs):
         if verbose:
+            print(f"\nError in the corpus {corpus_path}: ")
             print(*args, **kwargs)
 
     ngram_params = (+50, 50)
