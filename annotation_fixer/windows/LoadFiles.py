@@ -4,7 +4,7 @@ from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog, QComboBox, QScrollArea
 from annotation_fixer.common import Memory, GeneralWindow, open_postprocess, open_variables
 
-from src.annotation_fixer.common import multi_corpus_upload
+from annotation_fixer.common import multi_corpus_upload
 
 
 class LoadFiles(GeneralWindow):

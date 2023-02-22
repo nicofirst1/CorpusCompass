@@ -1,9 +1,9 @@
 import sys
 
-from qtpy import QtWidgets
+from PySide6 import QtWidgets
 
-from src.annotation_fixer.common import Memory
-from src.annotation_fixer.windows import AskLoading, LoadFiles, AnnotationFixer
+from annotation_fixer.common import Memory
+from annotation_fixer.windows import AskLoading, LoadFiles, AnnotationFixer
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
     if not load:
         loader = LoadFiles(mem)
         loader.show()
-        app.exec_()
+        app.exec()
 
         if not loader.has_finished:
             raise Exception("The user closed the window without loading the files")
