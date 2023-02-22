@@ -6,6 +6,8 @@ from typing import Tuple, List, Dict, Optional
 
 import nltk
 
+from dataset_analyzer.colors import *
+
 nltk.download('punkt')
 
 from nltk import word_tokenize
@@ -38,8 +40,8 @@ def check_correct_annotations(annotations: List[re.Match], corpus: str, corpus_p
 
     def custom_print(*args, **kwargs):
         if verbose:
-            print(f"\nError in the corpus {corpus_path}: ")
-            print(*args, **kwargs)
+            error(f"\nError in the corpus {corpus_path}: ")
+            error(*args, **kwargs)
 
     ngram_params = (+50, 50)
     new_annotations = []
@@ -82,7 +84,7 @@ def remove_features(corpus, square_regex):
             text = w.rsplit(".", 1)[1][:-1] + " "
             corpus = corpus.replace(w, text)
         except IndexError:
-            print(f"I found an error for the tag '{w}'. Maybe it does not have a point in it?\n"
+            error(f"I found an error for the tag '{w}'. Maybe it does not have a point in it?\n"
                   f"Please check the tag and try again.")
             wrong_tags.append(w)
             continue
@@ -147,19 +149,19 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] =
             encoding = alternative_encodings[idx]
 
             if idx > 0:
-                print(f"Trying with the encoding {encoding}.")
+                info(f"Trying with the encoding {encoding}.")
 
             try:
                 dec = to_decode.decode(encoding) + "\n"
 
                 if " " not in dec:
-                    print(
+                    warning(
                         f"The corpus {k} has been read with the encoding {encoding}, but it seems that it did not work.")
                     idx += 1
                     continue
 
             except UnicodeDecodeError as e:
-                print(f"Could not decode the corpus {k} with the encoding {encoding}.\n"
+                warning(f"Could not decode the corpus {k} with the encoding {encoding}.\n"
                       f"The error is: {e}\n")
                 idx += 1
                 continue
@@ -170,7 +172,7 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] =
             raise ValueError(f"Could not decode the corpus {k} with any of the encodings {alternative_encodings}.\n"
                              f"Please check the encoding of the corpus and try again.")
         else:
-            print(f"The corpus {k} has been read with the encoding {encoding}.")
+            info(f"The corpus {k} has been read with the encoding {encoding}.")
         return dec
 
     corpus = {}
