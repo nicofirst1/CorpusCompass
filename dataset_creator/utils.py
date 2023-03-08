@@ -101,7 +101,7 @@ def get_name(line: str, regex):
 
     name = regex.findall(line)
     if len(name) > 0:
-        return name[0].lower().strip()
+        return name[0].strip()
     else:
         return ""
 

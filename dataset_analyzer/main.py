@@ -118,7 +118,7 @@ def dependent_variable_count(df: pd.DataFrame, dependent_variables: List[str], s
 
     columns = []
     for c in df.columns:
-        c1 = c.split(":")[1]
+        c1 = c.split("_")[1]
         if any([x in c for x in dependent_variables]) or c1 in speakers:
             columns.append(c)
 
@@ -304,6 +304,15 @@ if __name__ == '__main__':
     if not os.path.exists(analysis_path):
         os.mkdir(analysis_path)
 
+    # analyze the data
+    print("Analyzing the variables...")
+    variable_analysis(df)
+    print("Done!")
+
+    print("Starting cluster analysis...")
+    kmeans_analysis(df, num_clusters=10)
+    print("Done!")
+
     # analyze the with regression
     if independent_variables or args.speaker:
         print("Analyzing the variables with regression...")
@@ -316,11 +325,4 @@ if __name__ == '__main__':
         dependent_variable_count(df, independent_variables, args.speaker)
         print("Done!")
 
-    # analyze the data
-    print("Analyzing the variables...")
-    variable_analysis(df)
-    print("Done!")
 
-    print("Starting cluster analysis...")
-    kmeans_analysis(df, num_clusters=10)
-    print("Done!")

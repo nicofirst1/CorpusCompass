@@ -100,14 +100,14 @@ class Memory:
     def init_default_settings(self):
         setting_values = {
             "separator": ";",
-            "encoding": "utf-8",
+            "encoding": "utf-16",
             "minimum_repetitions": 1,
             "annotation_regex": r"(\[\$[\S ]*?\])",
             "use_strict_rule": True,
             "data_source": "info",
             "auto_annotation_thr": 0.5,
             "use_loaded": False,
-            "style": "s0",
+            "style": "s1",
             "text_font": "Arial",
             "text_size": 12,
             "window_size": (500, 500),

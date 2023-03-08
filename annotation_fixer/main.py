@@ -21,7 +21,7 @@ def main():
     if mem.exist_preloaded():
         ask = AskLoading(mem)
         ask.show()
-        app.exec_()
+        app.exec()
         load = ask.load
     else:
         load = False
