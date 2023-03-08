@@ -18,7 +18,7 @@ def corpus_dict2text(corpus_list: Dict[str, str], skip_last=False) -> str:
 
         if skip_last and idx == max_len - 1:
             continue
-
+        value="\n".join(value.split("\n"))
         corpus_text += f"{value}\n\n\n"
 
         idx += 1
@@ -225,7 +225,7 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] =
                     idx += 1
                     continue
 
-                dec = re.sub(r'\s+', ' ', dec)
+                dec = re.sub(r'[^\S\n]+', ' ', dec)
 
 
             except UnicodeDecodeError as e:
