@@ -91,7 +91,7 @@ class Memory:
         self._postprocess_paths = SavingDict(self.save_memory, attr="file_postprocess_paths")
 
         self.postprocess_names = ["annotation_info.csv", "binary_dataset.csv", "dataset.csv", "missed_annotations.csv"]
-        self.variables_names = ["independent_variables.json", "dependent_variables.json"]
+        self.variables_names = ["independent_variables.json", "dependent_variables.json","speakers.json"]
         # load the memory
         self.load_memory()
 

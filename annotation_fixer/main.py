@@ -3,7 +3,7 @@ import sys
 from PySide6 import QtWidgets
 
 from annotation_fixer.common import Memory
-from annotation_fixer.windows import AskLoading, LoadFiles, AnnotationFixer
+from annotation_fixer.windows import AskLoading, LoadFiles, AnnotationFixer, DatasetCreator
 
 
 def main():
@@ -47,11 +47,15 @@ def main():
     else:
         postprocess_data = mem.load_all_preloaded()
 
-    # open new window
-    window2 = AnnotationFixer(mem, postprocess_data)
-    window2.show()
+    if "dataset" not in postprocess_data.keys():
+        window1 = DatasetCreator(mem, postprocess_data)
+        window1.show()
+    else:
+        # open new window
+        window2 = AnnotationFixer(mem, postprocess_data)
+        window2.show()
 
-    app.exec_()
+    app.exec()
 
 
 if __name__ == "__main__":

@@ -26,6 +26,8 @@ class LoadFiles(GeneralWindow):
         self.separator = mem.lfp.get("separator") or ";"
 
         self.has_finished = False
+        self.next_window = None
+
         super().__init__(mem, "Load Files")
 
     def create_widgets(self):
@@ -48,7 +50,7 @@ class LoadFiles(GeneralWindow):
         self.variables_button = QtWidgets.QPushButton("Load Variables")
         self.variables_button.clicked.connect(self.load_variables)
 
-        self.postprocess_button = QtWidgets.QPushButton("Load Pos-Processed data")
+        self.postprocess_button = QtWidgets.QPushButton("(Optional) Load Pos-Processed data")
         self.postprocess_button.clicked.connect(self.load_postporcess_files)
 
         self.encoding_label = QtWidgets.QLabel("Encoding:")
@@ -59,19 +61,29 @@ class LoadFiles(GeneralWindow):
         self.encoding_combo_box.activated[int].connect(self.handle_encoding_change)
         self.encoding_combo_box.setCurrentText(self.encoding)
 
-        self.finish_button = QtWidgets.QPushButton("Finish")
-        self.finish_button.clicked.connect(self.finish)
-        self.finish_button.setEnabled(False)
+        self.goto_fixer_button = QtWidgets.QPushButton("Fix Annotations")
+        self.goto_fixer_button.clicked.connect(self.finish)
+        self.goto_fixer_button.setEnabled(False)
+
+        self.goto_data_creator_button = QtWidgets.QPushButton("Create Dataset")
+        self.goto_data_creator_button.clicked.connect(self.finish)
+        self.goto_data_creator_button.setEnabled(False)
 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.encoding_label)
         layout.addWidget(self.encoding_combo_box)
         layout.addWidget(self.corpus_button)
-        layout.addWidget(self.postprocess_button)
         layout.addWidget(self.variables_button)
+        layout.addWidget(self.postprocess_button)
         layout.addWidget(self.message_scroll)
         layout.addWidget(self.corpus_message_scroll)
-        layout.addWidget(self.finish_button)
+
+        # add row layout
+        row_layout = QtWidgets.QHBoxLayout()
+        row_layout.addWidget(self.goto_fixer_button)
+        row_layout.addWidget(self.goto_data_creator_button)
+        layout.addLayout(row_layout)
+
 
         self.setLayout(layout)
 
@@ -228,11 +240,21 @@ class LoadFiles(GeneralWindow):
             self.enable_finish()
 
     def enable_finish(self):
-        if self.corpus_files and self.annotation_info_csv:
-            self.finish_button.setEnabled(True)
+        if self.corpus_files and self.annotation_info_csv and self.variables_csv:
+            self.goto_fixer_button.setEnabled(True)
+
+        if self.corpus_files and self.variables_csv:
+            self.goto_data_creator_button.setEnabled(True)
 
     def finish(self):
-        if self.corpus_text and self.annotation_info_csv:
-            self.has_finished = True
-            # close window
-            self.close()
+        # get the button that was clicked
+        button = self.sender()
+
+        if button == self.goto_fixer_button:
+            self.next_window="fixer"
+        elif button == self.goto_data_creator_button:
+            self.next_window="data_creator"
+
+        self.has_finished = True
+        # close window
+        self.close()
