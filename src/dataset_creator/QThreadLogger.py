@@ -8,12 +8,14 @@ class FakeStream(io.StringIO):
     """
     used to redirect tqdm output to text area
     """
+
     def __init__(self, signal):
         super().__init__()
         self.signal = signal
 
     def write(self, string):
         self.signal.emit(string)
+
 
 class QthreadLogger:
     def __init__(self, signal: QtCore.Signal, level=logging.DEBUG):
@@ -25,31 +27,41 @@ class QthreadLogger:
     def debug(self, msg):
         if self.level > logging.DEBUG:
             return
-        msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.DEBUG}))
+        msg = self.formatter.format(
+            logging.makeLogRecord({"msg": msg, "levelno": logging.DEBUG})
+        )
         self.logger.emit(msg)
 
     def info(self, msg):
         if self.level > logging.INFO:
             return
-        msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.INFO}))
+        msg = self.formatter.format(
+            logging.makeLogRecord({"msg": msg, "levelno": logging.INFO})
+        )
         self.logger.emit(msg)
 
     def warning(self, msg):
         if self.level > logging.WARNING:
             return
-        msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.WARNING}))
+        msg = self.formatter.format(
+            logging.makeLogRecord({"msg": msg, "levelno": logging.WARNING})
+        )
         self.logger.emit(msg)
 
     def error(self, msg):
         if self.level > logging.ERROR:
             return
-        msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.ERROR}))
+        msg = self.formatter.format(
+            logging.makeLogRecord({"msg": msg, "levelno": logging.ERROR})
+        )
         self.logger.emit(msg)
 
     def critical(self, msg):
         if self.level > logging.CRITICAL:
             return
-        msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.CRITICAL}))
+        msg = self.formatter.format(
+            logging.makeLogRecord({"msg": msg, "levelno": logging.CRITICAL})
+        )
         self.logger.emit(msg)
 
 
@@ -63,7 +75,7 @@ class HtmlColorFormatter(logging.Formatter):
             logging.INFO: "#000000",  # Black
             logging.WARNING: "#FFA500",  # Orange
             logging.ERROR: "#FF0000",  # Red
-            logging.CRITICAL: "#8B0000"  # Dark Red
+            logging.CRITICAL: "#8B0000",  # Dark Red
         }
         level_name = record.levelname
         level_color = level_colors[record.levelno]

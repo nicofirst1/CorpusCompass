@@ -40,7 +40,9 @@ class FindDialog(QtWidgets.QDialog):
 
         if not match.isNull():
             cursor.setPosition(match.position())
-            cursor.movePosition(QtGui.QTextCursor.Left, QtGui.QTextCursor.KeepAnchor, len(text))
+            cursor.movePosition(
+                QtGui.QTextCursor.Left, QtGui.QTextCursor.KeepAnchor, len(text)
+            )
             text_area.setTextCursor(cursor)
         else:
             # wrap around to the beginning of the document
@@ -49,7 +51,9 @@ class FindDialog(QtWidgets.QDialog):
 
             if not match.isNull():
                 cursor.setPosition(match.position())
-                cursor.movePosition(QtGui.QTextCursor.Left, QtGui.QTextCursor.KeepAnchor, len(text))
+                cursor.movePosition(
+                    QtGui.QTextCursor.Left, QtGui.QTextCursor.KeepAnchor, len(text)
+                )
                 text_area.setTextCursor(cursor)
         # re-enable the main app's window
         self.parent().setEnabled(True)
@@ -63,18 +67,31 @@ class FindDialog(QtWidgets.QDialog):
 
         # search for the previous occurrence of the text
         cursor = text_area.textCursor()
-        match = cursor.document().find(text, cursor, QtGui.QTextDocument.FindBackward | QtGui.QTextDocument.FindCaseSensitively)
+        match = cursor.document().find(
+            text,
+            cursor,
+            QtGui.QTextDocument.FindBackward | QtGui.QTextDocument.FindCaseSensitively,
+        )
 
         if not match.isNull():
             cursor.setPosition(match.position())
-            cursor.movePosition(QtGui.QTextCursor.Left, QtGui.QTextCursor.KeepAnchor, len(text))
+            cursor.movePosition(
+                QtGui.QTextCursor.Left, QtGui.QTextCursor.KeepAnchor, len(text)
+            )
             text_area.setTextCursor(cursor)
         else:
             # wrap around to the end of the document
             cursor.setPosition(cursor.document().characterCount() - 1)
-            match = cursor.document().find(text, cursor, QtGui.QTextDocument.FindBackward | QtGui.QTextDocument.FindCaseSensitively)
+            match = cursor.document().find(
+                text,
+                cursor,
+                QtGui.QTextDocument.FindBackward
+                | QtGui.QTextDocument.FindCaseSensitively,
+            )
 
             if not match.isNull():
                 cursor.setPosition(match.position())
-                cursor.movePosition(QtGui.QTextCursor.Left, QtGui.QTextCursor.KeepAnchor, len(text))
+                cursor.movePosition(
+                    QtGui.QTextCursor.Left, QtGui.QTextCursor.KeepAnchor, len(text)
+                )
                 text_area.setTextCursor(cursor)

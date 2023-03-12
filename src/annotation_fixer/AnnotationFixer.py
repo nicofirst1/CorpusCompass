@@ -6,16 +6,19 @@ from typing import Dict, Any
 import pandas as pd
 from PySide6 import QtWidgets, QtGui, QtCore
 
-from annotation_fixer.Find import FindDialog
-from annotation_fixer.af_utils import corpus_dict2text, remove_independent_vars, find_annotation_regex, \
-    find_annotation_context
-from common import Memory, GeneralWindow, AppLogger
-from other_windows import Settings
+from src.annotation_fixer.Find import FindDialog
+from src.annotation_fixer.af_utils import (
+    corpus_dict2text,
+    remove_independent_vars,
+    find_annotation_regex,
+    find_annotation_context,
+)
+from src.common import GeneralWindow, Memory, AppLogger
+from src.other_windows import Settings
 
 
 class AnnotationFixer(GeneralWindow):
     def __init__(self, mem: Memory, postprocess_data: Dict[str, Any]):
-
         self.corpus_dict = OrderedDict(postprocess_data["corpus_text"])
         self.corpus_text = corpus_dict2text(self.corpus_dict)
         self.annotation_info_df = postprocess_data["annotation_info"]
@@ -26,7 +29,9 @@ class AnnotationFixer(GeneralWindow):
         self.independent_variables = postprocess_data["independent_variables"]
         self.dependent_variables = postprocess_data["dependent_variables"]
 
-        self.dependent_variables = remove_independent_vars(self.dependent_variables, self.independent_variables)
+        self.dependent_variables = remove_independent_vars(
+            self.dependent_variables, self.independent_variables
+        )
 
         self.list_to_fix = []
         self.saved_lists = []
@@ -38,7 +43,7 @@ class AnnotationFixer(GeneralWindow):
         self.low_reps = None
         self.current_match = None
 
-        self.logger = AppLogger(".annotation_fixer/annotation_fixer.log")
+        self.logger = AppLogger(mem, "annotation_fixer.log")
         self.history = History(self)
 
         super().__init__(mem, "Annotation Fixer")
@@ -194,9 +199,11 @@ class AnnotationFixer(GeneralWindow):
         index = self.dropdown.currentIndex()
 
         # save settings
-        min_reps = self.mem.settings['minimum_repetitions']
+        min_reps = self.mem.settings["minimum_repetitions"]
         # get the rows where 'annotated' is less than the minimum repetition
-        low_reps = self.annotation_info_df[self.annotation_info_df['annotated'] <= min_reps]
+        low_reps = self.annotation_info_df[
+            self.annotation_info_df["annotated"] <= min_reps
+        ]
         self.saved_lists.append(low_reps)
 
         # save settings
@@ -255,7 +262,6 @@ class AnnotationFixer(GeneralWindow):
         self.history.save_state()
 
     def ignore(self):
-
         row = self.current_match["row"]
         if len(self.queue) > 0:
             # remove the found from the queue
@@ -270,11 +276,12 @@ class AnnotationFixer(GeneralWindow):
         self.history.save_state()
 
     def annotate_all(self):
-
         suggestes = self.current_match.get("suggest_annotation", None)
         for found in reversed(self.queue):
             found, row = found
-            self.current_match = dict(path=found[0], match=found[1], row=row, suggest_annotation=suggestes)
+            self.current_match = dict(
+                path=found[0], match=found[1], row=row, suggest_annotation=suggestes
+            )
 
             match = found[1]
             self.annotation_rule(wait_refresh=True)
@@ -295,7 +302,6 @@ class AnnotationFixer(GeneralWindow):
         self.history.save_state()
 
     def annotation_rule(self, wait_refresh=False):
-
         # get the current highlighted word based on the cursor position
         path = self.current_match["path"]
         match = self.current_match["match"]
@@ -311,13 +317,13 @@ class AnnotationFixer(GeneralWindow):
             n_gram = (max(0, n_gram[0]), min(len(c), n_gram[1]))
 
             # get the substring of the current word
-            sub_string = c[n_gram[0]:n_gram[1]]
+            sub_string = c[n_gram[0] : n_gram[1]]
 
             # replace match
             sub_string = sub_string.replace(original, replacement, 1)
 
             # update c
-            c = c[:n_gram[0]] + sub_string + c[n_gram[1]:]
+            c = c[: n_gram[0]] + sub_string + c[n_gram[1] :]
             self.corpus_dict[path] = c
 
         if self.dropdown.currentIndex() == 0:
@@ -375,7 +381,6 @@ class AnnotationFixer(GeneralWindow):
         # self.index -= 1
 
     def drop_row(self, row):
-
         try:
             self.list_to_fix = self.list_to_fix.drop(row.name)
             self.logger.info(f"Dropped row: {row.name}\n{row}\n")
@@ -392,7 +397,7 @@ class AnnotationFixer(GeneralWindow):
             for col in row.index:
                 note += f"-{col}: {row[col]}\n"
         else:
-            token = row['token']
+            token = row["token"]
             cols = list(row.index)
             cols = [x for x in cols if "context" in x]
             note += f"--token: {token}\n"
@@ -400,13 +405,15 @@ class AnnotationFixer(GeneralWindow):
 
             # find in dataset_df the row where the token is the same
             # and get the context
-            matches = self.dataset_df[self.dataset_df['token'] == token]
+            matches = self.dataset_df[self.dataset_df["token"] == token]
 
             # drop columns that are all nan
-            matches = matches.dropna(axis=1, how='all')
+            matches = matches.dropna(axis=1, how="all")
 
             # drop columns called token, context
-            matches = matches.drop(columns=['token', 'context', 'Unnamed: 0'], errors='ignore')
+            matches = matches.drop(
+                columns=["token", "context", "Unnamed: 0"], errors="ignore"
+            )
 
             # for all the columns left, get a counter of the values
             counters = {}
@@ -421,10 +428,14 @@ class AnnotationFixer(GeneralWindow):
                 for value in counters[col]:
                     note += f"---- {value}: {counters[col][value]}\n"
 
-            dependent_var = {k: v for k, v in counters.items() if k in self.dependent_variables.keys()}
+            dependent_var = {
+                k: v
+                for k, v in counters.items()
+                if k in self.dependent_variables.keys()
+            }
 
             # convert counters values to percentages and keep only the highest if above threshold
-            trh = self.mem.settings['auto_annotation_thr']
+            trh = self.mem.settings["auto_annotation_thr"]
             dependent_var_copy = copy.deepcopy(dependent_var)
 
             for k in dependent_var_copy:
@@ -448,7 +459,7 @@ class AnnotationFixer(GeneralWindow):
             # cast to str
             dependent_var = [str(x) for x in dependent_var]
 
-            self.current_match['suggest_annotation'] = dependent_var
+            self.current_match["suggest_annotation"] = dependent_var
 
             # if there are dependent variables, add them to the note as suggestions
             if len(dependent_var) > 0:
@@ -463,12 +474,10 @@ class AnnotationFixer(GeneralWindow):
         return note
 
     def highlight_current_word(self) -> bool:
-
         if len(self.queue) > 0:
             found = self.queue[self.queue_index % len(self.queue)]
             found, row = found
         else:
-
             if len(self.list_to_fix) == 0:
                 note = "No more words to annotate"
                 self.info_text.setText(note)
@@ -479,11 +488,15 @@ class AnnotationFixer(GeneralWindow):
             # drop nan
             row = row.dropna()
 
-            word = row['token']
+            word = row["token"]
 
             if self.dropdown.currentIndex() == 0:
-                found = find_annotation_regex(self.corpus_dict, word, self.annotation_regex,
-                                              use_strict_rule=self.mem.settings['use_strict_rule'])
+                found = find_annotation_regex(
+                    self.corpus_dict,
+                    word,
+                    self.annotation_regex,
+                    use_strict_rule=self.mem.settings["use_strict_rule"],
+                )
             else:
                 cols = list(row.index)
                 cols = [x for x in cols if "context" in x]
@@ -494,7 +507,9 @@ class AnnotationFixer(GeneralWindow):
                 print(f"Could not find {word} in corpus text")
                 return False
             elif len(found) > 1:
-                print(f"Found more than one instance of {word} in corpus text, adding to queue")
+                print(
+                    f"Found more than one instance of {word} in corpus text, adding to queue"
+                )
                 self.queue += [(x, row) for x in found]
                 self.queue_index = 0
                 found = found[0]
@@ -521,10 +536,12 @@ class AnnotationFixer(GeneralWindow):
 
         curr_idx = self.general_index + len(self.queue)
         max_idx = len(self.list_to_fix) + len(self.queue)
-        note = f"General :{curr_idx} of {max_idx} " \
-               f"rows left ({curr_idx / max_idx * 100:.2f}%)\n" \
-               f"-File: {file}\n\n" \
-               f"Specific:\n"
+        note = (
+            f"General :{curr_idx} of {max_idx} "
+            f"rows left ({curr_idx / max_idx * 100:.2f}%)\n"
+            f"-File: {file}\n\n"
+            f"Specific:\n"
+        )
 
         # fill notes
         note += self.fill_notes(row)
@@ -536,19 +553,24 @@ class AnnotationFixer(GeneralWindow):
         return True
 
     def save_corpus_dict(self):
-
         # save the corpus dict
         for path, text in self.corpus_dict.items():
             # use encoding in mem
-            with open(path, "w", encoding=self.mem.settings['encoding']) as f:
+            with open(path, "w", encoding=self.mem.settings["encoding"]) as f:
                 f.write(text)
 
         # save the annotation info
 
-        self.annotation_info_df.to_csv(self.mem.postprocess_paths['annotation_info'], index=False,
-                                       sep=self.mem.settings['separator'])
-        self.missing_annotations_df.to_csv(self.mem.postprocess_paths['missed_annotations'], index=False,
-                                           sep=self.mem.settings['separator'])
+        self.annotation_info_df.to_csv(
+            self.mem.postprocess_paths["annotation_info"],
+            index=False,
+            sep=self.mem.settings["separator"],
+        )
+        self.missing_annotations_df.to_csv(
+            self.mem.postprocess_paths["missed_annotations"],
+            index=False,
+            sep=self.mem.settings["separator"],
+        )
 
         # display message
         msg = QtWidgets.QMessageBox()
@@ -562,16 +584,16 @@ class AnnotationFixer(GeneralWindow):
         self.save_button.setEnabled(False)
 
     def change_button_status(self, prev_next: bool):
-
         if prev_next:
-
             self.annotate_button.setEnabled(True)
             self.ignore_button.setEnabled(True)
             self.ignore_all_button.setEnabled(True)
             self.annotate_all_button.setEnabled(True)
-            if self.current_match is not None and \
-                    "suggest_annotation" in self.current_match.keys() and \
-                    len(self.current_match['suggest_annotation']) == 0:
+            if (
+                self.current_match is not None
+                and "suggest_annotation" in self.current_match.keys()
+                and len(self.current_match["suggest_annotation"]) == 0
+            ):
                 self.annotate_button.setEnabled(False)
                 self.annotate_all_button.setEnabled(False)
             if len(self.queue) == 0:
@@ -585,7 +607,6 @@ class AnnotationFixer(GeneralWindow):
             self.annotate_all_button.setEnabled(False)
 
     def go_to_prev(self):
-
         while self.index > 0:
             self.index -= 1
 
@@ -622,16 +643,24 @@ class AnnotationFixer(GeneralWindow):
 
 
 class History:
-
     def __init__(self, ann_fixer: AnnotationFixer):
         self.ann_fixer = ann_fixer
         self.history = []
         self.index = 0
 
-        self.save_attributes = ['corpus_dict', 'annotation_info_df', 'missing_annotations_df', 'list_to_fix',
-                                'general_index', 'queue', 'queue_index']
+        self.save_attributes = [
+            "corpus_dict",
+            "annotation_info_df",
+            "missing_annotations_df",
+            "list_to_fix",
+            "general_index",
+            "queue",
+            "queue_index",
+        ]
 
-    def add_buttons(self, undo_button: QtWidgets.QPushButton, redo_button: QtWidgets.QPushButton):
+    def add_buttons(
+        self, undo_button: QtWidgets.QPushButton, redo_button: QtWidgets.QPushButton
+    ):
         self.undo_button = undo_button
         self.redo_button = redo_button
 

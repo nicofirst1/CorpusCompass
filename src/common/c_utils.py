@@ -6,14 +6,23 @@ from typing import Dict, Optional, Tuple, List, Any
 import pandas as pd
 
 
-def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16") -> Tuple[
-    Dict[str, str], List[str]]:
+def multi_corpus_upload(
+    corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16"
+) -> Tuple[Dict[str, str], List[str]]:
     """
     Upload multiple corpus
     """
 
-    alternative_encodings = [encoding] + ["utf-8", "utf-16", "latin-1", "ascii", "cp1252", "cp1250", "cp1251",
-                                          "cp1253", ]
+    alternative_encodings = [encoding] + [
+        "utf-8",
+        "utf-16",
+        "latin-1",
+        "ascii",
+        "cp1252",
+        "cp1250",
+        "cp1251",
+        "cp1253",
+    ]
 
     def decode(to_decode) -> Tuple[str, str]:
         idx = 0
@@ -30,16 +39,18 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] =
 
                 if " " not in dec:
                     print(
-                        f"The corpus {k} has been read with the encoding {encoding}, but it seems that it did not work.")
+                        f"The corpus {k} has been read with the encoding {encoding}, but it seems that it did not work."
+                    )
                     idx += 1
                     continue
 
-                dec = re.sub(r'[^\S\n]+', ' ', dec)
-
+                dec = re.sub(r"[^\S\n]+", " ", dec)
 
             except UnicodeDecodeError as e:
-                print(f"Could not decode the corpus {k} with the encoding {encoding}.\n"
-                      f"The error is: {e}\n")
+                print(
+                    f"Could not decode the corpus {k} with the encoding {encoding}.\n"
+                    f"The error is: {e}\n"
+                )
                 idx += 1
                 continue
             success = True
@@ -64,7 +75,9 @@ def multi_corpus_upload(corpus_list: Dict[str, bytes], encoding: Optional[str] =
     return corpus, errs
 
 
-def open_postprocess(paths: List[str], encoding: str, separator: str) -> Tuple[List[Any], Optional[str]]:
+def open_postprocess(
+    paths: List[str], encoding: str, separator: str
+) -> Tuple[List[Any], Optional[str]]:
     """
     Open the file and return the content
     :param paths: list of paths
@@ -75,7 +88,9 @@ def open_postprocess(paths: List[str], encoding: str, separator: str) -> Tuple[L
     for path in paths:
         file_name = os.path.basename(path).split(".")[0]
         try:
-            content[file_name] = pd.read_csv(path, encoding=encoding, on_bad_lines="skip", sep=separator)
+            content[file_name] = pd.read_csv(
+                path, encoding=encoding, on_bad_lines="skip", sep=separator
+            )
         except UnicodeError as e:
             if encoding == "utf-8":
                 encoding = "utf-16"
@@ -85,7 +100,9 @@ def open_postprocess(paths: List[str], encoding: str, separator: str) -> Tuple[L
                 error = f"Error while opening the file {path}\n{repr(e)}"
                 return content, error
 
-            content[file_name] = pd.read_csv(path, encoding=encoding, on_bad_lines="skip", sep=separator)
+            content[file_name] = pd.read_csv(
+                path, encoding=encoding, on_bad_lines="skip", sep=separator
+            )
         except Exception as e:
             error = f"Error while opening the file {path}\n{repr(e)}"
             return content, error
@@ -123,4 +140,3 @@ def open_variables(paths: List[str], encoding: str) -> Tuple[List[Any], Optional
             return content, error
 
     return content, None
-

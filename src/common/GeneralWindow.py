@@ -1,8 +1,15 @@
 from typing import Optional
 
 from PySide6 import QtWidgets, QtGui, QtCore
-from PySide6.QtWidgets import QPushButton, QTextEdit, QComboBox, QLabel, QLineEdit, QScrollArea, QMessageBox
-
+from PySide6.QtWidgets import (
+    QPushButton,
+    QTextEdit,
+    QComboBox,
+    QLabel,
+    QLineEdit,
+    QScrollArea,
+    QMessageBox,
+)
 from common.Memory import Memory
 
 STYLES = [
@@ -12,7 +19,6 @@ STYLES = [
         "border-style": "dotted",
         "border-width": "2px",
         "border-color": "#ffffff",
-
     },
     {
         "color": "#000000",
@@ -21,23 +27,19 @@ STYLES = [
         "border-width": "1px",
         "border-color": "#000000",
     },
-
     {
         "color": "#0000ff",
         "background-color": "#ffff00",
         "border-style": "dashed",
         "border-width": "3px",
         "border-color": "#00ff00",
-
     },
-
     {
         "color": "#00ff00",
         "background-color": "#ff00ff",
         "border-style": "double",
         "border-width": "4px",
         "border-color": "#0000ff",
-
     },
     {
         "color": "#8b0000",
@@ -45,43 +47,34 @@ STYLES = [
         "border-style": "dotted",
         "border-width": "2px",
         "border-color": "#8b0000",
-
     },
-
     {
         "color": "#006400",
         "background-color": "#add8e6",
         "border-style": "dashed",
         "border-width": "3px",
         "border-color": "#006400",
-
     },
-
     {
         "color": "#4b0082",
         "background-color": "#ffd700",
         "border-style": "double",
         "border-width": "4px",
         "border-color": "#4b0082",
-
     },
-
     {
         "color": "#ffd700",
         "background-color": "#4b0082",
         "border-style": "groove",
         "border-width": "5px",
         "border-color": "#ffd700",
-
     },
-
     {
         "color": "#add8e6",
         "background-color": "#006400",
         "border-style": "ridge",
         "border-width": "6px",
         "border-color": "#add8e6",
-
     },
 ]
 
@@ -101,7 +94,10 @@ class GeneralWindow(QtWidgets.QWidget):
         # apply the background color setting
         self.setAutoFillBackground(True)
         p = self.palette()
-        p.setColor(self.backgroundRole(), self.mem.settings.get("background_color", QtGui.QColor(255, 255, 255)))
+        p.setColor(
+            self.backgroundRole(),
+            self.mem.settings.get("background_color", QtGui.QColor(255, 255, 255)),
+        )
         self.setPalette(p)
 
         # apply the text font and size setting
@@ -132,7 +128,6 @@ class GeneralWindow(QtWidgets.QWidget):
         timer.start(50)
 
     def set_style(self):
-
         font = self.mem.settings.get("text_font", "Arial")
         size = self.mem.settings.get("text_size", 12)
         self.setFont(QtGui.QFont(font, size))
@@ -141,7 +136,15 @@ class GeneralWindow(QtWidgets.QWidget):
         style = int(style[1])
         chosen_style = STYLES[style]
 
-        types = [QScrollArea, QMessageBox, QComboBox, QTextEdit, QPushButton, QLabel, QLineEdit]
+        types = [
+            QScrollArea,
+            QMessageBox,
+            QComboBox,
+            QTextEdit,
+            QPushButton,
+            QLabel,
+            QLineEdit,
+        ]
         sheet = [f"{prop}: {value}" for prop, value in chosen_style.items()]
         sheet = ";".join(sheet)
 

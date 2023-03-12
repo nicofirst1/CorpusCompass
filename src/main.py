@@ -45,7 +45,6 @@ def main():
         postprocess_data.update(loader.variables_csv)
         mem.save_preloaded(postprocess_data)
 
-
     else:
         postprocess_data = mem.load_all_preloaded()
 

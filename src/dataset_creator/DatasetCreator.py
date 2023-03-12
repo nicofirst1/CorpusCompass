@@ -6,9 +6,9 @@ from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QToolTip, QLineEdit
 
-from annotation_fixer.af_utils import corpus_dict2text
-from common import Memory, GeneralWindow, AppLogger
-from dataset_creator.DatasetThread import DatasetThread
+from src.annotation_fixer.af_utils import corpus_dict2text
+from src.common import GeneralWindow, Memory, AppLogger
+from src.dataset_creator.DatasetThread import DatasetThread
 
 
 class LogQTextEdit(QtWidgets.QTextEdit):
@@ -18,14 +18,16 @@ class LogQTextEdit(QtWidgets.QTextEdit):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.last_line = ''
+        self.last_line = ""
 
     def write(self, string):
         if "\r" in string:
             if self.last_line:
                 # If there's a carriage return, move the cursor to the beginning of the line
                 self.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-                self.moveCursor(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.MoveAnchor)
+                self.moveCursor(
+                    QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.MoveAnchor
+                )
             # Replace the last line with the new one (excluding the carriage return)
             self.last_line = string.split("\r")[-1]
             self.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
@@ -42,10 +44,10 @@ class LogQTextEdit(QtWidgets.QTextEdit):
             # If there's no carriage return, just append the string to the text edit
             self.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
             self.insertHtml(string)
-            self.last_line = ''
+            self.last_line = ""
 
 
-def create_input_lineedit(label, default_value='', hover_help='', delay=500):
+def create_input_lineedit(label, default_value="", hover_help="", delay=500):
     # Create QLineEdit widget
     input_widget = QLineEdit()
     input_widget.setPlaceholderText(default_value)
@@ -53,8 +55,11 @@ def create_input_lineedit(label, default_value='', hover_help='', delay=500):
 
     # Set tooltip with hover help text
     if hover_help:
+
         def show_tooltip():
-            QToolTip.showText(QCursor.pos(), hover_help, input_widget, input_widget.rect())
+            QToolTip.showText(
+                QCursor.pos(), hover_help, input_widget, input_widget.rect()
+            )
 
         def hide_tooltip():
             QToolTip.hideText()
@@ -85,27 +90,33 @@ class DatasetCreator(GeneralWindow):
         self.worker_thread = None
 
         super().__init__(mem, "Dataset Creator")
-        self.logger = AppLogger(".annotation_fixer/dataset_creator.log")
+        self.logger = AppLogger(mem, "dataset_creator.log")
 
     def create_widgets(self):
         # Create QLineEdit widgets with hover help
         square_regex_help = "Regex to find the complete annotation rule."
-        self.square_regex_input, square_regex_lay = create_input_lineedit("Square regex: ",
-                                                                          default_value=r"(\[\$[\S ]*?\])",
-                                                                          hover_help=square_regex_help)
+        self.square_regex_input, square_regex_lay = create_input_lineedit(
+            "Square regex: ",
+            default_value=r"(\[\$[\S ]*?\])",
+            hover_help=square_regex_help,
+        )
 
         feat_regex_help = "Regex to find the content of an annotation."
-        self.feat_regex_input, feat_regex_lay = create_input_lineedit("Feat regex: ",
-                                                                      default_value=r'\[\$([\S ]*?)\]',
-                                                                      hover_help=feat_regex_help)
+        self.feat_regex_input, feat_regex_lay = create_input_lineedit(
+            "Feat regex: ", default_value=r"\[\$([\S ]*?)\]", hover_help=feat_regex_help
+        )
 
         name_regex_help = "Regex to univocally find the speaker name in the paragraph."
-        self.name_regex_input, name_regex_lay = create_input_lineedit("Name regex: ",
-                                                                      default_value=r"(^[A-z0-9?._]+) ",
-                                                                      hover_help=name_regex_help)
+        self.name_regex_input, name_regex_lay = create_input_lineedit(
+            "Name regex: ",
+            default_value=r"(^[A-z0-9?._]+) ",
+            hover_help=name_regex_help,
+        )
 
         # Create QCheckBox widget for previous_line
-        self.previous_line_checkbox = QtWidgets.QCheckBox("Include previous paragraph in final output", self)
+        self.previous_line_checkbox = QtWidgets.QCheckBox(
+            "Include previous paragraph in final output", self
+        )
         self.previous_line_checkbox.setChecked(False)
 
         # Create QSpinBox widgets for ngram_params
@@ -146,9 +157,10 @@ class DatasetCreator(GeneralWindow):
         self.setLayout(layout)
 
     def start_generate_dataset(self):
-
         if self.worker_thread is not None:
-            QtWidgets.QMessageBox.warning(self, "Warning", "Generation already in progress.")
+            QtWidgets.QMessageBox.warning(
+                self, "Warning", "Generation already in progress."
+            )
             return
 
         self.log_window.clear()
@@ -163,11 +175,21 @@ class DatasetCreator(GeneralWindow):
         name_regex = self.name_regex_input.text()
 
         inputs = [
-            square_regex, feat_regex, name_regex, previous_line, ngram_prev, ngram_next
+            square_regex,
+            feat_regex,
+            name_regex,
+            previous_line,
+            ngram_prev,
+            ngram_next,
         ]
 
-        self.worker_thread = DatasetThread(inputs, self.corpus_dict, self.independent_variables,
-                                           self.dependent_variables, self.speakers)
+        self.worker_thread = DatasetThread(
+            inputs,
+            self.corpus_dict,
+            self.independent_variables,
+            self.dependent_variables,
+            self.speakers,
+        )
 
         self.worker_thread.finished.connect(self.on_generate_dataset_finished)
         self.worker_thread.signal.connect(self.log_window.write)
@@ -177,7 +199,11 @@ class DatasetCreator(GeneralWindow):
         if isinstance(self.worker_thread.results, str):
             QtWidgets.QMessageBox.warning(self, "Warning", self.worker_thread.results)
         elif isinstance(self.worker_thread.results, Dict):
-            QtWidgets.QMessageBox.information(self, "Information", "Dataset generated successfully.")
+            QtWidgets.QMessageBox.information(
+                self, "Information", "Dataset generated successfully."
+            )
         else:
-            QtWidgets.QMessageBox.warning(self, "Warning", "Failed to generate dataset.")
+            QtWidgets.QMessageBox.warning(
+                self, "Warning", "Failed to generate dataset."
+            )
         self.worker_thread = None

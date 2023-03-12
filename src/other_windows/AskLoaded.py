@@ -1,8 +1,7 @@
 from PySide6 import QtWidgets, QtCore
 
-from common.Memory import Memory
 from common.GeneralWindow import GeneralWindow
-
+from common.Memory import Memory
 
 
 class AskLoading(GeneralWindow):
@@ -13,9 +12,10 @@ class AskLoading(GeneralWindow):
         self.mem.lfp["separator"] = self.separator
         self.load = False
 
-
     def create_widgets(self):
-        self.message = QtWidgets.QLabel("Found loaded files from previous session. Do you want to use them?")
+        self.message = QtWidgets.QLabel(
+            "Found loaded files from previous session. Do you want to use them?"
+        )
         self.message.setAlignment(QtCore.Qt.AlignCenter)
 
         self.yes = QtWidgets.QPushButton("Yes")

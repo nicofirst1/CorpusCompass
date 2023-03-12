@@ -9,9 +9,7 @@ class Settings(GeneralWindow):
     def __init__(self, mem: Memory):
         super().__init__(mem, "Settings")
 
-
     def create_widgets(self):
-
         form_layout = QtWidgets.QFormLayout()
         form_layout.setAlignment(QtCore.Qt.AlignCenter)
 
@@ -67,7 +65,6 @@ class Settings(GeneralWindow):
         return widget
 
     def save_setting(self, name=None):
-
         if name is None or not isinstance(name, str):
             sender = self.sender()
             name = sender.objectName()

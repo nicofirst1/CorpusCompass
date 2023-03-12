@@ -1,10 +1,6 @@
-import json
-import os.path
 import re
 from collections import OrderedDict
 from typing import Dict, List, Tuple, Any, Optional
-
-import pandas as pd
 
 
 def corpus_dict2text(corpus_list: Dict[str, str], skip_last=False) -> str:
@@ -18,7 +14,7 @@ def corpus_dict2text(corpus_list: Dict[str, str], skip_last=False) -> str:
 
         if skip_last and idx == max_len - 1:
             continue
-        value="\n".join(value.split("\n"))
+        value = "\n".join(value.split("\n"))
         corpus_text += f"{value}\n\n\n"
 
         idx += 1
@@ -27,8 +23,14 @@ def corpus_dict2text(corpus_list: Dict[str, str], skip_last=False) -> str:
 
 
 class CustomMatch:
-
-    def __init__(self, start: int, end: int, token: str, full_corpus: str, match: Optional[re.Match] = None):
+    def __init__(
+        self,
+        start: int,
+        end: int,
+        token: str,
+        full_corpus: str,
+        match: Optional[re.Match] = None,
+    ):
         self.match = match
         fc_len = len(full_corpus)
 
@@ -41,8 +43,9 @@ class CustomMatch:
         self.token = token
 
 
-def find_annotation_context(corpus: Dict[str, str], token: str, contexts: List[str]) -> \
-        List[Tuple[CustomMatch]]:
+def find_annotation_context(
+    corpus: Dict[str, str], token: str, contexts: List[str]
+) -> List[Tuple[CustomMatch]]:
     def save_match(word_idx):
         start = context_idx + word_idx
         end = start + len(token)
@@ -89,9 +92,12 @@ def find_annotation_context(corpus: Dict[str, str], token: str, contexts: List[s
     return found
 
 
-def find_annotation_regex(corpus: Dict[str, str], token: str, annotation_regex: re.Pattern,
-                          use_strict_rule: bool = True) -> \
-        List[Tuple[CustomMatch]]:
+def find_annotation_regex(
+    corpus: Dict[str, str],
+    token: str,
+    annotation_regex: re.Pattern,
+    use_strict_rule: bool = True,
+) -> List[Tuple[CustomMatch]]:
     found = []
     # for all the lines in the corpus find the annotation  with the regex
     full_text = OrderedDict()
@@ -102,7 +108,9 @@ def find_annotation_regex(corpus: Dict[str, str], token: str, annotation_regex: 
         matches = [m for m in matches if token in m.group()]
 
         if use_strict_rule:
-            matches = [m for m in matches if m.group().split(".")[-1].replace("]", "") == token]
+            matches = [
+                m for m in matches if m.group().split(".")[-1].replace("]", "") == token
+            ]
 
         if len(matches) > 0:
             for m in matches:
@@ -111,9 +119,6 @@ def find_annotation_regex(corpus: Dict[str, str], token: str, annotation_regex: 
                 found.append((k, m))
 
     return found
-
-
-
 
 
 def remove_independent_vars(dependent: Dict[str, Any], independent: Dict[str, Any]):
@@ -137,5 +142,3 @@ def remove_independent_vars(dependent: Dict[str, Any], independent: Dict[str, An
                     break
 
     return dependent
-
-

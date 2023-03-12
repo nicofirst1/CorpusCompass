@@ -1,5 +1,4 @@
 import itertools
-import itertools
 import re
 import traceback
 from collections import Counter
@@ -7,16 +6,27 @@ from copy import copy
 
 import pandas as pd
 from PySide6 import QtCore
-from tqdm import tqdm
-
 from common import AppLogger
 from dataset_creator.QThreadLogger import QthreadLogger
-from dataset_creator.dc_utils import preprocess_corpus, get_name, check_correct_annotations, find_repetitions, \
-    remove_features, get_ngram
+from dataset_creator.dc_utils import (
+    preprocess_corpus,
+    get_name,
+    check_correct_annotations,
+    find_repetitions,
+    remove_features,
+    get_ngram,
+)
+from tqdm import tqdm
 
 
-def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speakers: dict, independent_variables,
-                     dependent_variables):
+def generate_dataset(
+    inputs: list,
+    logger: AppLogger,
+    corpus_dict: dict,
+    speakers: dict,
+    independent_variables,
+    dependent_variables,
+):
     # extract input values
     square_regex, feat_regex, name_regex, previous_line, ngram_prev, ngram_next = inputs
 
@@ -26,7 +36,9 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
     name_regex = re.compile(name_regex)
 
     logger.info("Starting dataset generation")
-    corpus_dict = {k: preprocess_corpus(v, k, name_regex, logger) for k, v in corpus_dict.items()}
+    corpus_dict = {
+        k: preprocess_corpus(v, k, name_regex, logger) for k, v in corpus_dict.items()
+    }
     corpus = list(corpus_dict.values())
     corpus = list(itertools.chain(*corpus))
 
@@ -35,16 +47,22 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
     # remove spaces
     speakers_of_interest = [x.strip() for x in speakers_of_interest]
 
-    logger.info(f"The selected speakers of interest are: {', '.join(speakers_of_interest)}")
+    logger.info(
+        f"The selected speakers of interest are: {', '.join(speakers_of_interest)}"
+    )
 
     # get interviewer/interviewees names
     all_speakers = [get_name(x, name_regex) for x in corpus]
     all_speakers = set(all_speakers)
     # filter out empty all_speakers
-    all_speakers = [x for x in all_speakers if x != '']
+    all_speakers = [x for x in all_speakers if x != ""]
 
-    all_speakers_dict = {k: set([get_name(x, name_regex) for x in v]) for k, v in corpus_dict.items()}
-    all_speakers_dict = {k: sorted(v) for k, v in all_speakers_dict.items() if len(v) > 0}
+    all_speakers_dict = {
+        k: set([get_name(x, name_regex) for x in v]) for k, v in corpus_dict.items()
+    }
+    all_speakers_dict = {
+        k: sorted(v) for k, v in all_speakers_dict.items() if len(v) > 0
+    }
 
     # notify user about names
     logger.info(f"I found the following speakers names: {', '.join(all_speakers)}")
@@ -54,13 +72,16 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
         not_in_list = set(all_speakers) - set(speakers_of_interest)
         if len(not_in_list) > 0:
             logger.warning(
-                f"Warning: the following speakers are not in the list of speakers of interest: {', '.join(not_in_list)}")
+                f"Warning: the following speakers are not in the list of speakers of interest: {', '.join(not_in_list)}"
+            )
 
     # merge the two dictionaries into a new one and warn on duplicates
     # order the keys so that the dependent variables are first
     variable_dict = {**independent_variables, **dependent_variables}
     if len(variable_dict) != len(independent_variables) + len(dependent_variables):
-        logger.warning("Warning: I have found duplicate variables. I will take the first one")
+        logger.warning(
+            "Warning: I have found duplicate variables. I will take the first one"
+        )
         # warning the duplicates
         logger.warning("Duplicates are:")
         for token, v in variable_dict.items():
@@ -84,12 +105,14 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
     # There are different outputs and here we specify their names.
 
     # compile regex to find features
-    csv_header = sorted(dependent_variables.keys()) + sorted(independent_variables.keys())
+    csv_header = sorted(dependent_variables.keys()) + sorted(
+        independent_variables.keys()
+    )
 
     # define the end of the csv
-    csv_end = ["speaker", "interlocutor/s", "file", 'context', 'unk']
+    csv_end = ["speaker", "interlocutor/s", "file", "context", "unk"]
     if previous_line:
-        csv_end.insert(0, 'previous line')
+        csv_end.insert(0, "previous line")
     csv_header = ["token"] + csv_header + csv_end
     csv_file = [csv_header]
     unk_categories = []
@@ -121,25 +144,33 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
 
     # check if there are any annotations not annotated
 
-    for token, v in tqdm(annotation_counter.items(), desc="Checking annotations...", file=logger.text_edit_stream):
+    for token, v in tqdm(
+        annotation_counter.items(),
+        desc="Checking annotations...",
+        file=logger.text_edit_stream,
+    ):
         # check for annotation repetitions
-        wild_rep, wild_rep_interest, ann_rep, _ = find_repetitions(whole_corpus, token, feat_regex, name_regex,
-                                                                   speakers_of_interest)
+        wild_rep, wild_rep_interest, ann_rep, _ = find_repetitions(
+            whole_corpus, token, feat_regex, name_regex, speakers_of_interest
+        )
         total_rep = wild_rep + ann_rep
-        not_annotated = total_rep - v['annotated']
-        annotation_counter[token]['not annotated'] = not_annotated
-        annotation_counter[token]['not_annotated_interest'] = wild_rep_interest
+        not_annotated = total_rep - v["annotated"]
+        annotation_counter[token]["not annotated"] = not_annotated
+        annotation_counter[token]["not_annotated_interest"] = wild_rep_interest
 
-    annotated = sum([x['annotated'] for x in annotation_counter.values()])
-    not_annotated = sum([x['not annotated'] for x in annotation_counter.values()])
-    not_annotated_interest = sum([x['not_annotated_interest'] for x in annotation_counter.values()])
+    annotated = sum([x["annotated"] for x in annotation_counter.values()])
+    not_annotated = sum([x["not annotated"] for x in annotation_counter.values()])
+    not_annotated_interest = sum(
+        [x["not_annotated_interest"] for x in annotation_counter.values()]
+    )
 
     logger.info(
         f"There is a total of {annotated} annotations in the corpus ({annotated / len(whole_corpus.split(' ')) * 100:.2f}% "
         f"of the corpus).\n"
         f"I found {not_annotated} not annotated words that where previously annotated.\n"
         f"Of those {not_annotated_interest} ({not_annotated_interest / not_annotated * 100:.2f}%) "
-        f"are produced by a speakers of interest")
+        f"are produced by a speakers of interest"
+    )
 
     # While the previous cell, counts all the tokens in the whole corpus, we probably want to differentiate between speakers.
     # For this reason, here we need to specify where we want to look for the missed tokens.
@@ -147,8 +178,11 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
 
     not_annotated_log = {}
 
-    for path, crp in tqdm(corpus_dict.items(), desc="Finding not annotated words", file=logger.text_edit_stream):
-
+    for path, crp in tqdm(
+        corpus_dict.items(),
+        desc="Finding not annotated words",
+        file=logger.text_edit_stream,
+    ):
         # filter out the speakers of interest
         crp = [x for x in crp if get_name(x, name_regex) in speakers_of_interest]
 
@@ -158,8 +192,14 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
         # for all the tokens
         for token, _ in annotation_counter.items():
             # find the annotations
-            _, _, _, wna = find_repetitions(crp, token, feat_regex, name_regex, speakers_of_interest,
-                                            check_annotated=False)
+            _, _, _, wna = find_repetitions(
+                crp,
+                token,
+                feat_regex,
+                name_regex,
+                speakers_of_interest,
+                check_annotated=False,
+            )
             if len(wna) > 0:
                 if token not in not_annotated_log[path]:
                     not_annotated_log[path][token] = []
@@ -167,26 +207,33 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
 
     # Finally, some pre-processing
 
-    for sp in tqdm(speakers, desc="Finding speakers for not annotated words", file=logger.text_edit_stream):
+    for sp in tqdm(
+        speakers,
+        desc="Finding speakers for not annotated words",
+        file=logger.text_edit_stream,
+    ):
         sp_corpus = [c for c in corpus if get_name(c, name_regex) == sp]
         sp_corpus = "\n".join(sp_corpus)
         for token, v in annotation_counter.items():
             # check for annotation repetitions
-            wild_rep, wild_rep_interest, ann_rep, _ = find_repetitions(sp_corpus, token, feat_regex, name_regex,
-                                                                       speakers_of_interest)
+            wild_rep, wild_rep_interest, ann_rep, _ = find_repetitions(
+                sp_corpus, token, feat_regex, name_regex, speakers_of_interest
+            )
 
-            if sp + ' not annotated' not in annotation_counter[token]:
-                annotation_counter[token][sp + ' not annotated'] = 0
-            if sp + ' annotated' not in annotation_counter[token]:
-                annotation_counter[token][sp + ' annotated'] = 0
+            if sp + " not annotated" not in annotation_counter[token]:
+                annotation_counter[token][sp + " not annotated"] = 0
+            if sp + " annotated" not in annotation_counter[token]:
+                annotation_counter[token][sp + " annotated"] = 0
 
-            annotation_counter[token][sp + ' not annotated'] = wild_rep
-            annotation_counter[token][sp + ' annotated'] = ann_rep
+            annotation_counter[token][sp + " not annotated"] = wild_rep
+            annotation_counter[token][sp + " annotated"] = ann_rep
 
     # augment annotation_counter with speakers and add total number
     for token in annotation_counter.keys():
-        annotation_counter[token]['total'] = annotation_counter[token]['annotated'] + annotation_counter[token][
-            'not annotated']
+        annotation_counter[token]["total"] = (
+            annotation_counter[token]["annotated"]
+            + annotation_counter[token]["not annotated"]
+        )
         for speaker in speakers_of_interest:
             annotation_counter[token][speaker + " annotated"] = 0
             annotation_counter[token][speaker + " not annotated"] = 0
@@ -196,7 +243,9 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
 
     # for every paragraph in the transcript
     logger.info(f"Starting the main loop")
-    for file_path, corpus in tqdm(corpus_dict.items(), desc="Building dataset... ", file=logger.text_edit_stream):
+    for file_path, corpus in tqdm(
+        corpus_dict.items(), desc="Building dataset... ", file=logger.text_edit_stream
+    ):
         file_speakers = all_speakers_dict[file_path]
         for idx in range(len(corpus)):
             c = corpus[idx]
@@ -292,7 +341,9 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
         header = ["file", "token"]
 
         # count the maximum length for all the values of the values of the dict
-        max_lens = max([len(x) for sub in not_annotated_log.values() for x in sub.values()])
+        max_lens = max(
+            [len(x) for sub in not_annotated_log.values() for x in sub.values()]
+        )
         header += [f"context {i}" for i in range(1, max_lens + 1)]
 
         missing_annotations = [header]
@@ -311,7 +362,7 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
     to_drop = ["context", "token", "unk", "file"]
 
     tokens = df["token"]
-    context = df['context']
+    context = df["context"]
 
     # drop first and last two columns
     df = df.drop(to_drop, axis=1)
@@ -324,7 +375,6 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
         annotation_info=annotation_info,
         missing_annotations=missing_annotations,
         binary_dataset=df_encoded,
-
     )
 
     # Unknown categories
@@ -335,7 +385,8 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
         unk_categories = sorted(unk_categories)
         logger.warning(
             f"I have found several categories not listed in your variable file.\n"
-            f"Following in alphabetical order:")
+            f"Following in alphabetical order:"
+        )
         for idx, c in enumerate(unk_categories):
             logger.warning(f"{idx} - '{c}'")
 
@@ -345,7 +396,9 @@ def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speaker
 class DatasetThread(QtCore.QThread):
     signal = QtCore.Signal(str)
 
-    def __init__(self, inputs, corpus_dict, independent_variables, dependent_variables, speakers):
+    def __init__(
+        self, inputs, corpus_dict, independent_variables, dependent_variables, speakers
+    ):
         super().__init__()
 
         self.corpus_dict = corpus_dict
@@ -358,17 +411,23 @@ class DatasetThread(QtCore.QThread):
         self.results = None
 
     def run(self):
-
         try:
             # Call the generate_dataset() method here
-            results = generate_dataset(self.inputs, self.logger, self.corpus_dict, self.speakers,
-                                       self.independent_variables,
-                                       self.dependent_variables)
+            results = generate_dataset(
+                self.inputs,
+                self.logger,
+                self.corpus_dict,
+                self.speakers,
+                self.independent_variables,
+                self.dependent_variables,
+            )
 
             self.results = results
         except Exception as e:
-            err_msg = f"An error occurred while generating the dataset: {e}\n" \
-                      f"{traceback.format_exc()}"
+            err_msg = (
+                f"An error occurred while generating the dataset: {e}\n"
+                f"{traceback.format_exc()}"
+            )
 
             self.results = err_msg
 
