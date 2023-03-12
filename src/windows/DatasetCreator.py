@@ -1,14 +1,46 @@
 from collections import OrderedDict
-from collections import OrderedDict
 from typing import Dict, Any
 
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QToolTip, QLineEdit
 
-from annotation_fixer.common import Memory, GeneralWindow, corpus_dict2text, GenerateDatasetThread
-from annotation_fixer.common.AppLogger import DataCreatorLogger
+from common import Memory, GeneralWindow, corpus_dict2text, DatasetThread, AppLogger
+
+
+class LogQTextEdit(QtWidgets.QTextEdit):
+    """
+    used to write logs to textare, implements rewriter for string starting with '\r'
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.last_line = ''
+
+    def write(self, string):
+        if "\r" in string:
+            if self.last_line:
+                # If there's a carriage return, move the cursor to the beginning of the line
+                self.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+                self.moveCursor(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.MoveAnchor)
+            # Replace the last line with the new one (excluding the carriage return)
+            self.last_line = string.split("\r")[-1]
+            self.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+            self.moveCursor(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.KeepAnchor)
+            self.insertPlainText(self.last_line)
+
+        else:
+            if self.last_line:
+                # put a new line  with br at the start of the string
+                string = f"<br>{string}"
+
+            # substitute the new line with br
+            string = string.replace("\n", "<br>")
+            # If there's no carriage return, just append the string to the text edit
+            self.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+            self.insertHtml(string)
+            self.last_line = ''
 
 
 def create_input_lineedit(label, default_value='', hover_help='', delay=500):
@@ -51,7 +83,7 @@ class DatasetCreator(GeneralWindow):
         self.worker_thread = None
 
         super().__init__(mem, "Dataset Creator")
-        self.logger = DataCreatorLogger(".annotation_fixer/dataset_creator.log", self.log_window)
+        self.logger = AppLogger(".annotation_fixer/dataset_creator.log")
 
     def create_widgets(self):
         # Create QLineEdit widgets with hover help
@@ -90,7 +122,7 @@ class DatasetCreator(GeneralWindow):
         self.generate_dataset_button.clicked.connect(self.start_generate_dataset)
 
         # Create non-editable log window
-        self.log_window = QtWidgets.QTextEdit(self)
+        self.log_window = LogQTextEdit(self)
         self.log_window.setAcceptRichText(True)
         self.log_window.setReadOnly(True)
 
@@ -132,12 +164,11 @@ class DatasetCreator(GeneralWindow):
             square_regex, feat_regex, name_regex, previous_line, ngram_prev, ngram_next
         ]
 
-        self.worker_thread = GenerateDatasetThread(inputs, self.corpus_dict, self.independent_variables,
-                                                   self.dependent_variables, self.speakers,
-                                                   self.mem.settings['separator'])
+        self.worker_thread = DatasetThread(inputs, self.corpus_dict, self.independent_variables,
+                                           self.dependent_variables, self.speakers)
 
         self.worker_thread.finished.connect(self.on_generate_dataset_finished)
-        self.worker_thread.signal.connect(self.log_window.append)
+        self.worker_thread.signal.connect(self.log_window.write)
         self.worker_thread.start()
 
     def on_generate_dataset_finished(self):

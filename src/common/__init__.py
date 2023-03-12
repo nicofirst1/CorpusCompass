@@ -1,6 +1,6 @@
-from .AppLogger import AppLogger, DataCreatorLogger
+from .AppLogger import AppLogger
 from .GeneralWindow import GeneralWindow
-from .GenerateDatasetThread import GenerateDatasetThread
+from .DatasetThread import DatasetThread
 from .Memory import Memory
 from .data_creator_utils import split_paragraphs, get_name, check_correct_annotations, find_repetitions, \
     remove_features, get_ngram, preprocess_corpus
@@ -23,7 +23,6 @@ __all__ = [
 
     # AppLogger
     "AppLogger"
-    "DataCreatorLogger"
 
     # data_creator_utils
     "split_paragraphs",

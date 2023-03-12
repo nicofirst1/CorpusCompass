@@ -2,38 +2,7 @@ import io
 import logging
 import sys
 
-from PySide6 import QtGui, QtWidgets, QtCore
-
-
-class QTextEditStream(io.StringIO):
-    def __init__(self, text_edit: QtWidgets.QTextEdit):
-        super().__init__()
-        self.text_edit = text_edit
-        self.last_line = ''
-
-    def write(self, string):
-        if "\r" in string:
-            if self.last_line:
-                # If there's a carriage return, move the cursor to the beginning of the line
-                self.text_edit.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-                self.text_edit.moveCursor(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.MoveAnchor)
-            # Replace the last line with the new one (excluding the carriage return)
-            self.last_line = string.split("\r")[-1]
-            self.text_edit.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-            self.text_edit.moveCursor(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.KeepAnchor)
-            self.text_edit.insertPlainText(self.last_line)
-
-        else:
-            if self.last_line:
-                # put a new line  with br at the start of the string
-                string = f"<br>{string}"
-
-            # substitute the new line with br
-            string = string.replace("\n", "<br>")
-            # If there's no carriage return, just append the string to the text edit
-            self.text_edit.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-            self.text_edit.insertHtml(string)
-            self.last_line = ''
+from PySide6 import QtCore
 
 
 class AppLogger:
@@ -72,12 +41,24 @@ class AppLogger:
         self.logger.addHandler(handler)
 
 
+class FakeStream(io.StringIO):
+    """
+    used to redirect tqdm output to text area
+    """
+    def __init__(self, signal):
+        super().__init__()
+        self.signal = signal
+
+    def write(self, string):
+        self.signal.emit(string)
+
+
 class QthreadLogger:
     def __init__(self, signal: QtCore.Signal, level=logging.DEBUG):
         self.logger = signal
         self.level = level
         self.formatter = HtmlColorFormatter("%(message)s")
-        self.text_edit_stream=None
+        self.text_edit_stream = FakeStream(signal)
 
     def debug(self, msg):
         if self.level > logging.DEBUG:
@@ -108,22 +89,6 @@ class QthreadLogger:
             return
         msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.CRITICAL}))
         self.logger.emit(msg)
-
-
-class DataCreatorLogger(AppLogger):
-
-    def __init__(self, filename, text_edit: QtWidgets.QTextEdit, level=logging.DEBUG, ):
-        super().__init__(filename, level)
-
-        formatter = HtmlColorFormatter("%(message)s")
-
-        if isinstance(text_edit, QtWidgets.QTextEdit):
-            self.text_edit_stream = QTextEditStream(text_edit)
-            stream_handler = logging.StreamHandler(self.text_edit_stream)
-            stream_handler.setFormatter(formatter)
-            self.logger.addHandler(stream_handler)
-        else:
-            raise TypeError("Stream must be a QTextEdit")
 
 
 class HtmlColorFormatter(logging.Formatter):

@@ -6,17 +6,16 @@ from collections import Counter
 from copy import copy
 
 import pandas as pd
-import psutil
 from PySide6 import QtCore
 from tqdm import tqdm
 
-from .AppLogger import DataCreatorLogger, QthreadLogger
+from .AppLogger import QthreadLogger, AppLogger
 from .data_creator_utils import get_name, check_correct_annotations, find_repetitions, remove_features, get_ngram, \
     preprocess_corpus
 
 
-def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict, speakers: dict, independent_variables,
-                     dependent_variables, separator: str):
+def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speakers: dict, independent_variables,
+                     dependent_variables):
     # extract input values
     square_regex, feat_regex, name_regex, previous_line, ngram_prev, ngram_next = inputs
 
@@ -342,25 +341,10 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
     return to_return
 
 
-class FakeLogger(object):
-    def __init__(self):
-        self.text_edit_stream = None
-        pass
-
-    def warning(self, msg):
-        print(msg)
-
-    def info(self, msg):
-        print(msg)
-
-    def debug(self, msg):
-        print(msg)
-
-
-class GenerateDatasetThread(QtCore.QThread):
+class DatasetThread(QtCore.QThread):
     signal = QtCore.Signal(str)
 
-    def __init__(self, inputs, corpus_dict, independent_variables, dependent_variables, speakers, separator):
+    def __init__(self, inputs, corpus_dict, independent_variables, dependent_variables, speakers):
         super().__init__()
 
         self.corpus_dict = corpus_dict
@@ -369,7 +353,6 @@ class GenerateDatasetThread(QtCore.QThread):
         self.speakers = speakers
         self.inputs = inputs
         self.logger = QthreadLogger(self.signal)
-        self.separator = separator
 
         self.results = None
 
@@ -379,7 +362,7 @@ class GenerateDatasetThread(QtCore.QThread):
             # Call the generate_dataset() method here
             results = generate_dataset(self.inputs, self.logger, self.corpus_dict, self.speakers,
                                        self.independent_variables,
-                                       self.dependent_variables, self.separator)
+                                       self.dependent_variables)
 
             self.results = results
         except Exception as e:
@@ -387,9 +370,6 @@ class GenerateDatasetThread(QtCore.QThread):
                       f"{traceback.format_exc()}"
 
             self.results = err_msg
-
-
-
 
         finally:
             self.finished.emit()
