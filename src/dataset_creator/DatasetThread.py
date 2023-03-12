@@ -9,9 +9,10 @@ import pandas as pd
 from PySide6 import QtCore
 from tqdm import tqdm
 
-from .AppLogger import QthreadLogger, AppLogger
-from .data_creator_utils import get_name, check_correct_annotations, find_repetitions, remove_features, get_ngram, \
-    preprocess_corpus
+from common import AppLogger
+from dataset_creator.QThreadLogger import QthreadLogger
+from dataset_creator.dc_utils import preprocess_corpus, get_name, check_correct_annotations, find_repetitions, \
+    remove_features, get_ngram
 
 
 def generate_dataset(inputs: list, logger: AppLogger, corpus_dict: dict, speakers: dict, independent_variables,

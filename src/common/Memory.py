@@ -70,7 +70,7 @@ class Memory:
     """
 
     def __init__(self):
-        self.dir = ".annotation_fixer"
+        self.dir = ".corpus_compass"
         # create dir if not exists
         if not os.path.exists(self.dir):
             os.mkdir(self.dir)

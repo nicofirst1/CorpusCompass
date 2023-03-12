@@ -2,9 +2,8 @@ import os
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog, QComboBox, QScrollArea
-from annotation_fixer.common import Memory, GeneralWindow, open_postprocess, open_variables
 
-from annotation_fixer.common import multi_corpus_upload
+from common import GeneralWindow, Memory, multi_corpus_upload, open_postprocess, open_variables
 
 
 class LoadFiles(GeneralWindow):
@@ -83,7 +82,6 @@ class LoadFiles(GeneralWindow):
         row_layout.addWidget(self.goto_fixer_button)
         row_layout.addWidget(self.goto_data_creator_button)
         layout.addLayout(row_layout)
-
 
         self.setLayout(layout)
 
@@ -251,9 +249,9 @@ class LoadFiles(GeneralWindow):
         button = self.sender()
 
         if button == self.goto_fixer_button:
-            self.next_window="fixer"
+            self.next_window = "fixer"
         elif button == self.goto_data_creator_button:
-            self.next_window="data_creator"
+            self.next_window = "data_creator"
 
         self.has_finished = True
         # close window

@@ -2,7 +2,8 @@ from typing import Optional
 
 from PySide6 import QtWidgets, QtGui, QtCore
 from PySide6.QtWidgets import QPushButton, QTextEdit, QComboBox, QLabel, QLineEdit, QScrollArea, QMessageBox
-from annotation_fixer.common import Memory
+
+from common.Memory import Memory
 
 STYLES = [
     {

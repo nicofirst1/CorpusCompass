@@ -2,8 +2,10 @@ import sys
 
 from PySide6 import QtWidgets
 
-from annotation_fixer.common import Memory
-from annotation_fixer.windows import AskLoading, LoadFiles, AnnotationFixer, DatasetCreator
+from annotation_fixer import AnnotationFixer
+from common import Memory
+from dataset_creator import DatasetCreator
+from other_windows import AskLoading, LoadFiles
 
 
 def main():

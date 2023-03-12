@@ -1,6 +1,7 @@
 from PySide6 import QtWidgets, QtCore
 
-from annotation_fixer.common import Memory, GeneralWindow
+from common.Memory import Memory
+from common.GeneralWindow import GeneralWindow
 
 
 

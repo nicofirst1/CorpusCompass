@@ -6,7 +6,9 @@ from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QToolTip, QLineEdit
 
-from common import Memory, GeneralWindow, corpus_dict2text, DatasetThread, AppLogger
+from annotation_fixer.af_utils import corpus_dict2text
+from common import Memory, GeneralWindow, AppLogger
+from dataset_creator.DatasetThread import DatasetThread
 
 
 class LogQTextEdit(QtWidgets.QTextEdit):

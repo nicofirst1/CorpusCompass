@@ -6,11 +6,11 @@ from typing import Dict, Any
 import pandas as pd
 from PySide6 import QtWidgets, QtGui, QtCore
 
-from annotation_fixer.common import Memory, GeneralWindow, corpus_dict2text, find_annotation_regex, \
-    find_annotation_context, remove_independent_vars
-from annotation_fixer.common.AppLogger import AppLogger
-from annotation_fixer.windows.Find import FindDialog
-from annotation_fixer.windows.Settings import Settings
+from annotation_fixer.Find import FindDialog
+from annotation_fixer.af_utils import corpus_dict2text, remove_independent_vars, find_annotation_regex, \
+    find_annotation_context
+from common import Memory, GeneralWindow, AppLogger
+from other_windows import Settings
 
 
 class AnnotationFixer(GeneralWindow):
@@ -186,7 +186,6 @@ class AnnotationFixer(GeneralWindow):
     def show_find_dialog(self):
         self.find_dialog = FindDialog(self)
         self.find_dialog.show()
-
 
     def on_text_changed(self):
         self.save_button.setEnabled(True)
