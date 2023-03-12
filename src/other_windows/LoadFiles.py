@@ -66,13 +66,10 @@ class LoadFiles(GeneralWindow):
         self.encoding_combo_box.activated[int].connect(self.handle_encoding_change)
         self.encoding_combo_box.setCurrentText(self.encoding)
 
-        self.goto_fixer_button = QtWidgets.QPushButton("Fix Annotations")
-        self.goto_fixer_button.clicked.connect(self.finish)
-        self.goto_fixer_button.setEnabled(False)
+        self.finish_button = QtWidgets.QPushButton("Finish")
+        self.finish_button.clicked.connect(self.finish)
+        self.finish_button.setEnabled(False)
 
-        self.goto_data_creator_button = QtWidgets.QPushButton("Create Dataset")
-        self.goto_data_creator_button.clicked.connect(self.finish)
-        self.goto_data_creator_button.setEnabled(False)
 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.encoding_label)
@@ -85,8 +82,7 @@ class LoadFiles(GeneralWindow):
 
         # add row layout
         row_layout = QtWidgets.QHBoxLayout()
-        row_layout.addWidget(self.goto_fixer_button)
-        row_layout.addWidget(self.goto_data_creator_button)
+        row_layout.addWidget(self.finish_button)
         layout.addLayout(row_layout)
 
         self.setLayout(layout)
@@ -287,19 +283,14 @@ class LoadFiles(GeneralWindow):
 
     def enable_finish(self):
         if self.corpus_files and self.annotation_info_csv and self.variables_csv:
-            self.goto_fixer_button.setEnabled(True)
+            self.finish_button.setEnabled(True)
 
         if self.corpus_files and self.variables_csv:
-            self.goto_data_creator_button.setEnabled(True)
+            self.finish_button.setEnabled(True)
 
     def finish(self):
         # get the button that was clicked
         button = self.sender()
-
-        if button == self.goto_fixer_button:
-            self.next_window = "fixer"
-        elif button == self.goto_data_creator_button:
-            self.next_window = "data_creator"
 
         self.has_finished = True
         # close window

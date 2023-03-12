@@ -5,7 +5,6 @@ from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QToolTip, QLineEdit
-from qtpy import QtCore
 
 from src.annotation_fixer.af_utils import corpus_dict2text
 from src.common import GeneralWindow, Memory, AppLogger, save_postprocess
@@ -143,6 +142,20 @@ class DatasetCreator(GeneralWindow):
         self.stop_generation_button.clicked.connect(self.stop_generation)
         self.stop_generation_button.setEnabled(False)
 
+        # add a "go to annotation fixer" button
+        self.go_to_annotation_fixer_button = QtWidgets.QPushButton(
+            "Go to Annotation Fixer"
+        )
+        self.go_to_annotation_fixer_button.clicked.connect(self.go_to_next)
+        self.go_to_annotation_fixer_button.setEnabled(False)
+
+        # add a "go to dataset analysis" button
+        self.go_to_dataset_analysis_button = QtWidgets.QPushButton(
+            "Go to Dataset Analysis"
+        )
+        self.go_to_dataset_analysis_button.clicked.connect(self.go_to_next)
+        self.go_to_dataset_analysis_button.setEnabled(False)
+
         # Create non-editable log window
         self.log_window = LogQTextEdit(self)
         self.log_window.setAcceptRichText(True)
@@ -163,10 +176,16 @@ class DatasetCreator(GeneralWindow):
         layout.addLayout(ngram_lay)
         layout.addWidget(self.log_window)
 
+        # add buttons to layout
         start_stop_lay = QtWidgets.QHBoxLayout()
         start_stop_lay.addWidget(self.generate_dataset_button)
         start_stop_lay.addWidget(self.stop_generation_button)
         layout.addLayout(start_stop_lay)
+
+        next_lay = QtWidgets.QHBoxLayout()
+        next_lay.addWidget(self.go_to_annotation_fixer_button)
+        next_lay.addWidget(self.go_to_dataset_analysis_button)
+        layout.addLayout(next_lay)
 
         self.setLayout(layout)
 
@@ -224,7 +243,7 @@ class DatasetCreator(GeneralWindow):
         self.worker_thread.finished.connect(self.on_generate_dataset_finished)
         self.worker_thread.signal.connect(self.log_window.write)
         self.worker_thread.start()
-        self.worker_thread_started=True
+        self.worker_thread_started = True
 
     def on_generate_dataset_finished(self):
         print("on_generate_dataset_finished called")
@@ -256,6 +275,10 @@ class DatasetCreator(GeneralWindow):
 
             self.log_window.ensureCursorVisible()
 
+            # enable buttons
+            self.go_to_annotation_fixer_button.setEnabled(True)
+            self.go_to_dataset_analysis_button.setEnabled(True)
+
         else:
             msg.setText("Failed to generate dataset.")
             msg.setWindowTitle("Warning")
@@ -263,6 +286,17 @@ class DatasetCreator(GeneralWindow):
         self.worker_thread = None
         self.generate_dataset_button.setEnabled(True)
         self.stop_generation_button.setEnabled(False)
-        self.worker_thread_started=False
+        self.worker_thread_started = False
 
         msg.exec_()
+
+    def go_to_next(self):
+        # get sender
+        sender = self.sender()
+        if sender == self.go_to_annotation_fixer_button:
+            self.next_page = "annotation_fixer"
+        elif sender == self.go_to_dataset_analysis_button:
+            self.next_page = "dataset_analysis"
+
+        #close window
+        self.close()

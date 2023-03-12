@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 
-from common import GeneralWindow, Memory
+from src.common import GeneralWindow, Memory
 
 
 class Settings(GeneralWindow):

@@ -1,10 +1,12 @@
 from PySide6 import QtWidgets, QtCore
 
-from common.GeneralWindow import GeneralWindow
-from common.Memory import Memory
+from src.common.GeneralWindow import GeneralWindow
+from src.common.Memory import Memory
 
 
 class AskLoading(GeneralWindow):
+    finished = QtCore.Signal()
+
     def __init__(self, mem: Memory):
         super().__init__(mem, "Use loaded files?")
 
@@ -19,10 +21,10 @@ class AskLoading(GeneralWindow):
         self.message.setAlignment(QtCore.Qt.AlignCenter)
 
         self.yes = QtWidgets.QPushButton("Yes")
-        self.yes.clicked.connect(self.use_loaded)
+        self.yes.clicked.connect(self.conclude)
 
         self.no = QtWidgets.QPushButton("No")
-        self.no.clicked.connect(self.load_files)
+        self.no.clicked.connect(self.conclude)
 
         layout = QtWidgets.QVBoxLayout()
         layout.setAlignment(QtCore.Qt.AlignCenter)
@@ -32,10 +34,13 @@ class AskLoading(GeneralWindow):
 
         self.setLayout(layout)
 
-    def use_loaded(self):
-        self.load = True
-        self.close()
+    def conclude(self):
+        # get sender
+        sender = self.sender()
+        if sender == self.yes:
+            self.load = False
+        elif sender == self.no:
+            self.load = True
 
-    def load_files(self):
-        self.load = False
+        self.finished.emit()
         self.close()
