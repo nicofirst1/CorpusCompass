@@ -8,7 +8,7 @@ from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QToolTip, QLineEdit
 
 from annotation_fixer.common import Memory, GeneralWindow, corpus_dict2text, GenerateDatasetThread
-from annotation_fixer.common.AppLogger import AppLogger, DataCreatorLogger
+from annotation_fixer.common.AppLogger import DataCreatorLogger
 
 
 def create_input_lineedit(label, default_value='', hover_help='', delay=500):
@@ -51,7 +51,7 @@ class DatasetCreator(GeneralWindow):
         self.worker_thread = None
 
         super().__init__(mem, "Dataset Creator")
-        self.logger = DataCreatorLogger(".annotation_fixer/dataset_creator.log",  self.log_window)
+        self.logger = DataCreatorLogger(".annotation_fixer/dataset_creator.log", self.log_window)
 
     def create_widgets(self):
         # Create QLineEdit widgets with hover help
@@ -91,6 +91,7 @@ class DatasetCreator(GeneralWindow):
 
         # Create non-editable log window
         self.log_window = QtWidgets.QTextEdit(self)
+        self.log_window.setAcceptRichText(True)
         self.log_window.setReadOnly(True)
 
         # Create layout for ngram inputs
@@ -111,11 +112,12 @@ class DatasetCreator(GeneralWindow):
         self.setLayout(layout)
 
     def start_generate_dataset(self):
-        self.log_window.clear()
 
         if self.worker_thread is not None:
             QtWidgets.QMessageBox.warning(self, "Warning", "Generation already in progress.")
             return
+
+        self.log_window.clear()
 
         # get inputs
         previous_line = self.previous_line_checkbox.isChecked()
@@ -131,12 +133,18 @@ class DatasetCreator(GeneralWindow):
         ]
 
         self.worker_thread = GenerateDatasetThread(inputs, self.corpus_dict, self.independent_variables,
-                                                   self.dependent_variables, self.speakers, self.logger, self.mem.settings['separator'])
+                                                   self.dependent_variables, self.speakers,
+                                                   self.mem.settings['separator'])
 
         self.worker_thread.finished.connect(self.on_generate_dataset_finished)
-        self.worker_thread.log.connect(self.log_window.append)
+        self.worker_thread.signal.connect(self.log_window.append)
         self.worker_thread.start()
 
     def on_generate_dataset_finished(self):
+        if isinstance(self.worker_thread.results, str):
+            QtWidgets.QMessageBox.warning(self, "Warning", self.worker_thread.results)
+        elif isinstance(self.worker_thread.results, Dict):
+            QtWidgets.QMessageBox.information(self, "Information", "Dataset generated successfully.")
+        else:
+            QtWidgets.QMessageBox.warning(self, "Warning", "Failed to generate dataset.")
         self.worker_thread = None
-        QtWidgets.QMessageBox.information(self, "Information", "Dataset generation completed.")

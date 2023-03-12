@@ -2,19 +2,38 @@ import io
 import logging
 import sys
 
-from PySide6 import QtGui, QtWidgets
-from tqdm import tqdm
+from PySide6 import QtGui, QtWidgets, QtCore
 
 
 class QTextEditStream(io.StringIO):
-    def __init__(self, text_edit:QtWidgets.QTextEdit):
+    def __init__(self, text_edit: QtWidgets.QTextEdit):
         super().__init__()
         self.text_edit = text_edit
+        self.last_line = ''
 
     def write(self, string):
-        self.text_edit.moveCursor(QtGui.QTextCursor.End)
-        self.text_edit.insertPlainText(string)
-        self.text_edit.moveCursor(QtGui.QTextCursor.End)
+        if "\r" in string:
+            if self.last_line:
+                # If there's a carriage return, move the cursor to the beginning of the line
+                self.text_edit.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+                self.text_edit.moveCursor(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.MoveAnchor)
+            # Replace the last line with the new one (excluding the carriage return)
+            self.last_line = string.split("\r")[-1]
+            self.text_edit.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+            self.text_edit.moveCursor(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.KeepAnchor)
+            self.text_edit.insertPlainText(self.last_line)
+
+        else:
+            if self.last_line:
+                # put a new line  with br at the start of the string
+                string = f"<br>{string}"
+
+            # substitute the new line with br
+            string = string.replace("\n", "<br>")
+            # If there's no carriage return, just append the string to the text edit
+            self.text_edit.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
+            self.text_edit.insertHtml(string)
+            self.last_line = ''
 
 
 class AppLogger:
@@ -34,8 +53,6 @@ class AppLogger:
         stream_handler.setFormatter(formatter)
         self.logger.addHandler(stream_handler)
 
-
-
     def debug(self, msg):
         self.logger.debug(msg)
 
@@ -54,28 +71,51 @@ class AppLogger:
     def addHandler(self, handler):
         self.logger.addHandler(handler)
 
-class TqdmWithLogOutput(tqdm):
-    def __init__(self, iterable=None, desc=None, total=None, leave=True, file=None,
-                 ncols=None, mininterval=0.1, maxinterval=10.0, miniters=None,
-                 order=None, dynamic_ncols=False, smoothing=0.3, bar_format=None,
-                 initial=0, position=None, gui=False, logger=None):
-        super().__init__(iterable, desc, total, leave, file, ncols, mininterval, maxinterval, miniters,
-                         order, dynamic_ncols, smoothing, bar_format, initial, position, gui)
-        self.logger = logger
-        self.text_edit_stream = QTextEditStream(file)
 
-    def write(self, msg='', end='\n', refresh=True):
-        if self.logger is not None:
-            self.logger.info(msg)
-        self.text_edit_stream.write(msg + end)
-        if refresh:
-            self.refresh()
+class QthreadLogger:
+    def __init__(self, signal: QtCore.Signal, level=logging.DEBUG):
+        self.logger = signal
+        self.level = level
+        self.formatter = HtmlColorFormatter("%(message)s")
+        self.text_edit_stream=None
+
+    def debug(self, msg):
+        if self.level > logging.DEBUG:
+            return
+        msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.DEBUG}))
+        self.logger.emit(msg)
+
+    def info(self, msg):
+        if self.level > logging.INFO:
+            return
+        msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.INFO}))
+        self.logger.emit(msg)
+
+    def warning(self, msg):
+        if self.level > logging.WARNING:
+            return
+        msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.WARNING}))
+        self.logger.emit(msg)
+
+    def error(self, msg):
+        if self.level > logging.ERROR:
+            return
+        msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.ERROR}))
+        self.logger.emit(msg)
+
+    def critical(self, msg):
+        if self.level > logging.CRITICAL:
+            return
+        msg = self.formatter.format(logging.makeLogRecord({"msg": msg, "levelno": logging.CRITICAL}))
+        self.logger.emit(msg)
+
+
 class DataCreatorLogger(AppLogger):
 
-    def __init__(self, filename,  text_edit:QtWidgets.QTextEdit,level=logging.DEBUG,):
+    def __init__(self, filename, text_edit: QtWidgets.QTextEdit, level=logging.DEBUG, ):
         super().__init__(filename, level)
 
-        formatter = logging.Formatter("%(message)s")
+        formatter = HtmlColorFormatter("%(message)s")
 
         if isinstance(text_edit, QtWidgets.QTextEdit):
             self.text_edit_stream = QTextEditStream(text_edit)
@@ -85,9 +125,27 @@ class DataCreatorLogger(AppLogger):
         else:
             raise TypeError("Stream must be a QTextEdit")
 
-    def add_tqdm(self, iterable=None, desc=None, total=None, leave=True, file=None,
-                 ncols=None, mininterval=0.1, maxinterval=10.0, miniters=None,
-                 order=None, dynamic_ncols=False, smoothing=0.3, bar_format=None,
-                 initial=0, position=None, gui=False):
-        return TqdmWithLogOutput(iterable, desc, total, leave, self.text_edit_stream, ncols, mininterval, maxinterval, miniters,
-                         order, dynamic_ncols, smoothing, bar_format, initial, position, gui, self.logger)
+
+class HtmlColorFormatter(logging.Formatter):
+    def __init__(self, format):
+        super().__init__(format)
+
+    def format(self, record):
+        level_colors = {
+            logging.DEBUG: "#FFFF00",  # Yellow
+            logging.INFO: "#000000",  # Black
+            logging.WARNING: "#FFA500",  # Orange
+            logging.ERROR: "#FF0000",  # Red
+            logging.CRITICAL: "#8B0000"  # Dark Red
+        }
+        level_name = record.levelname
+        level_color = level_colors[record.levelno]
+        message = record.getMessage()
+
+        # Add color to level name
+
+        # Add color to message
+        message = f'<span style="color: {level_color}">{message}</span><br/>'
+
+        record.msg = message
+        return super().format(record)

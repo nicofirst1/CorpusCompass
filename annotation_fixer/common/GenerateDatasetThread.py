@@ -1,21 +1,22 @@
-import csv
 import itertools
-import os
+import itertools
 import re
+import traceback
 from collections import Counter
 from copy import copy
 
 import pandas as pd
+import psutil
 from PySide6 import QtCore
 from tqdm import tqdm
 
-from .AppLogger import DataCreatorLogger
+from .AppLogger import DataCreatorLogger, QthreadLogger
 from .data_creator_utils import get_name, check_correct_annotations, find_repetitions, remove_features, get_ngram, \
     preprocess_corpus
 
 
 def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict, speakers: dict, independent_variables,
-                     dependent_variables, separator:str):
+                     dependent_variables, separator: str):
     # extract input values
     square_regex, feat_regex, name_regex, previous_line, ngram_prev, ngram_next = inputs
 
@@ -75,26 +76,15 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
         else:
             idv[v] = token
 
+    del variable_dict
+
     # Output file settings
     # Now it's time to create the output files.
     #
     # There are different outputs and here we specify their names.
 
-
-    # get the name of the output path
-    output_dir = "postprocessed"
-    # create the output directory if it does not exist
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # define the output file names
-    dataset_path = os.path.join(output_dir, "dataset.csv")
-    binary_dataset_path = os.path.join(output_dir, "binary_dataset.csv")
-    annotation_info_path = os.path.join(output_dir, "annotation_info.csv")
-    not_annotated_path = os.path.join(output_dir, "missed_annotations.csv")
-
     # compile regex to find features
-    csv_header = sorted(dependent_variables.keys())
+    csv_header = sorted(dependent_variables.keys()) + sorted(independent_variables.keys())
 
     # define the end of the csv
     csv_end = ["speaker", "interlocutor/s", "file", 'context', 'unk']
@@ -103,9 +93,6 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
     csv_header = ["token"] + csv_header + csv_end
     csv_file = [csv_header]
     unk_categories = []
-
-    print(f"The csv header looks like this")
-    csv_header
 
     # Finding all the annotated words
     whole_corpus = "\n".join(corpus)
@@ -128,14 +115,13 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
     annotation_counter = Counter(annotations)
     annotation_counter = {k: dict(annotated=v) for k, v in annotation_counter.items()}
 
-    print(f"The total number of annotated words is {len(annotation_counter)}")
+    logger.info(f"There is a total of  {len(annotation_counter)} unique annotations")
 
     # Now, we check the number of times the token appears annotated (following the REGEX rule) vs not, we do this for each annotated token.
 
-
     # check if there are any annotations not annotated
 
-    for token, v in tqdm(annotation_counter.items(), desc="Checking annotations", file=logger.text_edit_stream):
+    for token, v in tqdm(annotation_counter.items(), desc="Checking annotations...", file=logger.text_edit_stream):
         # check for annotation repetitions
         wild_rep, wild_rep_interest, ann_rep, _ = find_repetitions(whole_corpus, token, feat_regex, name_regex,
                                                                    speakers_of_interest)
@@ -144,39 +130,27 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
         annotation_counter[token]['not annotated'] = not_annotated
         annotation_counter[token]['not_annotated_interest'] = wild_rep_interest
 
-    logger.info(
-        f"The total repetitions of annotated words is {sum([x['annotated'] for x in annotation_counter.values()])}")
-    logger.info(
-        f"The total repetitions of not annotated words is {sum([x['not annotated'] for x in annotation_counter.values()])}")
-    logger.info(
-        f"The total repetitions of not annotated words from speaker of interest is {sum([x['not_annotated_interest'] for x in annotation_counter.values()])}")
+    annotated = sum([x['annotated'] for x in annotation_counter.values()])
+    not_annotated = sum([x['not annotated'] for x in annotation_counter.values()])
+    not_annotated_interest = sum([x['not_annotated_interest'] for x in annotation_counter.values()])
 
+    logger.info(
+        f"There is a total of {annotated} annotations in the corpus ({annotated / len(whole_corpus.split(' ')) * 100:.2f}% "
+        f"of the corpus).\n"
+        f"I found {not_annotated} not annotated words that where previously annotated.\n"
+        f"Of those {not_annotated_interest} ({not_annotated_interest / not_annotated * 100:.2f}%) "
+        f"are produced by a speakers of interest")
 
     # While the previous cell, counts all the tokens in the whole corpus, we probably want to differentiate between speakers.
     # For this reason, here we need to specify where we want to look for the missed tokens.
-    #
-    # You have the following options:
-    #
-    # - Choose all the speakers found in your corpus with: `speakers=all_speakers`
-    # - Choose only the speakers you are interested in (defined previously):
-    # `speakers=speakers_of_interest`
-    # - Choose other speakers you are interested in, by manually enumerating them: `speakers= ["name1","name2",...,"nameN"]`
-    #
-    # By default, we check for all the speakers
-
-
-    # choose which speaker to check for annotations, you can uncomment one of the following lines:
-    speakers = all_speakers
-
     # Now it's time to find those missing annotations
-
 
     not_annotated_log = {}
 
-    for path, crp in tqdm(corpus_dict.items(), desc="Finding not annotated words"):
+    for path, crp in tqdm(corpus_dict.items(), desc="Finding not annotated words", file=logger.text_edit_stream):
 
         # filter out the speakers of interest
-        crp = [x for x in crp if get_name(x, name_regex) in speakers]
+        crp = [x for x in crp if get_name(x, name_regex) in speakers_of_interest]
 
         # join the corpus
         crp = "\n".join(crp)
@@ -191,12 +165,9 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
                     not_annotated_log[path][token] = []
                 not_annotated_log[path][token] += wna
 
-    logger.info(f"\nThe total number of not annotated words is {len(not_annotated_log)}")
-
     # Finally, some pre-processing
 
-
-    for sp in tqdm(speakers, desc="Finding speakers for not annotated words"):
+    for sp in tqdm(speakers, desc="Finding speakers for not annotated words", file=logger.text_edit_stream):
         sp_corpus = [c for c in corpus if get_name(c, name_regex) == sp]
         sp_corpus = "\n".join(sp_corpus)
         for token, v in annotation_counter.items():
@@ -223,10 +194,9 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
     # Starting the main loop
     # This part starts the main loop. You don't need to change anything here, if you are interested check out the comments.
 
-
     # for every paragraph in the transcript
     logger.info(f"Starting the main loop")
-    for file_path, corpus in tqdm(corpus_dict.items(), desc="Files"):
+    for file_path, corpus in tqdm(corpus_dict.items(), desc="Building dataset... ", file=logger.text_edit_stream):
         file_speakers = all_speakers_dict[file_path]
         for idx in range(len(corpus)):
             c = corpus[idx]
@@ -299,7 +269,7 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
                 csv_line[0] = text
                 csv_line[-2] = context
                 csv_line[-3] = file_path
-                csv_line[-4] = speakers
+                csv_line[-4] = ",".join(speakers)
                 csv_line[-5] = cur_speaker
                 if previous_line:
                     csv_line[-6] = sp
@@ -310,23 +280,14 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
     # Saving the output
     # Finally, we need to save the output in the csv file for all our results
 
-
-    # write the csv
-    with open(dataset_path, "w", newline="", encoding="utf16") as f:
-        writer = csv.writer(f, delimiter=separator)
-        writer.writerows(csv_file)
-
     # generate the annotation info file
     header = ["token"] + list(list(annotation_counter.values())[0].keys())
-
-    with open(annotation_info_path, "w", newline="", encoding="utf16") as f:
-        writer = csv.writer(f, delimiter=separator)
-        writer.writerow(header)
-
-        for token, v in annotation_counter.items():
-            writer.writerow([token] + list(v.values()))
+    annotation_info = [header]
+    for token, v in annotation_counter.items():
+        annotation_info.append([token] + list(v.values()))
 
     # save the not annotated log
+    missing_annotations = []
     if len(not_annotated_log) > 0:
         header = ["file", "token"]
 
@@ -334,23 +295,18 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
         max_lens = max([len(x) for sub in not_annotated_log.values() for x in sub.values()])
         header += [f"context {i}" for i in range(1, max_lens + 1)]
 
-        with open(not_annotated_path, "w", newline="", encoding="utf16") as f:
-            writer = csv.writer(f, delimiter=separator)
-            writer.writerow(header)
-            for path, vals in not_annotated_log.items():
-                for token, context in vals.items():
-                    writer.writerow([path, token] + context)
+        missing_annotations = [header]
 
-    # If you want to download it right away run this cell:
-
+        for path, vals in not_annotated_log.items():
+            for token, context in vals.items():
+                missing_annotations.append([path, token] + context)
 
     # Binary Dataset
     # The original dataset likely had categorical variables with multiple possible values represented as text or numbers. In order to perform certain types of analysis or feed the data into a machine learning model, it's often helpful to convert these categorical variables into a numerical format. One way to do this is through one-hot encoding, where a new binary column is created for each possible value of a categorical variable. This new dataset will differ from the original in that it will have more columns, one for each possible value of the categorical variables. Additionally, each row will now contain only 0's and 1's. The benefit of having the dataset encoded in this format is that it allows for the data to be easily processed by many machine learning algorithms, since they often expect numerical data as input. Additionally, one-hot encoding can help improve the performance of certain types of models, such as decision trees, by allowing them to make splits on categorical variables without having to convert them to numerical values first.
 
-
     # create the binary dataset file
     # read the csv file to pandas dataframe
-    df = pd.read_csv(dataset_path, sep=separator, encoding="utf16")
+    df = pd.DataFrame(data=csv_file[1:], columns=csv_file[0])
 
     to_drop = ["context", "token", "unk", "file"]
 
@@ -363,16 +319,16 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
     df_encoded["token"] = tokens
     df_encoded["context"] = context
 
-    df_encoded.to_csv(binary_dataset_path, index=False)
+    to_return = dict(
+        dataset=csv_file,
+        annotation_info=annotation_info,
+        missing_annotations=missing_annotations,
+        binary_dataset=df_encoded,
 
-    # Finally to download it run
-
-    #
-
+    )
 
     # Unknown categories
     # Here, we show the unknown category, if any could be found.
-
 
     if len(unk_categories) > 0:
         unk_categories = set(unk_categories)
@@ -383,12 +339,28 @@ def generate_dataset(inputs: list, logger: DataCreatorLogger, corpus_dict: dict,
         for idx, c in enumerate(unk_categories):
             logger.warning(f"{idx} - '{c}'")
 
+    return to_return
+
+
+class FakeLogger(object):
+    def __init__(self):
+        self.text_edit_stream = None
+        pass
+
+    def warning(self, msg):
+        print(msg)
+
+    def info(self, msg):
+        print(msg)
+
+    def debug(self, msg):
+        print(msg)
+
 
 class GenerateDatasetThread(QtCore.QThread):
-    log = QtCore.Signal(str)
+    signal = QtCore.Signal(str)
 
-    def __init__(self, inputs, corpus_dict, independent_variables, dependent_variables, speakers,
-                 logger, separator):
+    def __init__(self, inputs, corpus_dict, independent_variables, dependent_variables, speakers, separator):
         super().__init__()
 
         self.corpus_dict = corpus_dict
@@ -396,17 +368,28 @@ class GenerateDatasetThread(QtCore.QThread):
         self.dependent_variables = dependent_variables
         self.speakers = speakers
         self.inputs = inputs
-        self.logger = logger
+        self.logger = QthreadLogger(self.signal)
         self.separator = separator
 
+        self.results = None
+
     def run(self):
+
         try:
             # Call the generate_dataset() method here
-            dataset = generate_dataset(self.inputs, self.logger, self.corpus_dict, self.speakers,
+            results = generate_dataset(self.inputs, self.logger, self.corpus_dict, self.speakers,
                                        self.independent_variables,
                                        self.dependent_variables, self.separator)
-            # ...
+
+            self.results = results
         except Exception as e:
-            self.log.emit(f"Error generating dataset: {e}")
+            err_msg = f"An error occurred while generating the dataset: {e}\n" \
+                      f"{traceback.format_exc()}"
+
+            self.results = err_msg
+
+
+
+
         finally:
             self.finished.emit()
