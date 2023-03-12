@@ -2,11 +2,11 @@ import os
 
 from PySide6 import QtWidgets
 from PySide6.QtWidgets import QFileDialog, QComboBox, QScrollArea
-from common import (
+from src.common import (
     GeneralWindow,
     Memory,
     multi_corpus_upload,
-    open_postprocess,
+    load_postprocess,
     open_variables,
 )
 
@@ -202,7 +202,7 @@ class LoadFiles(GeneralWindow):
             self.corpus_message.setStyleSheet("color: red")
             return
 
-        postprocess_files, erro_msg = open_postprocess(
+        postprocess_files, erro_msg = load_postprocess(
             found, self.encoding, self.separator
         )
 

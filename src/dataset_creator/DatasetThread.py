@@ -1,14 +1,17 @@
 import itertools
 import re
+import threading
 import traceback
 from collections import Counter
 from copy import copy
+from typing import Dict, Tuple
 
 import pandas as pd
 from PySide6 import QtCore
-from common import AppLogger
-from dataset_creator.QThreadLogger import QthreadLogger
-from dataset_creator.dc_utils import (
+from tqdm import tqdm
+
+from src.dataset_creator.QThreadLogger import QthreadLogger
+from src.dataset_creator.dc_utils import (
     preprocess_corpus,
     get_name,
     check_correct_annotations,
@@ -16,16 +19,16 @@ from dataset_creator.dc_utils import (
     remove_features,
     get_ngram,
 )
-from tqdm import tqdm
 
 
 def generate_dataset(
-    inputs: list,
-    logger: AppLogger,
-    corpus_dict: dict,
-    speakers: dict,
-    independent_variables,
-    dependent_variables,
+    inputs: Tuple,
+    logger: QthreadLogger,
+    corpus_dict: Dict,
+    speakers: Dict,
+    independent_variables: Dict,
+    dependent_variables: Dict,
+    stop_flag: threading.Event(),
 ):
     # extract input values
     square_regex, feat_regex, name_regex, previous_line, ngram_prev, ngram_next = inputs
@@ -117,6 +120,10 @@ def generate_dataset(
     csv_file = [csv_header]
     unk_categories = []
 
+    if stop_flag.is_set():
+        logger.info("Dataset generation stopped.")
+        return None
+
     # Finding all the annotated words
     whole_corpus = "\n".join(corpus)
 
@@ -143,12 +150,12 @@ def generate_dataset(
     # Now, we check the number of times the token appears annotated (following the REGEX rule) vs not, we do this for each annotated token.
 
     # check if there are any annotations not annotated
-
-    for token, v in tqdm(
+    pbar = tqdm(
         annotation_counter.items(),
         desc="Checking annotations...",
         file=logger.text_edit_stream,
-    ):
+    )
+    for token, v in pbar:
         # check for annotation repetitions
         wild_rep, wild_rep_interest, ann_rep, _ = find_repetitions(
             whole_corpus, token, feat_regex, name_regex, speakers_of_interest
@@ -157,6 +164,10 @@ def generate_dataset(
         not_annotated = total_rep - v["annotated"]
         annotation_counter[token]["not annotated"] = not_annotated
         annotation_counter[token]["not_annotated_interest"] = wild_rep_interest
+        if stop_flag.is_set():
+            pbar.close()
+            logger.info("Dataset generation stopped.")
+            return None
 
     annotated = sum([x["annotated"] for x in annotation_counter.values()])
     not_annotated = sum([x["not annotated"] for x in annotation_counter.values()])
@@ -177,12 +188,13 @@ def generate_dataset(
     # Now it's time to find those missing annotations
 
     not_annotated_log = {}
-
-    for path, crp in tqdm(
+    pbar = tqdm(
         corpus_dict.items(),
         desc="Finding not annotated words",
         file=logger.text_edit_stream,
-    ):
+    )
+
+    for path, crp in pbar:
         # filter out the speakers of interest
         crp = [x for x in crp if get_name(x, name_regex) in speakers_of_interest]
 
@@ -204,14 +216,20 @@ def generate_dataset(
                 if token not in not_annotated_log[path]:
                     not_annotated_log[path][token] = []
                 not_annotated_log[path][token] += wna
+            if stop_flag.is_set():
+                pbar.close()
+                logger.info("Dataset generation stopped.")
+                return None
 
     # Finally, some pre-processing
 
-    for sp in tqdm(
+    pbar = tqdm(
         speakers,
         desc="Finding speakers for not annotated words",
         file=logger.text_edit_stream,
-    ):
+    )
+
+    for sp in pbar:
         sp_corpus = [c for c in corpus if get_name(c, name_regex) == sp]
         sp_corpus = "\n".join(sp_corpus)
         for token, v in annotation_counter.items():
@@ -228,6 +246,11 @@ def generate_dataset(
             annotation_counter[token][sp + " not annotated"] = wild_rep
             annotation_counter[token][sp + " annotated"] = ann_rep
 
+            if stop_flag.is_set():
+                pbar.close()
+                logger.info("Dataset generation stopped.")
+                return None
+
     # augment annotation_counter with speakers and add total number
     for token in annotation_counter.keys():
         annotation_counter[token]["total"] = (
@@ -238,16 +261,26 @@ def generate_dataset(
             annotation_counter[token][speaker + " annotated"] = 0
             annotation_counter[token][speaker + " not annotated"] = 0
 
+            if stop_flag.is_set():
+                logger.info("Dataset generation stopped.")
+                return None
+
     # Starting the main loop
     # This part starts the main loop. You don't need to change anything here, if you are interested check out the comments.
 
     # for every paragraph in the transcript
     logger.info(f"Starting the main loop")
-    for file_path, corpus in tqdm(
+    pbar = tqdm(
         corpus_dict.items(), desc="Building dataset... ", file=logger.text_edit_stream
-    ):
+    )
+    for file_path, corpus in pbar:
         file_speakers = all_speakers_dict[file_path]
         for idx in range(len(corpus)):
+            if stop_flag.is_set():
+                pbar.close()
+                logger.info("Dataset generation stopped.")
+                return None
+
             c = corpus[idx]
             cur_speaker = get_name(c, name_regex)
 
@@ -373,7 +406,7 @@ def generate_dataset(
     to_return = dict(
         dataset=csv_file,
         annotation_info=annotation_info,
-        missing_annotations=missing_annotations,
+        missed_annotations=missing_annotations,
         binary_dataset=df_encoded,
     )
 
@@ -407,8 +440,12 @@ class DatasetThread(QtCore.QThread):
         self.speakers = speakers
         self.inputs = inputs
         self.logger = QthreadLogger(self.signal)
-
+        # define the flag to stop the thread
+        self.stop_event = threading.Event()
         self.results = None
+
+    def stop(self) -> None:
+        self.stop_event.set()
 
     def run(self):
         try:
@@ -420,6 +457,7 @@ class DatasetThread(QtCore.QThread):
                 self.speakers,
                 self.independent_variables,
                 self.dependent_variables,
+                self.stop_event,
             )
 
             self.results = results

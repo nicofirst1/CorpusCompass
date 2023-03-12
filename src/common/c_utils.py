@@ -1,9 +1,12 @@
+import csv
 import json
 import os
 import re
 from typing import Dict, Optional, Tuple, List, Any
 
 import pandas as pd
+
+from src.common.Memory import Memory
 
 
 def multi_corpus_upload(
@@ -75,7 +78,7 @@ def multi_corpus_upload(
     return corpus, errs
 
 
-def open_postprocess(
+def load_postprocess(
     paths: List[str], encoding: str, separator: str
 ) -> Tuple[List[Any], Optional[str]]:
     """
@@ -108,6 +111,44 @@ def open_postprocess(
             return content, error
 
     return content, None
+
+
+def save_postprocess(results: Dict, mem: Memory):
+    separator = mem.settings.get("separator", ";")
+    # get the name of the output path
+    output_dir = "postprocessed"
+    # create the output directory if it does not exist
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # define the output file names
+    dataset_path = os.path.join(output_dir, "dataset.csv")
+    binary_dataset_path = os.path.join(output_dir, "binary_dataset.csv")
+    annotation_info_path = os.path.join(output_dir, "annotation_info.csv")
+    not_annotated_path = os.path.join(output_dir, "missed_annotations.csv")
+
+    # write the csv
+    with open(dataset_path, "w", newline="", encoding="utf16") as f:
+        writer = csv.writer(f, delimiter=separator)
+        writer.writerows(results["dataset"])
+
+    with open(annotation_info_path, "w", newline="", encoding="utf16") as f:
+        writer = csv.writer(f, delimiter=separator)
+        writer.writerow(results["annotation_info"])
+
+    with open(not_annotated_path, "w", newline="", encoding="utf16") as f:
+        writer = csv.writer(f, delimiter=separator)
+        writer.writerow(results["missed_annotations"])
+
+    results["binary_dataset"].to_csv(binary_dataset_path, index=False)
+
+    # save the new paths in the memory
+    mem.postprocess_paths = dict(
+        dataset=dataset_path,
+        binary_dataset=binary_dataset_path,
+        annotation_info=annotation_info_path,
+        missed_annotations=not_annotated_path,
+    )
 
 
 def open_variables(paths: List[str], encoding: str) -> Tuple[List[Any], Optional[str]]:

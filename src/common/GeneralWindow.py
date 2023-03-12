@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QMessageBox,
 )
-from common.Memory import Memory
+from src.common.Memory import Memory
 
 STYLES = [
     {

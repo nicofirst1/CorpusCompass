@@ -5,9 +5,10 @@ from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QToolTip, QLineEdit
+from qtpy import QtCore
 
 from src.annotation_fixer.af_utils import corpus_dict2text
-from src.common import GeneralWindow, Memory, AppLogger
+from src.common import GeneralWindow, Memory, AppLogger, save_postprocess
 from src.dataset_creator.DatasetThread import DatasetThread
 
 
@@ -45,6 +46,8 @@ class LogQTextEdit(QtWidgets.QTextEdit):
             self.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
             self.insertHtml(string)
             self.last_line = ""
+
+        self.update()
 
 
 def create_input_lineedit(label, default_value="", hover_help="", delay=500):
@@ -88,6 +91,7 @@ class DatasetCreator(GeneralWindow):
         self.dependent_variables = postprocess_data["dependent_variables"]
         self.speakers = postprocess_data["speakers"]
         self.worker_thread = None
+        self.worker_thread_started = False
 
         super().__init__(mem, "Dataset Creator")
         self.logger = AppLogger(mem, "dataset_creator.log")
@@ -134,6 +138,11 @@ class DatasetCreator(GeneralWindow):
         self.generate_dataset_button = QtWidgets.QPushButton("Generate Dataset")
         self.generate_dataset_button.clicked.connect(self.start_generate_dataset)
 
+        # Create "stop generation" button
+        self.stop_generation_button = QtWidgets.QPushButton("Stop Generation")
+        self.stop_generation_button.clicked.connect(self.stop_generation)
+        self.stop_generation_button.setEnabled(False)
+
         # Create non-editable log window
         self.log_window = LogQTextEdit(self)
         self.log_window.setAcceptRichText(True)
@@ -153,8 +162,27 @@ class DatasetCreator(GeneralWindow):
         layout.addWidget(self.previous_line_checkbox)
         layout.addLayout(ngram_lay)
         layout.addWidget(self.log_window)
-        layout.addWidget(self.generate_dataset_button)
+
+        start_stop_lay = QtWidgets.QHBoxLayout()
+        start_stop_lay.addWidget(self.generate_dataset_button)
+        start_stop_lay.addWidget(self.stop_generation_button)
+        layout.addLayout(start_stop_lay)
+
         self.setLayout(layout)
+
+    def stop_generation(self):
+        if self.worker_thread is None:
+            return
+
+        self.worker_thread.stop()
+        self.worker_thread = None
+        self.worker_thread_started = False
+
+        # clear log window
+        self.log_window.append("Generation stopped.")
+
+        self.stop_generation_button.setEnabled(False)
+        self.generate_dataset_button.setEnabled(True)
 
     def start_generate_dataset(self):
         if self.worker_thread is not None:
@@ -163,6 +191,8 @@ class DatasetCreator(GeneralWindow):
             )
             return
 
+        self.stop_generation_button.setEnabled(True)
+        self.generate_dataset_button.setEnabled(False)
         self.log_window.clear()
 
         # get inputs
@@ -194,16 +224,45 @@ class DatasetCreator(GeneralWindow):
         self.worker_thread.finished.connect(self.on_generate_dataset_finished)
         self.worker_thread.signal.connect(self.log_window.write)
         self.worker_thread.start()
+        self.worker_thread_started=True
 
     def on_generate_dataset_finished(self):
-        if isinstance(self.worker_thread.results, str):
-            QtWidgets.QMessageBox.warning(self, "Warning", self.worker_thread.results)
+        print("on_generate_dataset_finished called")
+        if not self.worker_thread_started:
+            return
+        # make qmessagebox not blocking
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+
+        if self.worker_thread is None:
+            pass
+        elif isinstance(self.worker_thread.results, str):
+            msg.setText(self.worker_thread.results)
+            msg.setWindowTitle("Warning")
+
         elif isinstance(self.worker_thread.results, Dict):
-            QtWidgets.QMessageBox.information(
-                self, "Information", "Dataset generated successfully."
-            )
+            msg.setText("Dataset generated successfully.")
+            msg.setWindowTitle("Success")
+            # save dataset
+            save_postprocess(self.worker_thread.results, self.mem)
+
+            # log where the dataset is saved
+            path_dict = self.mem.postprocess_paths
+            self.log_window.append("Dataset saved in: \n")
+
+            for key in path_dict:
+                self.log_window.append(key + ": " + path_dict[key])
+
+            self.log_window.ensureCursorVisible()
+
         else:
-            QtWidgets.QMessageBox.warning(
-                self, "Warning", "Failed to generate dataset."
-            )
+            msg.setText("Failed to generate dataset.")
+            msg.setWindowTitle("Warning")
+
         self.worker_thread = None
+        self.generate_dataset_button.setEnabled(True)
+        self.stop_generation_button.setEnabled(False)
+        self.worker_thread_started=False
+
+        msg.exec_()

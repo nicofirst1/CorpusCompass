@@ -2,7 +2,7 @@ from .AppLogger import AppLogger
 from .GeneralWindow import GeneralWindow
 from .Memory import Memory
 
-from .c_utils import multi_corpus_upload, open_postprocess, open_variables
+from .c_utils import multi_corpus_upload, load_postprocess, open_variables,save_postprocess
 
 __all__ = [
     "Memory",
@@ -10,6 +10,7 @@ __all__ = [
     "AppLogger",
     # c_utils
     "multi_corpus_upload",
-    "open_postprocess",
+    "load_postprocess",
     "open_variables",
+    "save_postprocess"
 ]
