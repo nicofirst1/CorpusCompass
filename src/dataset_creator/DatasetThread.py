@@ -404,9 +404,9 @@ def generate_dataset(
     df_encoded["context"] = context
 
     to_return = dict(
-        dataset=csv_file,
-        annotation_info=annotation_info,
-        missed_annotations=missing_annotations,
+        dataset=pd.DataFrame(data=csv_file[1:], columns=csv_file[0]),
+        annotation_info=pd.DataFrame(data=annotation_info[1:], columns=annotation_info[0]),
+        missed_annotations=pd.DataFrame(data=missing_annotations[1:], columns=missing_annotations[0]),
         binary_dataset=df_encoded,
     )
 

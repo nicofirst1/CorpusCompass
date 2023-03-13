@@ -4,6 +4,7 @@ import sys
 from collections import OrderedDict
 from typing import Dict, Any
 
+import pandas as pd
 from PySide6 import QtWidgets
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCursor
@@ -22,6 +23,7 @@ def create_input_lineedit(label, default_value="", hover_help="", delay=500):
 
     # Set tooltip with hover help text
     if hover_help:
+
         def show_tooltip():
             QToolTip.showText(
                 QCursor.pos(), hover_help, input_widget, input_widget.rect()
@@ -46,7 +48,6 @@ def create_input_lineedit(label, default_value="", hover_help="", delay=500):
 
 
 class DatasetCreator(GeneralWindow):
-
     def __init__(self, mem: Memory, preloaded: Dict[str, Any]):
         self.corpus_dict = OrderedDict(preloaded["corpus_text"])
         self.corpus_text = corpus_dict2text(self.corpus_dict)
@@ -110,16 +111,12 @@ class DatasetCreator(GeneralWindow):
         self.stop_generation_button.setEnabled(False)
 
         # add a "go to annotation fixer" button
-        self.finish_button = QtWidgets.QPushButton(
-            "Finish"
-        )
+        self.finish_button = QtWidgets.QPushButton("Finish")
         self.finish_button.clicked.connect(self.close)
         self.finish_button.setEnabled(False)
 
         # add a "open files" button
-        self.open_files_button = QtWidgets.QPushButton(
-            "Open Files"
-        )
+        self.open_files_button = QtWidgets.QPushButton("Open Files")
         self.open_files_button.clicked.connect(self.open_files)
         self.open_files_button.setEnabled(False)
 
@@ -261,6 +258,7 @@ class DatasetCreator(GeneralWindow):
     def close(self) -> bool:
         self.finished.emit()
         return super().close()
+
     def open_files(self):
         """Based on the system, open the files in the default program"""
         file_path = self.mem.postprocess_paths["dataset"]

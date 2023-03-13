@@ -26,10 +26,10 @@ class AnnotationFixer(GeneralWindow):
     ):
         self.corpus_dict = OrderedDict(preloaded_data["corpus_text"])
         self.corpus_text = corpus_dict2text(self.corpus_dict)
-        self.annotation_info_df = postprocess_data["annotation_info"]
-        self.missing_annotations_df = postprocess_data["missed_annotations"]
-        self.dataset_df = postprocess_data["dataset"]
-        self.binary_dataset_df = postprocess_data["binary_dataset"]
+        self.df_annotation_info = postprocess_data["annotation_info"]
+        self.df_missed_annotations = postprocess_data["missed_annotations"]
+        self.df_dataset = postprocess_data["dataset"]
+        self.df_binary_dataset = postprocess_data["binary_dataset"]
 
         self.independent_variables = preloaded_data["independent_variables"]
         self.dependent_variables = preloaded_data["dependent_variables"]
@@ -206,13 +206,13 @@ class AnnotationFixer(GeneralWindow):
         # save settings
         min_reps = self.mem.settings["minimum_repetitions"]
         # get the rows where 'annotated' is less than the minimum repetition
-        low_reps = self.annotation_info_df[
-            self.annotation_info_df["annotated"] <= min_reps
-        ]
+        low_reps = self.df_annotation_info[
+            self.df_annotation_info["annotated"] <= min_reps
+            ]
         self.saved_lists.append(low_reps)
 
         # save settings
-        self.saved_lists.append(self.missing_annotations_df)
+        self.saved_lists.append(self.df_missed_annotations)
 
         self.list_to_fix = self.saved_lists[index]
 
@@ -410,7 +410,7 @@ class AnnotationFixer(GeneralWindow):
 
             # find in dataset_df the row where the token is the same
             # and get the context
-            matches = self.dataset_df[self.dataset_df["token"] == token]
+            matches = self.df_dataset[self.df_dataset["token"] == token]
 
             # drop columns that are all nan
             matches = matches.dropna(axis=1, how="all")
@@ -566,12 +566,12 @@ class AnnotationFixer(GeneralWindow):
 
         # save the annotation info
 
-        self.annotation_info_df.to_csv(
+        self.df_annotation_info.to_csv(
             self.mem.postprocess_paths["annotation_info"],
             index=False,
             sep=self.mem.settings["separator"],
         )
-        self.missing_annotations_df.to_csv(
+        self.df_missed_annotations.to_csv(
             self.mem.postprocess_paths["missed_annotations"],
             index=False,
             sep=self.mem.settings["separator"],
@@ -655,8 +655,8 @@ class History:
 
         self.save_attributes = [
             "corpus_dict",
-            "annotation_info_df",
-            "missing_annotations_df",
+            "df_annotation_info",
+            "df_missed_annotations",
             "list_to_fix",
             "general_index",
             "queue",

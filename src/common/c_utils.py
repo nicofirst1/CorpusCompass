@@ -1,4 +1,3 @@
-import csv
 import json
 import os
 import re
@@ -125,31 +124,29 @@ def save_postprocess(results: Dict, mem: Memory):
     dataset_path = os.path.join(output_dir, "dataset.csv")
     binary_dataset_path = os.path.join(output_dir, "binary_dataset.csv")
     annotation_info_path = os.path.join(output_dir, "annotation_info.csv")
-    not_annotated_path = os.path.join(output_dir, "missed_annotations.csv")
+    missed_annotation_path = os.path.join(output_dir, "missed_annotations.csv")
 
     # write the csv
-    with open(dataset_path, "w", newline="", encoding="utf16") as f:
-        writer = csv.writer(f, delimiter=separator)
-        writer.writerows(results["dataset"])
-
-    with open(annotation_info_path, "w", newline="", encoding="utf16") as f:
-        writer = csv.writer(f, delimiter=separator)
-        writer.writerow(results["annotation_info"])
-
-    with open(not_annotated_path, "w", newline="", encoding="utf16") as f:
-        writer = csv.writer(f, delimiter=separator)
-        writer.writerow(results["missed_annotations"])
-
-    results["binary_dataset"].to_csv(binary_dataset_path, index=False)
+    results["dataset"].to_csv(
+        dataset_path, index=False, sep=separator, encoding="utf16"
+    )
+    results["annotation_info"].to_csv(
+        annotation_info_path, index=False, sep=separator, encoding="utf16"
+    )
+    results["missed_annotations"].to_csv(
+        missed_annotation_path, index=False, sep=separator, encoding="utf16"
+    )
+    results["binary_dataset"].to_csv(
+        binary_dataset_path, index=False, sep=separator, encoding="utf16"
+    )
 
     # save the new paths in the memory
     mem.postprocess_paths = dict(
         dataset=dataset_path,
         binary_dataset=binary_dataset_path,
         annotation_info=annotation_info_path,
-        missed_annotations=not_annotated_path,
+        missed_annotations=missed_annotation_path,
     )
-
 
 
 def open_variables(paths: List[str], encoding: str) -> Tuple[List[Any], Optional[str]]:

@@ -2,7 +2,7 @@ import sys
 
 from PySide6 import QtWidgets
 
-from common import Memory
+from src.common import Memory
 from src.other_windows import Main
 
 
