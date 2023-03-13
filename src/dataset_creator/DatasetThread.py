@@ -10,7 +10,7 @@ import pandas as pd
 from PySide6 import QtCore
 from tqdm import tqdm
 
-from src.dataset_creator.QThreadLogger import QthreadLogger
+from src.common import QTextLogger
 from src.dataset_creator.dc_utils import (
     preprocess_corpus,
     get_name,
@@ -23,7 +23,7 @@ from src.dataset_creator.dc_utils import (
 
 def generate_dataset(
     inputs: Tuple,
-    logger: QthreadLogger,
+    logger: QTextLogger,
     corpus_dict: Dict,
     speakers: Dict,
     independent_variables: Dict,
@@ -427,7 +427,6 @@ def generate_dataset(
 
 
 class DatasetThread(QtCore.QThread):
-    signal = QtCore.Signal(str)
 
     def __init__(
         self, inputs, corpus_dict, independent_variables, dependent_variables, speakers
@@ -439,7 +438,7 @@ class DatasetThread(QtCore.QThread):
         self.dependent_variables = dependent_variables
         self.speakers = speakers
         self.inputs = inputs
-        self.logger = QthreadLogger(self.signal)
+        self.logger = QTextLogger()
         # define the flag to stop the thread
         self.stop_event = threading.Event()
         self.results = None

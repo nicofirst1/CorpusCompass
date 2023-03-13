@@ -18,16 +18,21 @@ from src.other_windows import Settings
 
 
 class AnnotationFixer(GeneralWindow):
-    def __init__(self, mem: Memory, postprocess_data: Dict[str, Any]):
-        self.corpus_dict = OrderedDict(postprocess_data["corpus_text"])
+    def __init__(
+        self,
+        mem: Memory,
+        preloaded_data: Dict[str, Any],
+        postprocess_data: Dict[str, Any],
+    ):
+        self.corpus_dict = OrderedDict(preloaded_data["corpus_text"])
         self.corpus_text = corpus_dict2text(self.corpus_dict)
         self.annotation_info_df = postprocess_data["annotation_info"]
         self.missing_annotations_df = postprocess_data["missed_annotations"]
         self.dataset_df = postprocess_data["dataset"]
         self.binary_dataset_df = postprocess_data["binary_dataset"]
 
-        self.independent_variables = postprocess_data["independent_variables"]
-        self.dependent_variables = postprocess_data["dependent_variables"]
+        self.independent_variables = preloaded_data["independent_variables"]
+        self.dependent_variables = preloaded_data["dependent_variables"]
 
         self.dependent_variables = remove_independent_vars(
             self.dependent_variables, self.independent_variables

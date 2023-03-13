@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QMessageBox,
 )
+
 from src.common.Memory import Memory
 
 STYLES = [
@@ -80,6 +81,8 @@ STYLES = [
 
 
 class GeneralWindow(QtWidgets.QWidget):
+    finished = QtCore.Signal()
+
     def __init__(self, mem: Memory, title: Optional[str] = ""):
         super().__init__()
 

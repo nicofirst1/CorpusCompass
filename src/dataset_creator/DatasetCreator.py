@@ -1,52 +1,17 @@
+import os
+import subprocess
+import sys
 from collections import OrderedDict
 from typing import Dict, Any
 
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtWidgets
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QToolTip, QLineEdit
 
 from src.annotation_fixer.af_utils import corpus_dict2text
-from src.common import GeneralWindow, Memory, AppLogger, save_postprocess
+from src.common import GeneralWindow, Memory, AppLogger, save_postprocess, QTextEditLog
 from src.dataset_creator.DatasetThread import DatasetThread
-
-
-class LogQTextEdit(QtWidgets.QTextEdit):
-    """
-    used to write logs to textare, implements rewriter for string starting with '\r'
-    """
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.last_line = ""
-
-    def write(self, string):
-        if "\r" in string:
-            if self.last_line:
-                # If there's a carriage return, move the cursor to the beginning of the line
-                self.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-                self.moveCursor(
-                    QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.MoveAnchor
-                )
-            # Replace the last line with the new one (excluding the carriage return)
-            self.last_line = string.split("\r")[-1]
-            self.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-            self.moveCursor(QtGui.QTextCursor.StartOfLine, QtGui.QTextCursor.KeepAnchor)
-            self.insertPlainText(self.last_line)
-
-        else:
-            if self.last_line:
-                # put a new line  with br at the start of the string
-                string = f"<br>{string}"
-
-            # substitute the new line with br
-            string = string.replace("\n", "<br>")
-            # If there's no carriage return, just append the string to the text edit
-            self.moveCursor(QtGui.QTextCursor.End, QtGui.QTextCursor.MoveAnchor)
-            self.insertHtml(string)
-            self.last_line = ""
-
-        self.update()
 
 
 def create_input_lineedit(label, default_value="", hover_help="", delay=500):
@@ -57,7 +22,6 @@ def create_input_lineedit(label, default_value="", hover_help="", delay=500):
 
     # Set tooltip with hover help text
     if hover_help:
-
         def show_tooltip():
             QToolTip.showText(
                 QCursor.pos(), hover_help, input_widget, input_widget.rect()
@@ -82,13 +46,16 @@ def create_input_lineedit(label, default_value="", hover_help="", delay=500):
 
 
 class DatasetCreator(GeneralWindow):
-    def __init__(self, mem: Memory, postprocess_data: Dict[str, Any]):
-        self.corpus_dict = OrderedDict(postprocess_data["corpus_text"])
-        self.corpus_text = corpus_dict2text(self.corpus_dict)
 
-        self.independent_variables = postprocess_data["independent_variables"]
-        self.dependent_variables = postprocess_data["dependent_variables"]
-        self.speakers = postprocess_data["speakers"]
+    def __init__(self, mem: Memory, preloaded: Dict[str, Any]):
+        self.corpus_dict = OrderedDict(preloaded["corpus_text"])
+        self.corpus_text = corpus_dict2text(self.corpus_dict)
+        self.postprocessed = None
+
+        self.independent_variables = preloaded["independent_variables"]
+        self.dependent_variables = preloaded["dependent_variables"]
+        self.speakers = preloaded["speakers"]
+
         self.worker_thread = None
         self.worker_thread_started = False
 
@@ -143,21 +110,21 @@ class DatasetCreator(GeneralWindow):
         self.stop_generation_button.setEnabled(False)
 
         # add a "go to annotation fixer" button
-        self.go_to_annotation_fixer_button = QtWidgets.QPushButton(
-            "Go to Annotation Fixer"
+        self.finish_button = QtWidgets.QPushButton(
+            "Finish"
         )
-        self.go_to_annotation_fixer_button.clicked.connect(self.go_to_next)
-        self.go_to_annotation_fixer_button.setEnabled(False)
+        self.finish_button.clicked.connect(self.close)
+        self.finish_button.setEnabled(False)
 
-        # add a "go to dataset analysis" button
-        self.go_to_dataset_analysis_button = QtWidgets.QPushButton(
-            "Go to Dataset Analysis"
+        # add a "open files" button
+        self.open_files_button = QtWidgets.QPushButton(
+            "Open Files"
         )
-        self.go_to_dataset_analysis_button.clicked.connect(self.go_to_next)
-        self.go_to_dataset_analysis_button.setEnabled(False)
+        self.open_files_button.clicked.connect(self.open_files)
+        self.open_files_button.setEnabled(False)
 
         # Create non-editable log window
-        self.log_window = LogQTextEdit(self)
+        self.log_window = QTextEditLog(self)
         self.log_window.setAcceptRichText(True)
         self.log_window.setReadOnly(True)
 
@@ -183,8 +150,8 @@ class DatasetCreator(GeneralWindow):
         layout.addLayout(start_stop_lay)
 
         next_lay = QtWidgets.QHBoxLayout()
-        next_lay.addWidget(self.go_to_annotation_fixer_button)
-        next_lay.addWidget(self.go_to_dataset_analysis_button)
+        next_lay.addWidget(self.finish_button)
+        next_lay.addWidget(self.open_files_button)
         layout.addLayout(next_lay)
 
         self.setLayout(layout)
@@ -241,7 +208,7 @@ class DatasetCreator(GeneralWindow):
         )
 
         self.worker_thread.finished.connect(self.on_generate_dataset_finished)
-        self.worker_thread.signal.connect(self.log_window.write)
+        self.log_window.connect_signal(self.worker_thread.logger.signal)
         self.worker_thread.start()
         self.worker_thread_started = True
 
@@ -265,6 +232,7 @@ class DatasetCreator(GeneralWindow):
             msg.setWindowTitle("Success")
             # save dataset
             save_postprocess(self.worker_thread.results, self.mem)
+            self.postprocessed = self.worker_thread.results
 
             # log where the dataset is saved
             path_dict = self.mem.postprocess_paths
@@ -276,8 +244,8 @@ class DatasetCreator(GeneralWindow):
             self.log_window.ensureCursorVisible()
 
             # enable buttons
-            self.go_to_annotation_fixer_button.setEnabled(True)
-            self.go_to_dataset_analysis_button.setEnabled(True)
+            self.finish_button.setEnabled(True)
+            self.open_files_button.setEnabled(True)
 
         else:
             msg.setText("Failed to generate dataset.")
@@ -290,13 +258,16 @@ class DatasetCreator(GeneralWindow):
 
         msg.exec_()
 
-    def go_to_next(self):
-        # get sender
-        sender = self.sender()
-        if sender == self.go_to_annotation_fixer_button:
-            self.next_page = "annotation_fixer"
-        elif sender == self.go_to_dataset_analysis_button:
-            self.next_page = "dataset_analysis"
-
-        #close window
-        self.close()
+    def close(self) -> bool:
+        self.finished.emit()
+        return super().close()
+    def open_files(self):
+        """Based on the system, open the files in the default program"""
+        file_path = self.mem.postprocess_paths["dataset"]
+        file_dir = os.path.dirname(file_path)
+        if sys.platform == "win32":
+            os.startfile(file_dir)
+        elif sys.platform == "darwin":
+            subprocess.call(["open", file_dir])
+        else:
+            subprocess.call(["xdg-open", file_dir])

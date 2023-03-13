@@ -1,6 +1,6 @@
 import os
 
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtCore
 from PySide6.QtWidgets import QFileDialog, QComboBox, QScrollArea
 from src.common import (
     GeneralWindow,
@@ -12,11 +12,13 @@ from src.common import (
 
 
 class LoadFiles(GeneralWindow):
+
+    finished = QtCore.Signal()
     def __init__(self, mem: Memory):
         self.corpus_files = None
         self.corpus_text = {}
-        self.annotation_info = None
-        self.annotation_info_csv = {}
+        self.postprocess_files = None
+        self.postprocess_data = {}
         self.message = None
         self.variables_files = None
         self.variables_csv = {}
@@ -28,8 +30,8 @@ class LoadFiles(GeneralWindow):
 
         self.separator = mem.lfp.get("separator") or ";"
 
-        self.has_finished = False
-        self.next_window = None
+        # what is loaded (0: nothing, 1: [corpus, variables], 2: [corpus, variables, post-process])
+        self.what_is_loaded = 0
 
         super().__init__(mem, "Load Files")
 
@@ -100,9 +102,9 @@ class LoadFiles(GeneralWindow):
         )
         postprocess = (
             "- Post-process files loaded:\n\t--"
-            + "\n\t--".join(self.annotation_info)
+            + "\n\t--".join(self.postprocess_files)
             + "\n"
-            if self.annotation_info
+            if self.postprocess_files
             else "Post-process files not uploaded"
         )
         variables = (
@@ -116,8 +118,8 @@ class LoadFiles(GeneralWindow):
         self.message.setText(
             f"Please upload corpus and annotation:\n"
             f"- {corpus}\n"
-            f"- {postprocess}\n"
             f"- {variables}\n"
+            f"- {postprocess}\n"
         )
 
     def load_corpus(self):
@@ -130,8 +132,10 @@ class LoadFiles(GeneralWindow):
         )[0]
 
         if self.corpus_files:
+            # save directory
             self.mem.lfp["corpus_dir"] = self.corpus_files[0].rsplit("/", 1)[0]
 
+            # load corpus
             corpus_text = {p: open(p, "rb").read() for p in self.corpus_files}
             self.corpus_text, errors = multi_corpus_upload(corpus_text, self.encoding)
 
@@ -208,8 +212,8 @@ class LoadFiles(GeneralWindow):
             self.corpus_message.setStyleSheet("color: red")
             return
 
-        self.annotation_info_csv = postprocess_files
-        self.annotation_info = found
+        self.postprocess_data = postprocess_files
+        self.postprocess_files = found
         self.mem.postprocess_paths = {
             os.path.basename(f).split(".")[0]: f for f in found
         }
@@ -282,16 +286,15 @@ class LoadFiles(GeneralWindow):
             self.enable_finish()
 
     def enable_finish(self):
-        if self.corpus_files and self.annotation_info_csv and self.variables_csv:
+        if self.corpus_files and self.postprocess_data and self.variables_csv:
             self.finish_button.setEnabled(True)
+            self.what_is_loaded = 2
 
-        if self.corpus_files and self.variables_csv:
+        elif self.corpus_files and self.variables_csv:
             self.finish_button.setEnabled(True)
+            self.what_is_loaded = 1
 
     def finish(self):
-        # get the button that was clicked
-        button = self.sender()
-
-        self.has_finished = True
+        self.finished.emit()
         # close window
         self.close()
