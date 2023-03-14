@@ -57,7 +57,7 @@ class DataAnalyzer(GeneralWindow):
         (
             self.poissont_regression_analysis_checkbox,
             poissont_regression_analysis_lay,
-        ) = create_input(self, "poissont_regression_analysis", self.mem)
+        ) = create_input(self, "poisson_regression_analysis", self.mem)
 
         # add logging text area
         self.logging_area = QTextEditLog(self)
@@ -65,6 +65,16 @@ class DataAnalyzer(GeneralWindow):
         # add a button to start analysis
         self.start_analysis_button = QtWidgets.QPushButton("Start Analysis")
         self.start_analysis_button.clicked.connect(self.start_analysis)
+
+        # add a button to stop analysis
+        self.stop_analysis_button = QtWidgets.QPushButton("Stop Analysis")
+        self.stop_analysis_button.clicked.connect(self.stop_analysis)
+        self.stop_analysis_button.setEnabled(False)
+
+        # add layout for start and stop analysis button
+        start_stop_analysis_lay = QtWidgets.QHBoxLayout()
+        start_stop_analysis_lay.addWidget(self.start_analysis_button)
+        start_stop_analysis_lay.addWidget(self.stop_analysis_button)
 
         # add layout
         layout = QtWidgets.QVBoxLayout()
@@ -75,7 +85,7 @@ class DataAnalyzer(GeneralWindow):
         layout.addLayout(variable_analysis_lay)
         layout.addLayout(poissont_regression_analysis_lay)
         layout.addWidget(self.logging_area)
-        layout.addWidget(self.start_analysis_button)
+        layout.addLayout(start_stop_analysis_lay)
 
         self.setLayout(layout)
 
@@ -85,8 +95,6 @@ class DataAnalyzer(GeneralWindow):
             shutil.rmtree(self.mem.analysis_dir)
 
         os.mkdir(self.mem.analysis_dir)
-        for k, p in self.mem.analysis_paths.items():
-            os.mkdir(p)
 
     def start_analysis(self):
         # check if analysis is already running
@@ -113,6 +121,7 @@ class DataAnalyzer(GeneralWindow):
 
         # create analysis dir
         self.make_dirs()
+        self.logging_area.clear()
 
         # create a copy of the inputs
         binary_dataset = self.df_binary_dataset.copy()
@@ -132,5 +141,18 @@ class DataAnalyzer(GeneralWindow):
         self.logging_area.connect_signal(self.worker_thread.logger.signal)
         self.worker_thread.run()
 
+        self.stop_analysis_button.setEnabled(True)
+        self.start_analysis_button.setEnabled(False)
+
+    def stop_analysis(self):
+        if self.worker_thread is not None:
+            self.worker_thread.terminate()
+            self.worker_thread = None
+            self.stop_analysis_button.setEnabled(False)
+            self.start_analysis_button.setEnabled(True)
+
     def analysis_finished(self):
         self.worker_thread = None
+
+        self.stop_analysis_button.setEnabled(False)
+        self.start_analysis_button.setEnabled(True)

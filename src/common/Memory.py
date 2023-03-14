@@ -167,7 +167,7 @@ class Memory(QtCore.QObject):
             "kmean_max_clusters": 50,
             "dependent_variable_analysis": True,
             "variable_analysis": True,
-            "poissont_regression_analysis": True,
+            "poisson_regression_analysis": True,
         }
 
         self.settings_metadata = {
@@ -244,7 +244,7 @@ class Memory(QtCore.QObject):
                 "Perform variable analysis",
                 [True, False],
             ),
-            "poissont_regression_analysis": (
+            "poisson_regression_analysis": (
                 "Perform poisson regression analysis",
                 [True, False],
             ),
@@ -278,7 +278,7 @@ class Memory(QtCore.QObject):
                 "kmean_max_clusters",
                 "dependent_variable_analysis",
                 "variable_analysis",
-                "poissont_regression_analysis",
+                "poisson_regression_analysis",
             ],
         )
 

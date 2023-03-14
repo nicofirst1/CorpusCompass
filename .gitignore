@@ -24,3 +24,4 @@ dataset_analyzer/analysis_results/
 src/.corpus_compass/
 
 src/analysis/
+!/src/postprocessed/

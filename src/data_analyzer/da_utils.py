@@ -80,8 +80,14 @@ def kmeans_analysis(
         clusters[i] = list(set(clusters[i]))
 
     # save the clusters
+    cluster_path = f"{custom_path}/clusters"
+
+    # create the output directory if it does not exist
+    if not os.path.exists(cluster_path):
+        os.mkdir(cluster_path)
+
     for i in range(num_clusters):
-        with open(f"{custom_path}/cluster_{i}.txt", "w") as f:
+        with open(f"{cluster_path}/cluster_{i}.txt", "w") as f:
             f.write("\n".join(clusters[i]))
 
     # plot the clusters in 2D using PCA add legend with color and cluster number
@@ -321,11 +327,6 @@ if __name__ == "__main__":
     with open(args.custom_paths, "r") as f:
         custom_paths = json.load(f)
 
-    a = 1
-
-    # print the first 5 rows
-    print("First 5 rows of the csv file:")
-    print(binary_df.head())
 
     # get the tokens and drop them from the dataframe
     tokens = binary_df["token"]
@@ -334,6 +335,7 @@ if __name__ == "__main__":
 
     if setting["kmean_analysis"]:
         print("Starting cluster analysis...")
+        os.makedirs(custom_paths["kmean"], exist_ok=True)
         kmeans_analysis(
             binary_df,
             tokens,
@@ -343,21 +345,32 @@ if __name__ == "__main__":
         )
         print("Done!")
 
-    exit(0)
-
     # analyze the data
-    print("Analyzing the variables...")
-    variable_analysis(df)
-    print("Done!")
+    if setting["variable_analysis"]:
+        print("Analyzing the variables...")
+        os.makedirs(custom_paths["variable_analysis"], exist_ok=True)
+        variable_analysis(binary_df, custom_paths["variable_analysis"])
+        print("Done!")
 
-    # analyze the with regression
-    if independent_variables or args.speaker:
+    if setting["poisson_regression_analysis"]:
         print("Analyzing the variables with regression...")
-        poisson_regression(df, independent_variables, args.speaker)
+        os.makedirs(custom_paths["poisson_regression"], exist_ok=True)
+        poisson_regression(
+            binary_df,
+            independent_variables,
+            speaker,
+            custom_paths["poisson_regression"],
+        )
         print("Done!")
 
     # analyze the dependent variables
-    if independent_variables or args.speaker:
+    if setting["dependent_variable_analysis"]:
         print("Analyzing the dependent variables...")
-        dependent_variable_count(df, independent_variables, args.speaker)
+        os.makedirs(custom_paths["dependent_variable_analysis"], exist_ok=True)
+        dependent_variable_count(
+            binary_df,
+            dependent_variables,
+            speaker,
+            custom_paths["dependent_variable_analysis"],
+        )
         print("Done!")
