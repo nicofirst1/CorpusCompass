@@ -4,14 +4,20 @@ import sys
 from collections import OrderedDict
 from typing import Dict, Any
 
-import pandas as pd
 from PySide6 import QtWidgets
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QToolTip, QLineEdit
 
 from src.annotation_fixer.af_utils import corpus_dict2text
-from src.common import GeneralWindow, Memory, AppLogger, save_postprocess, QTextEditLog
+from src.common import (
+    GeneralWindow,
+    Memory,
+    AppLogger,
+    save_postprocess,
+    QTextEditLog,
+    create_input,
+)
 from src.dataset_creator.DatasetThread import DatasetThread
 
 
@@ -66,29 +72,22 @@ class DatasetCreator(GeneralWindow):
     def create_widgets(self):
         # Create QLineEdit widgets with hover help
         square_regex_help = "Regex to find the complete annotation rule."
-        self.square_regex_input, square_regex_lay = create_input_lineedit(
-            "Square regex: ",
-            default_value=r"(\[\$[\S ]*?\])",
-            hover_help=square_regex_help,
+        name = "annotation_regex"
+        self.square_regex_input, square_regex_lay = create_input(
+            self, "annotation_regex", self.mem
         )
 
-        feat_regex_help = "Regex to find the content of an annotation."
-        self.feat_regex_input, feat_regex_lay = create_input_lineedit(
-            "Feat regex: ", default_value=r"\[\$([\S ]*?)\]", hover_help=feat_regex_help
+        self.feat_regex_input, feat_regex_lay = create_input(
+            self, "feat_regex", self.mem
         )
 
-        name_regex_help = "Regex to univocally find the speaker name in the paragraph."
-        self.name_regex_input, name_regex_lay = create_input_lineedit(
-            "Name regex: ",
-            default_value=r"(^[A-z0-9?._]+) ",
-            hover_help=name_regex_help,
+        self.name_regex_input, name_regex_lay = create_input(
+            self, "name_regex", self.mem
         )
 
-        # Create QCheckBox widget for previous_line
-        self.previous_line_checkbox = QtWidgets.QCheckBox(
-            "Include previous paragraph in final output", self
+        self.previous_line_checkbox, previous_line_lay = create_input(
+            self, "previous_line", self.mem
         )
-        self.previous_line_checkbox.setChecked(False)
 
         # Create QSpinBox widgets for ngram_params
         self.ngram_prev_input = QtWidgets.QSpinBox(self)
@@ -136,7 +135,7 @@ class DatasetCreator(GeneralWindow):
         layout.addLayout(square_regex_lay)
         layout.addLayout(feat_regex_lay)
         layout.addLayout(name_regex_lay)
-        layout.addWidget(self.previous_line_checkbox)
+        layout.addLayout(previous_line_lay)
         layout.addLayout(ngram_lay)
         layout.addWidget(self.log_window)
 

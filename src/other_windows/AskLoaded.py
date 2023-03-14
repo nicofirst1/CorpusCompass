@@ -15,9 +15,9 @@ class AskLoading(GeneralWindow):
         self.load = False
 
     def create_widgets(self):
-        self.message = QtWidgets.QLabel(
-            "Found loaded files from previous session. Do you want to use them?"
-        )
+        self.message = QtWidgets.QLabel()
+        self.load_message()
+
         self.message.setAlignment(QtCore.Qt.AlignCenter)
 
         self.yes = QtWidgets.QPushButton("Yes")
@@ -33,6 +33,11 @@ class AskLoading(GeneralWindow):
         layout.addWidget(self.no)
 
         self.setLayout(layout)
+
+    def load_message(self):
+        msg = "Found loaded files from previous session. Do you want to use them?"
+
+        self.message.setText(msg)
 
     def conclude(self):
         # get sender

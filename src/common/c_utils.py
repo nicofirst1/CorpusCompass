@@ -1,9 +1,10 @@
 import json
 import os
 import re
-from typing import Dict, Optional, Tuple, List, Any
+from typing import Dict, Optional, Tuple, List, Any, Union
 
 import pandas as pd
+from PySide6 import QtWidgets, QtGui, QtCore
 
 from src.common.Memory import Memory
 
@@ -149,7 +150,9 @@ def save_postprocess(results: Dict, mem: Memory):
     )
 
 
-def open_variables(paths: List[str], encoding: str) -> Tuple[List[Any], Optional[str]]:
+def open_variables(
+    paths: List[str], encoding: str
+) -> Union[Tuple[Dict[str, Any], str], Tuple[Dict[str, Any], None]]:
     """
     Open the file and return the content
     :param paths: list of paths
@@ -179,3 +182,66 @@ def open_variables(paths: List[str], encoding: str) -> Tuple[List[Any], Optional
             return content, error
 
     return content, None
+
+
+def create_input(
+    parent, name: str, mem: Memory, delay: int = 2
+) -> Tuple[QtWidgets.QWidget, QtWidgets.QHBoxLayout]:
+    """
+    Create a widget for a setting
+    :param parent: the parent widget
+    :param name: the name of the setting
+    :param mem: the memory
+    :param delay: the delay for the timer
+    """
+    description, choices = mem.settings_metadata[name]
+    value = mem.settings.get(name, None)
+    save_setting_method = mem.save_setting(parent,name)
+
+    # make horizontal layout
+    layout = QtWidgets.QHBoxLayout()
+
+    label = QtWidgets.QLabel(name.capitalize() + ":")
+    label.setAlignment(QtCore.Qt.AlignRight)
+
+    if len(choices) > 1:
+        widget = QtWidgets.QComboBox()
+        widget.setObjectName(name)
+        widget.addItems([str(x) for x in choices])
+        widget.setCurrentIndex(choices.index(value))
+
+        # Find the width of the largest item text
+        width = 0
+        font = widget.font()
+        for item in choices:
+            fm = QtGui.QFontMetrics(font)
+            width = max(width, fm.horizontalAdvance(str(item)))
+
+        # Set the minimum width of the QComboBox
+        widget.setMinimumWidth(width + 50)
+
+        widget.currentIndexChanged.connect(save_setting_method)
+    elif len(choices) > 0:
+        widget = QtWidgets.QCheckBox(name, parent)
+        widget.setObjectName(name)
+        widget.setChecked(mem.settings[name])
+        widget.stateChanged.connect(save_setting_method)
+
+    else:
+        widget = QtWidgets.QLineEdit()
+        widget.setObjectName(name)
+        widget.setPlaceholderText("Enter a value...")
+        widget.setText(str(value))
+        widget.editingFinished.connect(save_setting_method)
+
+    timer = QtCore.QTimer(parent)
+    timer.setSingleShot(True)
+    timer.timeout.connect(lambda: widget.setToolTip(description))
+    widget.enterEvent = lambda _: timer.start(delay)
+    widget.leaveEvent = lambda _: timer.stop()
+
+    # add the label and the widget to the layout
+    layout.addWidget(label)
+    layout.addWidget(widget)
+
+    return widget, layout

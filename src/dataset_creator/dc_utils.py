@@ -2,11 +2,9 @@ import re
 import string
 from collections import Counter
 from copy import copy
-from typing import Tuple, List, Dict, Optional
+from typing import Tuple, List, Optional
 
 import nltk
-
-from dataset_analyzer.colors import *
 
 nltk.download("punkt")
 
@@ -50,7 +48,11 @@ def preprocess_corpus(corpus_text, path, name_regex, logger):
 
 
 def check_correct_annotations(
-    annotations: List[re.Match], corpus: str, corpus_path: str, verbose: bool = True
+    annotations: List[re.Match],
+    corpus: str,
+    corpus_path: str,
+    logger,
+    verbose: bool = True,
 ) -> Tuple[List[str], List[Tuple[str, str]]]:
     """
     Check if the annotations are correct
@@ -77,8 +79,8 @@ def check_correct_annotations(
 
     def custom_print(*args, **kwargs):
         if verbose:
-            error(f"\nError in the corpus {corpus_path}: ")
-            error(*args, **kwargs)
+            logger.error(f"\nError in the corpus {corpus_path}: ")
+            logger.error(*args, **kwargs)
 
     ngram_params = (+50, 50)
     new_annotations = []
@@ -113,7 +115,7 @@ def check_correct_annotations(
     return new_annotations, incorrect_annotations
 
 
-def remove_features(corpus, square_regex):
+def remove_features(corpus, square_regex, logger):
     """
     Remove the features from the corpus
     """
@@ -125,7 +127,7 @@ def remove_features(corpus, square_regex):
             text = w.rsplit(".", 1)[1][:-1] + " "
             corpus = corpus.replace(w, text)
         except IndexError:
-            error(
+            logger.error(
                 f"I found an error for the tag '{w}'. Maybe it does not have a point in it?\n"
                 f"Please check the tag and try again."
             )
@@ -176,71 +178,6 @@ def get_ngram(
     result, _ = remove_features(result, square_regex)
 
     return result
-
-
-def multi_corpus_upload(
-    corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16"
-) -> Dict[str, str]:
-    """
-    Upload multiple corpus
-    """
-
-    alternative_encodings = [encoding] + [
-        "utf-8",
-        "utf-16",
-        "latin-1",
-        "ascii",
-        "cp1252",
-        "cp1250",
-        "cp1251",
-        "cp1253",
-    ]
-
-    def decode(to_decode) -> str:
-        idx = 0
-        dec = ""
-        success = False
-        while idx < len(alternative_encodings):
-            encoding = alternative_encodings[idx]
-
-            if idx > 0:
-                info(f"Trying with the encoding {encoding}.")
-
-            try:
-                dec = to_decode.decode(encoding) + "\n"
-
-                if " " not in dec:
-                    warning(
-                        f"The corpus {k} has been read with the encoding {encoding}, but it seems that it did not work."
-                    )
-                    idx += 1
-                    continue
-
-            except UnicodeDecodeError as e:
-                warning(
-                    f"Could not decode the corpus {k} with the encoding {encoding}.\n"
-                    f"The error is: {e}\n"
-                )
-                idx += 1
-                continue
-            success = True
-            break
-
-        if not success:
-            raise ValueError(
-                f"Could not decode the corpus {k} with any of the encodings {alternative_encodings}.\n"
-                f"Please check the encoding of the corpus and try again."
-            )
-        else:
-            info(f"The corpus {k} has been read with the encoding {encoding}.")
-        return dec
-
-    corpus = {}
-
-    for k, v in corpus_list.items():
-        corpus[k] = decode(v)
-
-    return corpus
 
 
 def split_paragraphs(corpus: str) -> List[str]:

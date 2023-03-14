@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 
-from src.common import GeneralWindow, Memory
+from src.common import GeneralWindow, Memory, create_input
 
 
 class Settings(GeneralWindow):
@@ -13,10 +13,13 @@ class Settings(GeneralWindow):
         form_layout = QtWidgets.QFormLayout()
         form_layout.setAlignment(QtCore.Qt.AlignCenter)
 
-        for name, setting in self.mem.settings.items():
-            label = QtWidgets.QLabel(name.capitalize() + ":")
-            label.setAlignment(QtCore.Qt.AlignRight)
-            form_layout.addRow(label, self.create_input(name, setting))
+        for group, members in self.mem.setting_groups.items():
+            group_label = QtWidgets.QLabel(group)
+            group_label.setFont(QtGui.QFont("Arial", 12, QtGui.QFont.Bold))
+            form_layout.addRow(group_label)
+            for name in members:
+                input_, lay = create_input(self, name, self.mem)
+                form_layout.addRow(lay)
 
         layout = QtWidgets.QVBoxLayout()
         layout.setAlignment(QtCore.Qt.AlignCenter)
@@ -28,70 +31,5 @@ class Settings(GeneralWindow):
 
         self.setLayout(layout)
 
-    def create_input(self, name, setting):
-        metadata = self.mem.settings_metadata[name]
-        description, choices = metadata
-
-        if len(choices) > 0:
-            widget = QtWidgets.QComboBox()
-            widget.setObjectName(name)
-            widget.addItems([str(x) for x in choices])
-            widget.setCurrentIndex(choices.index(setting))
-
-            # Find the width of the largest item text
-            width = 0
-            font = widget.font()
-            for item in choices:
-                fm = QtGui.QFontMetrics(font)
-                width = max(width, fm.horizontalAdvance(str(item)))
-
-            # Set the minimum width of the QComboBox
-            widget.setMinimumWidth(width + 50)
-
-            widget.currentIndexChanged.connect(self.save_setting)
-        else:
-            widget = QtWidgets.QLineEdit()
-            widget.setObjectName(name)
-            widget.setPlaceholderText("Enter a value...")
-            widget.setText(str(setting))
-            widget.editingFinished.connect(self.save_setting)
-
-        timer = QtCore.QTimer(self)
-        timer.setSingleShot(True)
-        timer.timeout.connect(lambda: widget.setToolTip(description))
-        widget.enterEvent = lambda _: timer.start(2)
-        widget.leaveEvent = lambda _: timer.stop()
-
-        return widget
-
-    def save_setting(self, name=None):
-        if name is None or not isinstance(name, str):
-            sender = self.sender()
-            name = sender.objectName()
-
-        metadata = self.mem.settings_metadata[name]
-        description, choices = metadata
-
-        if len(choices) > 0:
-            val = self.findChild(QtWidgets.QComboBox, name).currentText()
-        else:
-            val = self.findChild(QtWidgets.QLineEdit, name).text()
-
-        # cast to type
-        old_val = self.mem.settings[name]
-        t = type(old_val)
-
-        if isinstance(old_val, tuple) or isinstance(old_val, list):
-            val = eval(val)
-        else:
-            val = t(val)
-
-        self.mem.settings[name] = val
-        self.set_style()
-        self.settingsChanged.emit()
-
     def accept_settings(self):
-        for name, _ in self.mem.settings.items():
-            self.save_setting(name)
-
         self.close()

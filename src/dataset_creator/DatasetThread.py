@@ -133,7 +133,7 @@ def generate_dataset(
         anns = feat_regex.finditer(crp)
 
         # check correctness of all annotations
-        anns, _ = check_correct_annotations(anns, crp, pt, verbose=True)
+        anns, _ = check_correct_annotations(anns, crp, pt, logger,verbose=True)
 
         annotations.extend(anns)
 
@@ -290,7 +290,7 @@ def generate_dataset(
             else:
                 continue
 
-            clean_p, wrong_tags = remove_features(c, square_regex)
+            clean_p, wrong_tags = remove_features(c, square_regex,logger)
 
             # get the features
             tags = feat_regex.finditer(c)

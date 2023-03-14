@@ -3,6 +3,7 @@ import os
 from typing import Dict, Any, Optional, List
 
 import pandas as pd
+from PySide6 import QtCore, QtWidgets
 
 
 class SavingDict(dict):
@@ -39,6 +40,8 @@ class SettingValue:
         description: Optional[str] = "",
         choices: Optional[List[Any]] = None,
     ):
+        super().__init__()
+
         if choices is not None:
             assert value in choices, f"Value {value} not in the choices {choices}"
 
@@ -68,12 +71,13 @@ class SettingValue:
         self._value = value
 
 
-class Memory:
+class Memory(QtCore.QObject):
     """
     Class to store the memory of the annotation fixer
     """
 
     def __init__(self):
+        super().__init__()
         self.dir = ".corpus_compass"
         # create dir if not exists
         if not os.path.exists(self.dir):
@@ -90,11 +94,13 @@ class Memory:
         self.file_postprocess_paths = os.path.join(self.dir, "postprocess_paths.json")
 
         # create the attributes
-        self._lfp = SavingDict(self.save_memory, attr="file_lfp")
-        self._settings = SavingDict(self.save_memory, attr="file_settings")
+        self._lfp = SavingDict(self.save_file, attr="file_lfp")
+        self._settings = SavingDict(self.save_file, attr="file_settings")
         self._postprocess_paths = SavingDict(
-            self.save_memory, attr="file_postprocess_paths"
+            self.save_file, attr="file_postprocess_paths"
         )
+
+        self.setting_groups = {}
 
         self.postprocess_names = [
             "annotation_info.csv",
@@ -114,28 +120,48 @@ class Memory:
 
     def init_default_settings(self):
         setting_values = {
-            "separator": ";",
-            "encoding": "utf-16",
-            "minimum_repetitions": 1,
-            "annotation_regex": r"(\[\$[\S ]*?\])",
-            "use_strict_rule": True,
-            "data_source": "info",
-            "auto_annotation_thr": 0.5,
-            "use_loaded": False,
+            # interface
             "style": "s1",
             "text_font": "Arial",
             "text_size": 12,
             "window_size": (500, 500),
+            # general
+            "separator": ";",
+            "encoding": "utf-16",
+            "use_loaded": False,
+            "annotation_regex": r"(\[\$[\S ]*?\])",
+            # annotation fixer
+            "minimum_repetitions": 1,
+            "use_strict_rule": True,
+            "data_source": "info",
+            "auto_annotation_thr": 0.5,
+            # dataset creator
+            "feat_regex": r"\[\$([\S ]*?)\]",
+            "name_regex": r"(^[A-z0-9?._]+) ",
+            "previous_line": False,
+            "ngram_prev": 10,
+            "ngram_next": 10,
         }
 
         self.settings_metadata = {
+            # interface
+            "text_font": ("Text font", []),
+            "text_size": ("Text size", []),
+            "window_size": ("Window Size", []),
+            "style": ("Style for the colors", [f"s{i}" for i in range(10)]),
+            # general
             "separator": ("Separator used in the csv files", [",", ";"]),
             "encoding": ("Encoding used in the csv files", ["utf-8", "utf-16"]),
+            "use_loaded": (
+                "Use the loaded data instead of the loading it from scratch",
+                [True, False],
+            ),
+            "annotation_regex": ("Regex to extract the annotations from the text", []),
+            # annotation fixer
             "minimum_repetitions": (
                 "Minimum number of repetitions to be considered when using the annotation info",
                 [],
             ),
-            "annotation_regex": ("Regex to extract the annotations from the text", []),
             "use_strict_rule": (
                 "Use the strict rule to extract the annotations with the regex",
                 [True, False],
@@ -144,16 +170,49 @@ class Memory:
                 "Data source to use for the annotation info, available options: info, missing",
                 ["info", "missing"],
             ),
-            "auto_annotation_thr": ("Threshold to use for the auto annotation", []),
-            "use_loaded": (
-                "Use the loaded data instead of the loading it from scratch",
+            "auto_annotation_thr": ("Threshold to use for the auto annotation", [x / 100.0 for x in range(0, 100, 10)]),
+            # dataset creator
+            "feat_regex": ("Regex to find the content of an annotation.", []),
+            "name_regex": (
+                "Regex to univocally find the speaker name in the paragraph.",
+                [],
+            ),
+            "previous_line": (
+                "Include previous paragraph in final output",
                 [True, False],
             ),
-            "style": ("Style for the colors", [f"s{i}" for i in range(10)]),
-            "text_font": ("Text font", []),
-            "text_size": ("Text size", []),
-            "window_size": ("Window Size", []),
+            "ngram_prev": (
+                "Number of previous words to include in the ngram",
+                list(range(1, 20)),
+            ),
+            "ngram_next": (
+                "Number of next words to include in the ngram",
+                list(range(1, 20)),
+            ),
         }
+
+        self.setting_groups = dict(
+            interface=["text_font", "text_size", "window_size", "style"],
+            general=[
+                "separator",
+                "encoding",
+                "use_loaded",
+                "annotation_regex",
+            ],
+            annotation_fixer=[
+                "minimum_repetitions",
+                "use_strict_rule",
+                "data_source",
+                "auto_annotation_thr",
+            ],
+            dataset_creator=[
+                "feat_regex",
+                "name_regex",
+                "previous_line",
+                "ngram_prev",
+                "ngram_next",
+            ],
+        )
 
         # update settings with the default if not exists
         for k, v in setting_values.items():
@@ -220,7 +279,7 @@ class Memory:
             with open(attr_value, "r") as f:
                 setattr(self, hid_attr, json.load(f))
 
-    def save_memory(self, attr=None):
+    def save_file(self, attr=None):
         """
         Save the memory to the files
         """
@@ -240,6 +299,32 @@ class Memory:
             with open(attr_value, "w") as f:
                 json.dump(getattr(self, hid_attr), f)
 
+    def save_setting(self, _parent, _name):
+        def inner():
+            metadata = self.settings_metadata[_name]
+            description, choices = metadata
+
+            if len(choices) > 1:
+                val = _parent.findChild(QtWidgets.QComboBox, _name).currentText()
+            elif len(choices) > 0:
+                val = _parent.findChild(QtWidgets.QCheckBox, _name).isChecked()
+
+            else:
+                val = _parent.findChild(QtWidgets.QLineEdit, _name).text()
+
+            # cast to type
+            old_val = self.settings[_name]
+            t = type(old_val)
+
+            if isinstance(old_val, tuple) or isinstance(old_val, list):
+                val = eval(val)
+            else:
+                val = t(val)
+
+            self.settings[_name] = val
+
+        return inner
+
     @property
     def lfp(self):
         return self._lfp
@@ -247,7 +332,7 @@ class Memory:
     @lfp.setter
     def lfp(self, value: Dict[str, str]):
         self._lfp.update(value)
-        self.save_memory("file_lfp")
+        self.save_file("file_lfp")
 
     @property
     def settings(self):
@@ -256,7 +341,7 @@ class Memory:
     @settings.setter
     def settings(self, value: Dict[str, Any]):
         self._settings.update(value)
-        self.save_memory("file_settings")
+        self.save_file("file_settings")
 
     @property
     def postprocess_paths(self):
@@ -265,4 +350,4 @@ class Memory:
     @postprocess_paths.setter
     def postprocess_paths(self, value: Dict[str, str]):
         self._postprocess_paths.update(value)
-        self.save_memory("file_postprocess_paths")
+        self.save_file("file_postprocess_paths")
