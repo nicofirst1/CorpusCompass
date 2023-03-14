@@ -152,7 +152,7 @@ def get_name(line: str, regex):
 
 
 def get_ngram(
-    corpus: str, ngram_params: Tuple[int, int], index: int, square_regex: re.Pattern
+    corpus: str, ngram_params: Tuple[int, int], index: int, square_regex: re.Pattern, logger,
 ):
     """
     Get the ngram of a word in a corpus
@@ -175,7 +175,7 @@ def get_ngram(
 
     result = prev + next
     result = " ".join(result)
-    result, _ = remove_features(result, square_regex)
+    result, _ = remove_features(result, square_regex,logger)
 
     return result
 

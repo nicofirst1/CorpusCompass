@@ -2,6 +2,7 @@ from PySide6 import QtWidgets
 
 from src.annotation_fixer import AnnotationFixer
 from src.common import GeneralWindow, Memory, load_postprocess
+from src.data_analyzer import DataAnalyzer
 from src.dataset_creator import DatasetCreator
 from src.other_windows import LoadFiles, Settings
 from src.other_windows.AskLoaded import AskLoading
@@ -137,7 +138,7 @@ class Main(GeneralWindow):
             )
             self.window_annotation_fixer.show()
         elif sender == self.data_analyzer_button and has_postprocess and has_preloaded:
-            self.window_data_analyzer = DataAnalyzer(self.mem, self.postprocess_data)
+            self.window_data_analyzer = DataAnalyzer(self.mem,self.preloaded_data , self.postprocess_data)
             self.window_data_analyzer.show()
 
         elif sender == self.load_files_button:

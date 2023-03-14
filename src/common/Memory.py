@@ -113,6 +113,18 @@ class Memory(QtCore.QObject):
             "dependent_variables.json",
             "speakers.json",
         ]
+
+        self.analysis_dir = "analysis"
+
+        self.analysis_paths = {
+            "kmean": os.path.join(self.analysis_dir, "kmean"),
+            "poisson_regression": os.path.join(self.analysis_dir, "poisson_regression"),
+            "variable_analysis": os.path.join(self.analysis_dir, "variable_analysis"),
+            "dependent_variable_analysis": os.path.join(
+                self.analysis_dir, "dependent_variable_analysis"
+            ),
+        }
+
         # load the memory
         self.load_memory()
 
@@ -130,6 +142,7 @@ class Memory(QtCore.QObject):
             "encoding": "utf-16",
             "use_loaded": False,
             "annotation_regex": r"(\[\$[\S ]*?\])",
+            "suppress_existent": True,
             # annotation fixer
             "minimum_repetitions": 1,
             "use_strict_rule": True,
@@ -141,6 +154,13 @@ class Memory(QtCore.QObject):
             "previous_line": False,
             "ngram_prev": 10,
             "ngram_next": 10,
+            # data analyzer
+            "kmean_analysis": True,
+            "kmean_n_clusters": -1,
+            "kmean_max_clusters": 50,
+            "dependent_variable_analysis": True,
+            "variable_analysis": True,
+            "poissont_regression_analysis": True,
         }
 
         self.settings_metadata = {
@@ -157,6 +177,10 @@ class Memory(QtCore.QObject):
                 [True, False],
             ),
             "annotation_regex": ("Regex to extract the annotations from the text", []),
+            "suppress_existent": (
+                "Suppress warnings for overwriting existing files",
+                [True, False],
+            ),
             # annotation fixer
             "minimum_repetitions": (
                 "Minimum number of repetitions to be considered when using the annotation info",
@@ -170,7 +194,10 @@ class Memory(QtCore.QObject):
                 "Data source to use for the annotation info, available options: info, missing",
                 ["info", "missing"],
             ),
-            "auto_annotation_thr": ("Threshold to use for the auto annotation", [x / 100.0 for x in range(0, 100, 10)]),
+            "auto_annotation_thr": (
+                "Threshold to use for the auto annotation",
+                [x / 100.0 for x in range(0, 100, 10)],
+            ),
             # dataset creator
             "feat_regex": ("Regex to find the content of an annotation.", []),
             "name_regex": (
@@ -189,6 +216,31 @@ class Memory(QtCore.QObject):
                 "Number of next words to include in the ngram",
                 list(range(1, 20)),
             ),
+            # data analyzer
+            "kmean_analysis": (
+                "Perform kmean analysis",
+                [True, False],
+            ),
+            "kmean_n_clusters": (
+                "Number of clusters for the kmean analysis. If -1, the number of clusters is determined by the elbow method.",
+                [x for x in list(range(-1, 20)) if x != 0],
+            ),
+            "kmean_max_clusters": (
+                "Maximum number of clusters to try when estimating the number of clusters with the elbow method.",
+                list(range(1, 100)),
+            ),
+            "dependent_variable_analysis": (
+                "Perform dependent variable analysis",
+                [True, False],
+            ),
+            "variable_analysis": (
+                "Perform variable analysis",
+                [True, False],
+            ),
+            "poissont_regression_analysis": (
+                "Perform poisson regression analysis",
+                [True, False],
+            ),
         }
 
         self.setting_groups = dict(
@@ -204,6 +256,7 @@ class Memory(QtCore.QObject):
                 "use_strict_rule",
                 "data_source",
                 "auto_annotation_thr",
+                "suppress_existent",
             ],
             dataset_creator=[
                 "feat_regex",
@@ -211,6 +264,14 @@ class Memory(QtCore.QObject):
                 "previous_line",
                 "ngram_prev",
                 "ngram_next",
+            ],
+            data_analyzer=[
+                "kmean_analysis",
+                "kmean_n_clusters",
+                "kmean_max_clusters",
+                "dependent_variable_analysis",
+                "variable_analysis",
+                "poissont_regression_analysis",
             ],
         )
 
@@ -304,10 +365,14 @@ class Memory(QtCore.QObject):
             metadata = self.settings_metadata[_name]
             description, choices = metadata
 
-            if len(choices) > 1:
-                val = _parent.findChild(QtWidgets.QComboBox, _name).currentText()
-            elif len(choices) > 0:
+            if len(choices) == 2 and isinstance(choices[0], bool):
                 val = _parent.findChild(QtWidgets.QCheckBox, _name).isChecked()
+
+            elif len(choices) > 0:
+                if all(isinstance(x, int) for x in choices):
+                    val = _parent.findChild(QtWidgets.QSpinBox, _name).value()
+                else:
+                    val = _parent.findChild(QtWidgets.QComboBox, _name).currentText()
 
             else:
                 val = _parent.findChild(QtWidgets.QLineEdit, _name).text()

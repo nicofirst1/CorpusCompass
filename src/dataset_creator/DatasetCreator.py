@@ -18,8 +18,7 @@ from src.common import (
     QTextEditLog,
     create_input,
 )
-from src.dataset_creator.DatasetThread import DatasetThread
-
+from src.dataset_creator.DCThread import DCThread
 
 def create_input_lineedit(label, default_value="", hover_help="", delay=500):
     # Create QLineEdit widget
@@ -71,8 +70,6 @@ class DatasetCreator(GeneralWindow):
 
     def create_widgets(self):
         # Create QLineEdit widgets with hover help
-        square_regex_help = "Regex to find the complete annotation rule."
-        name = "annotation_regex"
         self.square_regex_input, square_regex_lay = create_input(
             self, "annotation_regex", self.mem
         )
@@ -90,15 +87,9 @@ class DatasetCreator(GeneralWindow):
         )
 
         # Create QSpinBox widgets for ngram_params
-        self.ngram_prev_input = QtWidgets.QSpinBox(self)
-        self.ngram_prev_input.setMinimum(0)
-        self.ngram_prev_input.setMaximum(100)
-        self.ngram_prev_input.setValue(10)
+        self.ngram_prev_input, _ = create_input(self, "ngram_prev", self.mem)
 
-        self.ngram_next_input = QtWidgets.QSpinBox(self)
-        self.ngram_next_input.setMinimum(0)
-        self.ngram_next_input.setMaximum(100)
-        self.ngram_next_input.setValue(5)
+        self.ngram_next_input, _ = create_input(self, "ngram_next", self.mem)
 
         # Create "Generate Dataset" button
         self.generate_dataset_button = QtWidgets.QPushButton("Generate Dataset")
@@ -178,13 +169,13 @@ class DatasetCreator(GeneralWindow):
         self.log_window.clear()
 
         # get inputs
-        previous_line = self.previous_line_checkbox.isChecked()
-        ngram_prev = self.ngram_prev_input.value()
-        ngram_next = self.ngram_next_input.value()
+        previous_line = self.mem.settings["previous_line"]
+        ngram_prev = self.mem.settings["ngram_prev"]
+        ngram_next = self.mem.settings["ngram_next"]
         # get regexes
-        square_regex = self.square_regex_input.text()
-        feat_regex = self.feat_regex_input.text()
-        name_regex = self.name_regex_input.text()
+        square_regex = self.mem.settings["annotation_regex"]
+        feat_regex = self.mem.settings["feat_regex"]
+        name_regex = self.mem.settings["name_regex"]
 
         inputs = [
             square_regex,
@@ -195,7 +186,7 @@ class DatasetCreator(GeneralWindow):
             ngram_next,
         ]
 
-        self.worker_thread = DatasetThread(
+        self.worker_thread = DCThread(
             inputs,
             self.corpus_dict,
             self.independent_variables,
@@ -220,7 +211,8 @@ class DatasetCreator(GeneralWindow):
         if self.worker_thread is None:
             pass
         elif isinstance(self.worker_thread.results, str):
-            msg.setText(self.worker_thread.results)
+            msg.setText("An error occurred.")
+            msg.setDetailedText(self.worker_thread.results)
             msg.setWindowTitle("Warning")
 
         elif isinstance(self.worker_thread.results, Dict):

@@ -329,7 +329,7 @@ def generate_dataset(
                 text = feats[1]
                 feats = feats[0]
 
-                context = get_ngram(c, (ngram_prev, ngram_next), index, square_regex)
+                context = get_ngram(c, (ngram_prev, ngram_next), index, square_regex,logger)
 
                 # for every feature in the word
                 for f in feats.split("."):
@@ -426,7 +426,7 @@ def generate_dataset(
     return to_return
 
 
-class DatasetThread(QtCore.QThread):
+class DCThread(QtCore.QThread):
 
     def __init__(
         self, inputs, corpus_dict, independent_variables, dependent_variables, speakers

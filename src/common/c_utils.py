@@ -196,7 +196,7 @@ def create_input(
     """
     description, choices = mem.settings_metadata[name]
     value = mem.settings.get(name, None)
-    save_setting_method = mem.save_setting(parent,name)
+    save_setting_method = mem.save_setting(parent, name)
 
     # make horizontal layout
     layout = QtWidgets.QHBoxLayout()
@@ -204,28 +204,39 @@ def create_input(
     label = QtWidgets.QLabel(name.capitalize() + ":")
     label.setAlignment(QtCore.Qt.AlignRight)
 
-    if len(choices) > 1:
-        widget = QtWidgets.QComboBox()
-        widget.setObjectName(name)
-        widget.addItems([str(x) for x in choices])
-        widget.setCurrentIndex(choices.index(value))
-
-        # Find the width of the largest item text
-        width = 0
-        font = widget.font()
-        for item in choices:
-            fm = QtGui.QFontMetrics(font)
-            width = max(width, fm.horizontalAdvance(str(item)))
-
-        # Set the minimum width of the QComboBox
-        widget.setMinimumWidth(width + 50)
-
-        widget.currentIndexChanged.connect(save_setting_method)
-    elif len(choices) > 0:
+    # check if choices is boolean
+    if len(choices) == 2 and isinstance(choices[0], bool):
         widget = QtWidgets.QCheckBox(name, parent)
         widget.setObjectName(name)
         widget.setChecked(mem.settings[name])
         widget.stateChanged.connect(save_setting_method)
+
+    elif len(choices) > 0:
+        # if choices are all integers
+        if all(isinstance(x, int) for x in choices):
+            widget = QtWidgets.QSpinBox()
+            widget.setObjectName(name)
+            widget.setRange(min(choices), max(choices))
+            widget.setValue(value)
+            widget.valueChanged.connect(save_setting_method)
+
+        else:
+            widget = QtWidgets.QComboBox()
+            widget.setObjectName(name)
+            widget.addItems([str(x) for x in choices])
+            widget.setCurrentIndex(choices.index(value))
+
+            # Find the width of the largest item text
+            width = 0
+            font = widget.font()
+            for item in choices:
+                fm = QtGui.QFontMetrics(font)
+                width = max(width, fm.horizontalAdvance(str(item)))
+
+            # Set the minimum width of the QComboBox
+            widget.setMinimumWidth(width + 50)
+
+            widget.currentIndexChanged.connect(save_setting_method)
 
     else:
         widget = QtWidgets.QLineEdit()
