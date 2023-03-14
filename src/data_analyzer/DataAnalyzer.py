@@ -7,15 +7,15 @@ from PySide6 import QtWidgets
 
 from src.annotation_fixer.af_utils import corpus_dict2text
 from src.common import GeneralWindow, Memory, AppLogger, create_input, QTextEditLog
-from src.data_analyzer.DAThread import DAThread
+from src.data_analyzer.DAProcess import DAProcess
 
 
 class DataAnalyzer(GeneralWindow):
     def __init__(
-            self,
-            mem: Memory,
-            preloaded_data: Dict[str, Any],
-            postprocess_data: Dict[str, Any],
+        self,
+        mem: Memory,
+        preloaded_data: Dict[str, Any],
+        postprocess_data: Dict[str, Any],
     ):
         self.corpus_dict = OrderedDict(preloaded_data["corpus_text"])
         self.corpus_text = corpus_dict2text(self.corpus_dict)
@@ -95,8 +95,8 @@ class DataAnalyzer(GeneralWindow):
 
         # check if analysis path already exist
         if (
-                os.path.exists(self.mem.analysis_dir)
-                and not self.mem.settings["suppress_existent"]
+            os.path.exists(self.mem.analysis_dir)
+            and not self.mem.settings["suppress_existent"]
         ):
             # if analysis path already exist and suppress_existent is false
             # ask user if he wants to overwrite the analysis
@@ -114,22 +114,23 @@ class DataAnalyzer(GeneralWindow):
         # create analysis dir
         self.make_dirs()
 
-        binary_dataset = self.df_binary_dataset
+        # create a copy of the inputs
+        binary_dataset = self.df_binary_dataset.copy()
+        independent_variables = self.independent_variables.copy()
+        dependent_variables = self.dependent_variables.copy()
+        speakers = self.speakers.copy()
 
-
-
-        self.worker_thread = DAThread(
-            self.df_binary_dataset,
-            self.independent_variables,
-            self.dependent_variables,
-            self.speakers,
+        self.worker_thread = DAProcess(
+            binary_dataset,
+            independent_variables,
+            dependent_variables,
+            speakers,
             self.mem,
         )
 
         self.worker_thread.finished.connect(self.analysis_finished)
         self.logging_area.connect_signal(self.worker_thread.logger.signal)
-        self.worker_thread.start()
-
+        self.worker_thread.run()
 
     def analysis_finished(self):
         self.worker_thread = None

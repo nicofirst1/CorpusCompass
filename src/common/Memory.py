@@ -79,6 +79,9 @@ class Memory(QtCore.QObject):
     def __init__(self):
         super().__init__()
         self.dir = ".corpus_compass"
+
+        # get absolute path
+        self.dir = os.path.abspath(self.dir)
         # create dir if not exists
         if not os.path.exists(self.dir):
             os.mkdir(self.dir)
@@ -92,6 +95,7 @@ class Memory(QtCore.QObject):
         self.file_lfp = os.path.join(self.dir, "lfp.json")
         self.file_settings = os.path.join(self.dir, "settings.json")
         self.file_postprocess_paths = os.path.join(self.dir, "postprocess_paths.json")
+        self.file_analysis_paths = os.path.join(self.dir, "analysis_paths.json")
 
         # create the attributes
         self._lfp = SavingDict(self.save_file, attr="file_lfp")
@@ -99,6 +103,7 @@ class Memory(QtCore.QObject):
         self._postprocess_paths = SavingDict(
             self.save_file, attr="file_postprocess_paths"
         )
+        self._analysis_paths = SavingDict(self.save_file, attr="file_analysis_paths")
 
         self.setting_groups = {}
 
@@ -115,6 +120,8 @@ class Memory(QtCore.QObject):
         ]
 
         self.analysis_dir = "analysis"
+        # make it absolute
+        self.analysis_dir = os.path.abspath(self.analysis_dir)
 
         self.analysis_paths = {
             "kmean": os.path.join(self.analysis_dir, "kmean"),
@@ -416,3 +423,12 @@ class Memory(QtCore.QObject):
     def postprocess_paths(self, value: Dict[str, str]):
         self._postprocess_paths.update(value)
         self.save_file("file_postprocess_paths")
+
+    @property
+    def analysis_paths(self):
+        return self._analysis_paths
+
+    @analysis_paths.setter
+    def analysis_paths(self, value: Dict[str, str]):
+        self._analysis_paths.update(value)
+        self.save_file("file_analysis_paths")

@@ -1,4 +1,6 @@
+import argparse
 import csv
+import json
 import os
 from typing import List, Dict
 
@@ -13,11 +15,13 @@ from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
-from src.common import QTextLogger
-
 
 def kmeans_analysis(
-    df: pd.DataFrame, tokens:pd.Series, custom_path: str, logger: QTextLogger, num_clusters: int, max_clusters: int
+    df: pd.DataFrame,
+    tokens: pd.Series,
+    custom_path: str,
+    num_clusters: int,
+    max_clusters: int,
 ):
     """
     Perform a k-means analysis on the data
@@ -34,7 +38,10 @@ def kmeans_analysis(
     # estimate the number of clusters
     scores = []
     if num_clusters == -1:
-        pbar = tqdm(range(2, max_clusters), desc="Estimating the number of clusters", file=logger.text_edit_stream)
+        pbar = tqdm(
+            range(2, max_clusters),
+            desc="Estimating the number of clusters",
+        )
         for i in pbar:
             kmeans = KMeans(n_clusters=i, random_state=42, n_init=10)
             kmeans.fit(scaled_data)
@@ -49,8 +56,10 @@ def kmeans_analysis(
 
         # get the best number of clusters
         best_n_clusters = np.argmax(scores) + 2
-        logger.info(f"Best number of clusters: {best_n_clusters}.\n"
-                    f" You should use this number for the clustering in future runs")
+        print(
+            f"Best number of clusters: {best_n_clusters}.\n"
+            f" You should use this number for the clustering in future runs"
+        )
 
         num_clusters = best_n_clusters
 
@@ -79,11 +88,11 @@ def kmeans_analysis(
     pca = PCA(n_components=2)
     pca_data = pca.fit_transform(scaled_data)
 
-    # logger.info pca information for the user
-    logger.info("PCA 2d information:")
-    logger.info(f"Explained variance ratio: {pca.explained_variance_ratio_}")
-    logger.info(f"Explained variance: {pca.explained_variance_}")
-    logger.info(f"Singular values: {pca.singular_values_}")
+    # print pca information for the user
+    print("PCA 2d information:")
+    print(f"Explained variance ratio: {pca.explained_variance_ratio_}")
+    print(f"Explained variance: {pca.explained_variance_}")
+    print(f"Singular values: {pca.singular_values_}")
 
     for i in range(num_clusters):
         plt.scatter(
@@ -97,11 +106,11 @@ def kmeans_analysis(
     pca = PCA(n_components=3)
     pca_data = pca.fit_transform(scaled_data)
 
-    # logger.info pca information for the user
-    logger.info("PCA 3d information:")
-    logger.info(f"Explained variance ratio: {pca.explained_variance_ratio_}")
-    logger.info(f"Explained variance: {pca.explained_variance_}")
-    logger.info(f"Singular values: {pca.singular_values_}")
+    # print pca information for the user
+    print("PCA 3d information:")
+    print(f"Explained variance ratio: {pca.explained_variance_ratio_}")
+    print(f"Explained variance: {pca.explained_variance_}")
+    print(f"Singular values: {pca.singular_values_}")
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
@@ -265,85 +274,90 @@ def poisson_regression(
             with open(f"{custom_path}/poisson_regression_results_{dv}.csv", "w") as f:
                 f.write(csv_file)
         except Exception as e:
-            logger.info(f"Error in poisson regression for {dv}: {e}")
+            print(f"Error in poisson regression for {dv}: {e}")
 
 
-#
-# if __name__ == "__main__":
-#     # define argparse
-#     parser = argparse.ArgumentParser(
-#         description="This script performs an analysis of the data in the csv file."
-#     )
-#     parser.add_argument(
-#         "file_path", help="The path to the binary_dataset.csv file to analyze."
-#     )
-#     # optional argument for the dependent annotation
-#     parser.add_argument(
-#         "-i",
-#         "--independent_variables",
-#         help="The independent variables to use for the analysis. "
-#         "They should be provided as a list of strings, e.g. [GENDER,AGE].",
-#     )
-#
-#     parser.add_argument(
-#         "-s",
-#         "--speaker",
-#         help="The speaker to use for the analysis. "
-#         "They should be provided as a list of strings, e.g. [A,B,C,D].",
-#     )
-#
-#     args = parser.parse_args()
-#
-#     # read the file path given as argument
-#
-#     # read the dependent annotation given as argument to a list
-#     if args.independent_variables:
-#         args.independent_variables = args.independent_variables.strip("[]").split(",")
-#         args.independent_variables = [x.strip() for x in args.independent_variables]
-#     else:
-#         args.independent_variables = []
-#
-#     if args.speaker:
-#         args.speaker = args.speaker.strip("[]").split(",")
-#         args.speaker = [x.strip() for x in args.speaker]
-#     else:
-#         args.speaker = []
-#
-#     independent_variables = args.independent_variables
-#
-#     # open the csv file with pandas
-#     df = pd.read_csv(args.file_path)
-#
-#     # print the first 5 rows
-#     print("First 5 rows of the csv file:")
-#     print(df.head())
-#
-#     # get the tokens and drop them from the dataframe
-#     tokens = df["token"]
-#     context = df["context"]
-#     df = df.drop(columns=["token", "context"])
-#
-#     # make directory for the output files
-#     if not os.path.exists(analysis_path):
-#         os.mkdir(analysis_path)
-#
-#     # analyze the data
-#     print("Analyzing the variables...")
-#     variable_analysis(df)
-#     print("Done!")
-#
-#     print("Starting cluster analysis...")
-#     kmeans_analysis(df, num_clusters=10)
-#     print("Done!")
-#
-#     # analyze the with regression
-#     if independent_variables or args.speaker:
-#         print("Analyzing the variables with regression...")
-#         poisson_regression(df, independent_variables, args.speaker)
-#         print("Done!")
-#
-#     # analyze the dependent variables
-#     if independent_variables or args.speaker:
-#         print("Analyzing the dependent variables...")
-#         dependent_variable_count(df, independent_variables, args.speaker)
-#         print("Done!")
+if __name__ == "__main__":
+    # define argparse
+    parser = argparse.ArgumentParser(
+        description="This script performs an analysis of the data in the csv file."
+    )
+    parser.add_argument("preloaded_dir", help="The path to the preloaded dir")
+    parser.add_argument(
+        "binary_dataset_path", help="The path to the binary dataset pandas csv"
+    )
+    parser.add_argument("setting_file", help="The path to the setting file")
+    parser.add_argument("custom_paths", help="The path to the paths file")
+
+    args = parser.parse_args()
+
+    # open the setting file
+    with open(args.setting_file, "r") as f:
+        setting = json.load(f)
+
+    encoding = setting["encoding"]
+    separator = setting["separator"]
+    # get the binary dataset
+    binary_df = pd.read_csv(args.binary_dataset_path, sep=separator, encoding=encoding)
+
+    # from the preloaded dir load the dependent variables
+
+    dependent_variables = []
+    independent_variables = []
+    speaker = []
+
+    for file in os.listdir(args.preloaded_dir):
+        if "dependent_variables" in file:
+            with open(f"{args.preloaded_dir}/{file}", "r") as f:
+                dependent_variables = json.load(f)
+        elif "independent_variables" in file:
+            with open(f"{args.preloaded_dir}/{file}", "r") as f:
+                independent_variables = json.load(f)
+        elif "speaker" in file:
+            with open(f"{args.preloaded_dir}/{file}", "r") as f:
+                speaker = json.load(f)
+
+    # open the custom paths
+    with open(args.custom_paths, "r") as f:
+        custom_paths = json.load(f)
+
+    a = 1
+
+    # print the first 5 rows
+    print("First 5 rows of the csv file:")
+    print(binary_df.head())
+
+    # get the tokens and drop them from the dataframe
+    tokens = binary_df["token"]
+    context = binary_df["context"]
+    binary_df = binary_df.drop(columns=["token", "context"])
+
+    if setting["kmean_analysis"]:
+        print("Starting cluster analysis...")
+        kmeans_analysis(
+            binary_df,
+            tokens,
+            custom_paths["kmean"],
+            setting["kmean_n_clusters"],
+            setting["kmean_max_clusters"],
+        )
+        print("Done!")
+
+    exit(0)
+
+    # analyze the data
+    print("Analyzing the variables...")
+    variable_analysis(df)
+    print("Done!")
+
+    # analyze the with regression
+    if independent_variables or args.speaker:
+        print("Analyzing the variables with regression...")
+        poisson_regression(df, independent_variables, args.speaker)
+        print("Done!")
+
+    # analyze the dependent variables
+    if independent_variables or args.speaker:
+        print("Analyzing the dependent variables...")
+        dependent_variable_count(df, independent_variables, args.speaker)
+        print("Done!")

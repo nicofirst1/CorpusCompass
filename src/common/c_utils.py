@@ -121,6 +121,7 @@ def save_postprocess(results: Dict, mem: Memory):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
+    output_dir=os.path.abspath(output_dir)
     # define the output file names
     dataset_path = os.path.join(output_dir, "dataset.csv")
     binary_dataset_path = os.path.join(output_dir, "binary_dataset.csv")
