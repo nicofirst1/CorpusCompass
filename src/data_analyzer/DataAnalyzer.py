@@ -138,7 +138,7 @@ class DataAnalyzer(GeneralWindow):
         )
 
         self.worker_thread.finished.connect(self.analysis_finished)
-        self.logging_area.connect_signal(self.worker_thread.logger.signal)
+        self.logging_area.connect_signal(self.worker_thread.text_area_logger.signal)
         self.worker_thread.run()
 
         self.stop_analysis_button.setEnabled(True)

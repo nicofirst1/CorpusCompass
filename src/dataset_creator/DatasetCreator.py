@@ -5,9 +5,6 @@ from collections import OrderedDict
 from typing import Dict, Any
 
 from PySide6 import QtWidgets
-from PySide6.QtCore import QTimer
-from PySide6.QtGui import QCursor
-from PySide6.QtWidgets import QToolTip, QLineEdit
 
 from src.annotation_fixer.af_utils import corpus_dict2text
 from src.common import (
@@ -19,37 +16,6 @@ from src.common import (
     create_input,
 )
 from src.dataset_creator.DCThread import DCThread
-
-def create_input_lineedit(label, default_value="", hover_help="", delay=500):
-    # Create QLineEdit widget
-    input_widget = QLineEdit()
-    input_widget.setPlaceholderText(default_value)
-    input_widget.setText(default_value)
-
-    # Set tooltip with hover help text
-    if hover_help:
-
-        def show_tooltip():
-            QToolTip.showText(
-                QCursor.pos(), hover_help, input_widget, input_widget.rect()
-            )
-
-        def hide_tooltip():
-            QToolTip.hideText()
-
-        def on_hover(_):
-            QTimer.singleShot(delay, show_tooltip)
-
-        def on_leave(_):
-            QTimer.singleShot(0, hide_tooltip)
-
-        input_widget.enterEvent = on_hover
-        input_widget.leaveEvent = on_leave
-
-    # Add label and input widget to layout
-    layout = QtWidgets.QFormLayout()
-    layout.addRow(label, input_widget)
-    return input_widget, layout
 
 
 class DatasetCreator(GeneralWindow):
@@ -200,7 +166,6 @@ class DatasetCreator(GeneralWindow):
         self.worker_thread_started = True
 
     def on_generate_dataset_finished(self):
-        print("on_generate_dataset_finished called")
         if not self.worker_thread_started:
             return
         # make qmessagebox not blocking

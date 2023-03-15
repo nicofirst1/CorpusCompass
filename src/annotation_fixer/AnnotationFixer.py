@@ -98,8 +98,6 @@ class AnnotationFixer(GeneralWindow):
         self.save_button = QtWidgets.QPushButton("Save", self)
         self.save_button.clicked.connect(self.save_corpus_dict)
 
-        self.settings_button = QtWidgets.QPushButton("Settings", self)
-        self.settings_button.clicked.connect(self.open_settings)
 
         self.undo_button = QtWidgets.QPushButton("Undo", self)
         self.undo_button.clicked.connect(self.history.undo)
@@ -157,10 +155,9 @@ class AnnotationFixer(GeneralWindow):
         quatro_layout.addLayout(ignore_deannotate_all_layout)
         right_layout.addLayout(quatro_layout)
 
-        save_settings_layout = QtWidgets.QHBoxLayout()
-        save_settings_layout.addWidget(self.save_button)
-        save_settings_layout.addWidget(self.settings_button)
-        right_layout.addLayout(save_settings_layout)
+        save_layout = QtWidgets.QHBoxLayout()
+        save_layout.addWidget(self.save_button)
+        right_layout.addLayout(save_layout)
 
         layout.addWidget(self.info_text_scroll)
         layout.addWidget(self.text_area)
@@ -188,10 +185,6 @@ class AnnotationFixer(GeneralWindow):
         else:
             super().keyPressEvent(event)
 
-    def open_settings(self):
-        self.settings_window = Settings(self.mem)
-        self.settings_window.show()
-        self.settings_window.settingsChanged.connect(self.set_style)
 
     def show_find_dialog(self):
         self.find_dialog = FindDialog(self)

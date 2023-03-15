@@ -1,7 +1,7 @@
 import json
 import os
 import re
-from typing import Dict, Optional, Tuple, List, Any, Union
+from typing import Dict, Optional, Tuple, List, Any, Union, Literal
 
 import pandas as pd
 from PySide6 import QtWidgets, QtGui, QtCore
@@ -121,7 +121,7 @@ def save_postprocess(results: Dict, mem: Memory):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    output_dir=os.path.abspath(output_dir)
+    output_dir = os.path.abspath(output_dir)
     # define the output file names
     dataset_path = os.path.join(output_dir, "dataset.csv")
     binary_dataset_path = os.path.join(output_dir, "binary_dataset.csv")
@@ -186,7 +186,11 @@ def open_variables(
 
 
 def create_input(
-    parent, name: str, mem: Memory, delay: int = 2
+    parent,
+    name: str,
+    mem: Memory,
+    arrange: Literal["vert", "horz"] = "horz",
+    delay: int = 2,
 ) -> Tuple[QtWidgets.QWidget, QtWidgets.QHBoxLayout]:
     """
     Create a widget for a setting
@@ -197,17 +201,22 @@ def create_input(
     """
     description, choices = mem.settings_metadata[name]
     value = mem.settings.get(name, None)
+    pretty_name = to_pretty_name(name)
     save_setting_method = mem.save_setting(parent, name)
 
     # make horizontal layout
-    layout = QtWidgets.QHBoxLayout()
+    if arrange == "vert":
+        layout = QtWidgets.QVBoxLayout()
 
-    label = QtWidgets.QLabel(name.capitalize() + ":")
+    else:
+        layout = QtWidgets.QHBoxLayout()
+
+    label = QtWidgets.QLabel(pretty_name + ":")
     label.setAlignment(QtCore.Qt.AlignRight)
 
     # check if choices is boolean
     if len(choices) == 2 and isinstance(choices[0], bool):
-        widget = QtWidgets.QCheckBox(name, parent)
+        widget = QtWidgets.QCheckBox("", parent)
         widget.setObjectName(name)
         widget.setChecked(mem.settings[name])
         widget.stateChanged.connect(save_setting_method)
@@ -240,6 +249,7 @@ def create_input(
             widget.currentIndexChanged.connect(save_setting_method)
 
     else:
+        # todo: change from editingFinished to modified
         widget = QtWidgets.QLineEdit()
         widget.setObjectName(name)
         widget.setPlaceholderText("Enter a value...")
@@ -257,3 +267,13 @@ def create_input(
     layout.addWidget(widget)
 
     return widget, layout
+
+
+def to_pretty_name(name: str) -> str:
+    # remove underscores
+    name = name.replace("_", " ")
+
+    # capitalize
+    name = name.capitalize()
+
+    return name

@@ -257,13 +257,13 @@ class Memory(QtCore.QObject):
                 "encoding",
                 "use_loaded",
                 "annotation_regex",
+                "suppress_existent",
             ],
             annotation_fixer=[
                 "minimum_repetitions",
                 "use_strict_rule",
                 "data_source",
                 "auto_annotation_thr",
-                "suppress_existent",
             ],
             dataset_creator=[
                 "feat_regex",

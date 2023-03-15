@@ -327,7 +327,6 @@ if __name__ == "__main__":
     with open(args.custom_paths, "r") as f:
         custom_paths = json.load(f)
 
-
     # get the tokens and drop them from the dataframe
     tokens = binary_df["token"]
     context = binary_df["context"]

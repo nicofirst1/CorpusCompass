@@ -45,6 +45,12 @@ def generate_dataset(
     corpus = list(corpus_dict.values())
     corpus = list(itertools.chain(*corpus))
 
+    if len(corpus) == 0:
+        logger.error(
+            "All the paragraphs in the corpus have been deleted! You should review your regex rules"
+        )
+        raise ValueError("The corpus is empty!")
+
     # get speaker of interest
     speakers_of_interest = speakers.keys()
     # remove spaces
@@ -82,14 +88,16 @@ def generate_dataset(
     # order the keys so that the dependent variables are first
     variable_dict = {**independent_variables, **dependent_variables}
     if len(variable_dict) != len(independent_variables) + len(dependent_variables):
-        logger.warning(
-            "Warning: I have found duplicate variables. I will take the first one"
+        msg = (
+            "Warning: I have found duplicate variables. I will take the first one\n"
+            "Duplicates are:\n"
         )
-        # warning the duplicates
-        logger.warning("Duplicates are:")
+
         for token, v in variable_dict.items():
             if token in independent_variables and token in dependent_variables:
-                logger.warning(f"{token}: {v}")
+                msg += f"{token}: {v}\n"
+
+        logger.warning(msg)
 
     # get an inverse of the dependent variable
     idv = {}
@@ -128,14 +136,19 @@ def generate_dataset(
     whole_corpus = "\n".join(corpus)
 
     annotations = []
+    err_msg = ""
     for pt, crp in corpus_dict.items():
         crp = "\n".join(crp)
         anns = feat_regex.finditer(crp)
 
         # check correctness of all annotations
-        anns, _ = check_correct_annotations(anns, crp, pt, logger,verbose=True)
+        anns, _, msg = check_correct_annotations(anns, crp, pt, verbose=True)
+        err_msg += msg + "\n\n"
 
         annotations.extend(anns)
+
+    if err_msg:
+        logger.error(err_msg)
 
     annotations = [x.split(".")[-1] for x in annotations]
     # remove square brackets
@@ -290,7 +303,7 @@ def generate_dataset(
             else:
                 continue
 
-            clean_p, wrong_tags = remove_features(c, square_regex,logger)
+            clean_p, wrong_tags = remove_features(c, square_regex, logger)
 
             # get the features
             tags = feat_regex.finditer(c)
@@ -329,7 +342,9 @@ def generate_dataset(
                 text = feats[1]
                 feats = feats[0]
 
-                context = get_ngram(c, (ngram_prev, ngram_next), index, square_regex,logger)
+                context = get_ngram(
+                    c, (ngram_prev, ngram_next), index, square_regex, logger
+                )
 
                 # for every feature in the word
                 for f in feats.split("."):
@@ -405,8 +420,12 @@ def generate_dataset(
 
     to_return = dict(
         dataset=pd.DataFrame(data=csv_file[1:], columns=csv_file[0]),
-        annotation_info=pd.DataFrame(data=annotation_info[1:], columns=annotation_info[0]),
-        missed_annotations=pd.DataFrame(data=missing_annotations[1:], columns=missing_annotations[0]),
+        annotation_info=pd.DataFrame(
+            data=annotation_info[1:], columns=annotation_info[0]
+        ),
+        missed_annotations=pd.DataFrame(
+            data=missing_annotations[1:], columns=missing_annotations[0]
+        ),
         binary_dataset=df_encoded,
     )
 
@@ -427,7 +446,6 @@ def generate_dataset(
 
 
 class DCThread(QtCore.QThread):
-
     def __init__(
         self, inputs, corpus_dict, independent_variables, dependent_variables, speakers
     ):

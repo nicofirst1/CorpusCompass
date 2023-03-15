@@ -27,21 +27,19 @@ def preprocess_corpus(corpus_text, path, name_regex, logger):
     removed_sentences = len(prev_c) - len(corpus)
     if removed_sentences > 0:
         logger.warning(
-            f"I removed {removed_sentences} (out of {len(corpus)}) paragraphs from the '{path}' file, since I could not detect a speaker\n"
+            f"I removed {removed_sentences} (out of {len(prev_c)}, {len(corpus)} left) paragraphs from the '{path}' file, since I could not detect a speaker\n"
             f"I will show it over here, sorted by the their line:"
         )
         diff = set(prev_c) - set(corpus)
         diff = sorted(diff, key=lambda x: prev_c.index(x))
+        msg = ""
         for i in diff:
-            logger.warning(f"{prev_c.index(i)}: {i}")
-        logger.warning("\n\n")
-        logger.warning(
-            "If you see paragraphs you are interested in, consider manually changing them in the corpus, or expanding the 'name_regex' rule"
-        )
+            msg += f"{prev_c.index(i)}: {i}\n\n"
 
-    if len(corpus) == 0:
-        logger.error(
-            "All the paragraphs in the corpus have been deleted! You should review your regex rules"
+        logger.warning(
+            f"{msg}"
+            f"\n\n"
+            "If you see paragraphs you are interested in, consider manually changing them in the corpus, or expanding the 'name_regex' rule"
         )
 
     return corpus
@@ -51,9 +49,8 @@ def check_correct_annotations(
     annotations: List[re.Match],
     corpus: str,
     corpus_path: str,
-    logger,
     verbose: bool = True,
-) -> Tuple[List[str], List[Tuple[str, str]]]:
+) -> Tuple[List[str], List[Tuple[str, str]], str]:
     """
     Check if the annotations are correct
 
@@ -77,33 +74,37 @@ def check_correct_annotations(
 
         return result
 
-    def custom_print(*args, **kwargs):
+    def custom_print(to_print):
+        err_msg = ""
         if verbose:
-            logger.error(f"\nError in the corpus {corpus_path}: ")
-            logger.error(*args, **kwargs)
+            err_msg = f"\nError in the corpus {corpus_path}: \n" f"{to_print}\n"
+        return err_msg
 
     ngram_params = (+50, 50)
     new_annotations = []
     incorrect_annotations = []
+
+    error_msg = ""
+
     for ann in annotations:
         group = ann.group()
         # check if there are parenthesis
         if "(" in group or ")" in group:
-            custom_print(
+            error_msg += custom_print(
                 f"The annotation '{group}' contains parenthesis . Please remove them and try again."
             )
             incorrect_annotations.append((group, get_context(ann, ngram_params)))
             continue
         # elif if the number of square brackets is greater than 1
         elif len(re.findall(r"\[|\]", group)) > 2:
-            custom_print(
+            error_msg += custom_print(
                 f"The annotation '{group}' contains more than one square bracket. Please remove them and try again."
             )
             incorrect_annotations.append((group, get_context(ann, ngram_params)))
             continue
         # elif there is no point in the annotation
         elif "." not in group:
-            custom_print(
+            error_msg += custom_print(
                 f"The annotation '{group}' does not contain a point. Please add it and try again."
             )
             incorrect_annotations.append((group, get_context(ann, ngram_params)))
@@ -112,7 +113,7 @@ def check_correct_annotations(
         else:
             new_annotations.append(group)
 
-    return new_annotations, incorrect_annotations
+    return new_annotations, incorrect_annotations, error_msg
 
 
 def remove_features(corpus, square_regex, logger):
@@ -152,7 +153,11 @@ def get_name(line: str, regex):
 
 
 def get_ngram(
-    corpus: str, ngram_params: Tuple[int, int], index: int, square_regex: re.Pattern, logger,
+    corpus: str,
+    ngram_params: Tuple[int, int],
+    index: int,
+    square_regex: re.Pattern,
+    logger,
 ):
     """
     Get the ngram of a word in a corpus
@@ -175,7 +180,7 @@ def get_ngram(
 
     result = prev + next
     result = " ".join(result)
-    result, _ = remove_features(result, square_regex,logger)
+    result, _ = remove_features(result, square_regex, logger)
 
     return result
 
