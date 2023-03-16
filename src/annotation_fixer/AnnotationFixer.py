@@ -14,7 +14,6 @@ from src.annotation_fixer.af_utils import (
     find_annotation_context,
 )
 from src.common import GeneralWindow, Memory, AppLogger
-from src.other_windows import Settings
 
 
 class AnnotationFixer(GeneralWindow):
@@ -98,7 +97,6 @@ class AnnotationFixer(GeneralWindow):
         self.save_button = QtWidgets.QPushButton("Save", self)
         self.save_button.clicked.connect(self.save_corpus_dict)
 
-
         self.undo_button = QtWidgets.QPushButton("Undo", self)
         self.undo_button.clicked.connect(self.history.undo)
         self.redo_button = QtWidgets.QPushButton("Redo", self)
@@ -166,8 +164,6 @@ class AnnotationFixer(GeneralWindow):
 
         self.init_list_to_fix()
 
-        # Override keyPressEvent to handle key events
-
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         modifiers = event.modifiers()
         key = event.key()
@@ -185,7 +181,6 @@ class AnnotationFixer(GeneralWindow):
         else:
             super().keyPressEvent(event)
 
-
     def show_find_dialog(self):
         self.find_dialog = FindDialog(self)
         self.find_dialog.show()
@@ -201,7 +196,7 @@ class AnnotationFixer(GeneralWindow):
         # get the rows where 'annotated' is less than the minimum repetition
         low_reps = self.df_annotation_info[
             self.df_annotation_info["annotated"] <= min_reps
-            ]
+        ]
         self.saved_lists.append(low_reps)
 
         # save settings
