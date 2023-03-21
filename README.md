@@ -16,13 +16,7 @@ If you find a bug or have a feature request, please open an issue on the [issue 
 
 ## Getting started
 
-### Online Notebook
-This tool is designed to be used with a Jupyter notebook in an online environment.
-If you are not familiar with colab, check this tutorial on [how to use colab](https://colab.research.google.com/notebooks/intro.ipynb).
-
-We have a [notebook for creating the dataset](https://colab.research.google.com/github/nicofirst1/CorpusCompass/blob/main/src/dataset_creator/dataset_creation.ipynb).
-
-#### Troubleshooting
+#### Troubleshooting**
 
 If you get an error like this:
 ```
@@ -96,3 +90,11 @@ To do this, install nbconvert with `pip install nbconvert` and run `jupyter nbco
 
 On the other hand, if you want to convert python code to a notebook, you need to install `p2j` with `pip install p2j` 
 and run `p2j notebook.py` in the directory of the python file.
+
+
+### Compiling the app
+To compile the app you can use pyinstaller. 
+To do this, install pyinstaller with `pip install pyinstaller` and run 
+```bash
+pyinstaller main.py  --windowed --icon=includes/icon.jpg 
+```

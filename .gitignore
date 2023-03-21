@@ -25,3 +25,5 @@ src/.corpus_compass/
 
 src/analysis/
 src/postprocessed/
+
+dist/
