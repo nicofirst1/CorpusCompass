@@ -331,7 +331,7 @@ def generate_dataset(
                 csv_line = ["" for _ in range(len(csv_header))]
 
                 # get independent variable information
-                cur_speaker_var=speakers_variables.get(cur_speaker, [])
+                cur_speaker_var = speakers_variables.get(cur_speaker, [])
                 for var in cur_speaker_var:
                     category = idv[var]
                     cat_idx = csv_header.index(category)
@@ -414,7 +414,12 @@ def generate_dataset(
 
     # drop first and last two columns
     df = df.drop(to_drop, axis=1)
-    df_encoded = pd.get_dummies(df, columns=df.columns, prefix_sep=":")
+    sep = ":"
+    df_encoded = pd.get_dummies(df, columns=df.columns, prefix_sep=sep)
+
+    # drop all columns that have nothing after : in name
+    df_encoded = df_encoded.loc[:, ~df_encoded.columns.str.contains(f"{sep}$")]
+
     df_encoded["token"] = tokens
     df_encoded["context"] = context
 
