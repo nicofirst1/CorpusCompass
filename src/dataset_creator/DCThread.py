@@ -25,7 +25,7 @@ def generate_dataset(
     inputs: Tuple,
     logger: QTextLogger,
     corpus_dict: Dict,
-    speakers: Dict,
+    speakers_variables: Dict,
     independent_variables: Dict,
     dependent_variables: Dict,
     stop_flag: threading.Event(),
@@ -52,7 +52,7 @@ def generate_dataset(
         raise ValueError("The corpus is empty!")
 
     # get speaker of interest
-    speakers_of_interest = speakers.keys()
+    speakers_of_interest = speakers_variables.keys()
     # remove spaces
     speakers_of_interest = [x.strip() for x in speakers_of_interest]
 
@@ -147,6 +147,8 @@ def generate_dataset(
 
         annotations.extend(anns)
 
+    # check if err_msg is not just newlines
+    err_msg = err_msg.strip()
     if err_msg:
         logger.error(err_msg)
 
@@ -237,7 +239,7 @@ def generate_dataset(
     # Finally, some pre-processing
 
     pbar = tqdm(
-        speakers,
+        speakers_variables,
         desc="Finding speakers for not annotated words",
         file=logger.text_edit_stream,
     )
@@ -329,13 +331,11 @@ def generate_dataset(
                 csv_line = ["" for _ in range(len(csv_header))]
 
                 # get independent variable information
-                for token, v in independent_variables.items():
-                    if cur_speaker != token:
-                        continue
-                    for var in v:
-                        category = idv[var]
-                        cat_idx = csv_header.index(category)
-                        csv_line[cat_idx] = var
+                cur_speaker_var=speakers_variables.get(cur_speaker, [])
+                for var in cur_speaker_var:
+                    category = idv[var]
+                    cat_idx = csv_header.index(category)
+                    csv_line[cat_idx] = var
 
                 # get the features
                 feats = t.rsplit(".", 1)

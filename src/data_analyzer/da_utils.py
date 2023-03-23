@@ -2,6 +2,7 @@ import argparse
 import csv
 import json
 import os
+import sys
 from typing import List, Dict
 
 import matplotlib.pyplot as plt
@@ -170,7 +171,7 @@ def dependent_variable_count(
         writer.writerows(csv_lines)
 
 
-def variable_analysis(df, custom_path: str):
+def variable_analysis(df, custom_path: str, dependent_variables: Dict[str,List]  ):
     """
     This function performs an analysis of the variables in the dataframe.
     It saves the covariance matrix, the correlation matrix, the highest and lowest covariance and correlation.
@@ -183,6 +184,13 @@ def variable_analysis(df, custom_path: str):
         os.mkdir(custom_path)
 
     cov = df.cov()
+
+
+    # drop the rows that are not in the list
+    rows = [r for r in cov.index if any([x in r for x in dependent_variables.keys()])]
+    cols= [c for c in cov.columns if c not in rows]
+    cov = cov.loc[rows,cols]
+
 
     # save the covariance matrix
     cov.to_csv(f"{custom_path}/covariance_matrix.csv")
@@ -198,6 +206,7 @@ def variable_analysis(df, custom_path: str):
 
     # do the same for correlation matrix
     corr = df.corr()
+    corr = corr.loc[rows,cols]
     corr.to_csv(f"{custom_path}/correlation_matrix.csv")
     corr = corr.where(np.triu(np.ones(corr.shape), k=1).astype(bool))
     corr = corr.stack()
@@ -208,6 +217,7 @@ def variable_analysis(df, custom_path: str):
 
     # do the same for the pearson correlation matrix
     pearson = df.corr(method="pearson")
+    pearson = pearson.loc[rows,cols]
     pearson.to_csv(f"{custom_path}/pearson_correlation_matrix.csv")
     pearson = pearson.where(np.triu(np.ones(pearson.shape), k=1).astype(bool))
     pearson = pearson.stack()
@@ -218,6 +228,7 @@ def variable_analysis(df, custom_path: str):
 
     # do the same for the spearman correlation matrix
     spearman = df.corr(method="spearman")
+    spearman = spearman.loc[rows,cols]
     spearman.to_csv(f"{custom_path}/spearman_correlation_matrix.csv")
     spearman = spearman.where(np.triu(np.ones(spearman.shape), k=1).astype(bool))
     spearman = spearman.stack()
@@ -280,7 +291,7 @@ def poisson_regression(
             with open(f"{custom_path}/poisson_regression_results_{dv}.csv", "w") as f:
                 f.write(csv_file)
         except Exception as e:
-            print(f"Error in poisson regression for {dv}: {e}")
+            print(f"Error in poisson regression for {dv}: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":
@@ -313,12 +324,12 @@ if __name__ == "__main__":
     speaker = []
 
     for file in os.listdir(args.preloaded_dir):
-        if "dependent_variables" in file:
-            with open(f"{args.preloaded_dir}/{file}", "r") as f:
-                dependent_variables = json.load(f)
-        elif "independent_variables" in file:
+        if "independent_variables" in file:
             with open(f"{args.preloaded_dir}/{file}", "r") as f:
                 independent_variables = json.load(f)
+        elif "dependent_variables" in file:
+            with open(f"{args.preloaded_dir}/{file}", "r") as f:
+                dependent_variables = json.load(f)
         elif "speaker" in file:
             with open(f"{args.preloaded_dir}/{file}", "r") as f:
                 speaker = json.load(f)
@@ -348,7 +359,7 @@ if __name__ == "__main__":
     if setting["variable_analysis"]:
         print("Analyzing the variables...")
         os.makedirs(custom_paths["variable_analysis"], exist_ok=True)
-        variable_analysis(binary_df, custom_paths["variable_analysis"])
+        variable_analysis(binary_df, custom_paths["variable_analysis"], dependent_variables)
         print("Done!")
 
     if setting["poisson_regression_analysis"]:
