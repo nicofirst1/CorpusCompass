@@ -59,6 +59,8 @@ class DataAnalyzer(GeneralWindow):
             poissont_regression_analysis_lay,
         ) = create_input(self, "poisson_regression_analysis", self.mem)
 
+
+
         # add logging text area
         self.logging_area = QTextEditLog(self)
 

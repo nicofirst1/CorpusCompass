@@ -126,9 +126,23 @@ class Memory(QtCore.QObject):
         self.analysis_paths = {
             "kmean": os.path.join(self.analysis_dir, "kmean"),
             "poisson_regression": os.path.join(self.analysis_dir, "poisson_regression"),
-            "variable_analysis": os.path.join(self.analysis_dir, "variable_analysis"),
-            "dependent_variable_analysis": os.path.join(
-                self.analysis_dir, "dependent_variable_analysis"
+            "pair_wise_frequency_analysis": os.path.join(
+                self.analysis_dir, "pair_wise_frequency_analysis"
+            ),
+            "proportions_analysis": os.path.join(
+                self.analysis_dir, "proportions_analysis"
+            ),
+            "cross_tabulation_analysis": os.path.join(
+                self.analysis_dir, "cross_tabulation_analysis"
+            ),
+            "chi_square_analysis": os.path.join(
+                self.analysis_dir, "chi_square_analysis"
+            ),
+            "logistic_regression_analysis": os.path.join(
+                self.analysis_dir, "logistic_regression_analysis"
+            ),
+            "point_biserial_analysis": os.path.join(
+                self.analysis_dir, "point_biserial_analysis"
             ),
         }
 
@@ -165,9 +179,13 @@ class Memory(QtCore.QObject):
             "kmean_analysis": True,
             "kmean_n_clusters": -1,
             "kmean_max_clusters": 50,
-            "dependent_variable_analysis": True,
-            "variable_analysis": True,
+            "pair_wise_frequency_analysis": True,
             "poisson_regression_analysis": True,
+            "proportions_analysis": True,
+            "cross_tabulation_analysis": True,
+            "chi_square_analysis": True,
+            "logistic_regression_analysis": True,
+            "point_biserial_analysis": True,
         }
 
         self.settings_metadata = {
@@ -236,16 +254,33 @@ class Memory(QtCore.QObject):
                 "Maximum number of clusters to try when estimating the number of clusters with the elbow method.",
                 list(range(1, 100)),
             ),
-            "dependent_variable_analysis": (
-                "Perform dependent variable analysis",
+            "pair_wise_frequency_analysis": (
+                "Perform analysis of the pair wise frequency of the annotations",
                 [True, False],
             ),
-            "variable_analysis": (
-                "Perform variable analysis",
-                [True, False],
-            ),
+
             "poisson_regression_analysis": (
                 "Perform poisson regression analysis",
+                [True, False],
+            ),
+            "proportions_analysis": (
+                "Perform proportions analysis",
+                [True, False],
+            ),
+            "cross_tabulation_analysis": (
+                "Perform cross tabulation analysis",
+                [True, False],
+            ),
+            "chi_square_analysis": (
+                "Perform chi square analysis",
+                [True, False],
+            ),
+            "logistic_regression_analysis": (
+                "Perform logistic regression analysis",
+                [True, False],
+            ),
+            "point_biserial_analysis": (
+                "Perform point biserial analysis",
                 [True, False],
             ),
         }
@@ -276,9 +311,13 @@ class Memory(QtCore.QObject):
                 "kmean_analysis",
                 "kmean_n_clusters",
                 "kmean_max_clusters",
-                "dependent_variable_analysis",
-                "variable_analysis",
+                "pair_wise_frequency_analysis",
                 "poisson_regression_analysis",
+                "proportions_analysis",
+                "cross_tabulation_analysis",
+                "chi_square_analysis",
+                "logistic_regression_analysis",
+                "point_biserial_analysis",
             ],
         )
 

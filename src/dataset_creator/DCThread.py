@@ -434,6 +434,8 @@ def generate_dataset(
         binary_dataset=df_encoded,
     )
 
+    # todo: add check for values that are not used in the corpus but appear in the variable file
+
     # Unknown categories
     # Here, we show the unknown category, if any could be found.
 

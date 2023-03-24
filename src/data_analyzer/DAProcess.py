@@ -69,7 +69,7 @@ class DAProcess(QtCore.QProcess):
 
         cmd = [
             "-m",
-            "src.data_analyzer.da_utils",
+            "src.data_analyzer.da_main",
             self.mem.preloaded_dir,
             self.mem.postprocess_paths["binary_dataset"],
             self.mem.file_settings,
