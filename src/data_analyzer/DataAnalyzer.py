@@ -48,11 +48,9 @@ class DataAnalyzer(GeneralWindow):
         (
             self.dependent_variable_analysis_input,
             dependent_variable_analysis_lay,
-        ) = create_input(self, "dependent_variable_analysis", self.mem)
+        ) = create_input(self, "pair_wise_frequency_analysis", self.mem)
 
-        self.variable_analysis_checkbox, variable_analysis_lay = create_input(
-            self, "variable_analysis", self.mem
-        )
+
 
         (
             self.poissont_regression_analysis_checkbox,
@@ -84,7 +82,6 @@ class DataAnalyzer(GeneralWindow):
         layout.addLayout(kmean_n_clusters_lay)
         layout.addLayout(kmean_max_clusters_lay)
         layout.addLayout(dependent_variable_analysis_lay)
-        layout.addLayout(variable_analysis_lay)
         layout.addLayout(poissont_regression_analysis_lay)
         layout.addWidget(self.logging_area)
         layout.addLayout(start_stop_analysis_lay)
