@@ -34,30 +34,12 @@ class DataAnalyzer(GeneralWindow):
         self.logger = AppLogger(mem, "data_analyzer.log")
 
     def create_widgets(self):
-        self.kmean_analysis_input, kmean_analysis_lay = create_input(
-            self, "kmean_analysis", self.mem
-        )
+        layout = QtWidgets.QVBoxLayout()
 
-        self.kmean_n_clusters_input, kmean_n_clusters_lay = create_input(
-            self, "kmean_n_clusters", self.mem
-        )
-        self.kmean_max_clusters_input, kmean_max_clusters_lay = create_input(
-            self, "kmean_max_clusters", self.mem
-        )
+        for set_k in self.mem.setting_groups["data_analyzer"]:
+            _, lay = create_input(self, set_k, self.mem)
 
-        (
-            self.dependent_variable_analysis_input,
-            dependent_variable_analysis_lay,
-        ) = create_input(self, "pair_wise_frequency_analysis", self.mem)
-
-
-
-        (
-            self.poissont_regression_analysis_checkbox,
-            poissont_regression_analysis_lay,
-        ) = create_input(self, "poisson_regression_analysis", self.mem)
-
-
+            layout.addLayout(lay)
 
         # add logging text area
         self.logging_area = QTextEditLog(self)
@@ -77,12 +59,7 @@ class DataAnalyzer(GeneralWindow):
         start_stop_analysis_lay.addWidget(self.stop_analysis_button)
 
         # add layout
-        layout = QtWidgets.QVBoxLayout()
-        layout.addLayout(kmean_analysis_lay)
-        layout.addLayout(kmean_n_clusters_lay)
-        layout.addLayout(kmean_max_clusters_lay)
-        layout.addLayout(dependent_variable_analysis_lay)
-        layout.addLayout(poissont_regression_analysis_lay)
+
         layout.addWidget(self.logging_area)
         layout.addLayout(start_stop_analysis_lay)
 

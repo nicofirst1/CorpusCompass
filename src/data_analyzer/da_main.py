@@ -30,13 +30,12 @@ if __name__ == "__main__":
         )
         print("Done!")
 
-
     if setting["poisson_regression_analysis"]:
-        #todo: check if correct
+        # todo: check if correct
         print("Analyzing the variables with regression...")
         os.makedirs(custom_paths["poisson_regression"], exist_ok=True)
         poisson_regression(
-            binary_df,
+            binary_df.copy(),
             independent_variables,
             speakers,
             custom_paths["poisson_regression"],
@@ -47,6 +46,7 @@ if __name__ == "__main__":
     independent_variables = to_df_names(binary_df, independent_variables)
     dependent_variables = to_df_names(binary_df, dependent_variables)
     speakers = [f"speaker:{s}" for s in speakers.keys()]
+    speakers = [s for s in speakers if s in binary_df.columns]
 
     # sort alphabetically
     independent_variables.sort()
@@ -65,8 +65,6 @@ if __name__ == "__main__":
             custom_paths["pair_wise_frequency_analysis"],
         )
         print("Done!")
-
-
 
     if setting["proportions_analysis"]:
         print("Analyzing the proportions...")
