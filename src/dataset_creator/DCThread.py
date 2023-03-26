@@ -126,7 +126,6 @@ def generate_dataset(
         csv_end.insert(0, "previous line")
     csv_header = ["token"] + csv_header + csv_end
     csv_file = [csv_header]
-    unk_categories = []
 
     if stop_flag.is_set():
         logger.info("Dataset generation stopped.")
@@ -283,6 +282,9 @@ def generate_dataset(
     # Starting the main loop
     # This part starts the main loop. You don't need to change anything here, if you are interested check out the comments.
 
+    unk_variables = {}
+    used_dep_vars = {cat: {v1: 0 for v1 in v} for cat, v in dependent_variables.items()}
+
     # for every paragraph in the transcript
     logger.info(f"Starting the main loop")
     pbar = tqdm(
@@ -350,12 +352,24 @@ def generate_dataset(
                 for f in feats.split("."):
                     # if the category is not present in the dict, then add to unk
                     if f not in idv.keys():
-                        unk_categories.append(f)
+                        if f not in unk_variables:
+                            unk_variables[f] = []
+                        unk_d = dict(
+                            file=file_path,
+                            speaker=cur_speaker,
+                            context=context,
+                            token=text,
+                            tag=org_t,
+                        )
+
+                        unk_variables[f].append(unk_d)
+
                         csv_line[-1] = csv_line[-1] + f + ","
                     else:
                         category = idv[f]
                         cat_idx = csv_header.index(category)
                         csv_line[cat_idx] = f
+                        used_dep_vars[category][f] += 1
 
                 # add initial infos and final unk to the line
                 # ["speaker", "interlocutor/s", "file", 'context', 'unk']
@@ -423,6 +437,38 @@ def generate_dataset(
     df_encoded["token"] = tokens
     df_encoded["context"] = context
 
+    # todo: add check for values that are not used in the corpus but appear in the variable file
+
+    # Unknown categories
+    # Here, we show the unknown category, if any could be found.
+
+    if len(unk_variables) > 0:
+        header = ["variable", "file", "speaker", "context", "token", "tag"]
+
+        body = []
+
+        for var, vals in unk_variables.items():
+            for val in vals:
+                body.append(
+                    [
+                        var,
+                        val["file"],
+                        val["speaker"],
+                        val["context"],
+                        val["token"],
+                        val["tag"],
+                    ]
+                )
+
+        unk_df = pd.DataFrame(data=body, columns=header)
+
+        # warn the user
+        logger.warning(
+            f"Unknown dependent variables found in the corpus. Please check the unknown_vars.csv file for more information."
+        )
+    else:
+        unk_df = pd.DataFrame()
+
     to_return = dict(
         dataset=pd.DataFrame(data=csv_file[1:], columns=csv_file[0]),
         annotation_info=pd.DataFrame(
@@ -432,22 +478,8 @@ def generate_dataset(
             data=missing_annotations[1:], columns=missing_annotations[0]
         ),
         binary_dataset=df_encoded,
+        unk_variables=unk_df,
     )
-
-    # todo: add check for values that are not used in the corpus but appear in the variable file
-
-    # Unknown categories
-    # Here, we show the unknown category, if any could be found.
-
-    if len(unk_categories) > 0:
-        unk_categories = set(unk_categories)
-        unk_categories = sorted(unk_categories)
-        logger.warning(
-            f"I have found several categories not listed in your variable file.\n"
-            f"Following in alphabetical order:"
-        )
-        for idx, c in enumerate(unk_categories):
-            logger.warning(f"{idx} - '{c}'")
 
     return to_return
 

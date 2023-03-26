@@ -2,6 +2,7 @@ import os
 
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtWidgets import QFileDialog, QComboBox, QScrollArea
+
 from src.common import (
     GeneralWindow,
     Memory,
@@ -12,8 +13,8 @@ from src.common import (
 
 
 class LoadFiles(GeneralWindow):
-
     finished = QtCore.Signal()
+
     def __init__(self, mem: Memory):
         self.corpus_files = None
         self.corpus_text = {}
@@ -71,7 +72,6 @@ class LoadFiles(GeneralWindow):
         self.finish_button = QtWidgets.QPushButton("Finish")
         self.finish_button.clicked.connect(self.finish)
         self.finish_button.setEnabled(False)
-
 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.encoding_label)
@@ -265,6 +265,14 @@ class LoadFiles(GeneralWindow):
                 return
 
             variables_files, erro_msg = open_variables(found, self.encoding)
+
+            # for all the variables, transform value to list
+            for var_file in variables_files.keys():
+                for var in variables_files[var_file].keys():
+                    if not isinstance(variables_files[var_file][var], list):
+                        variables_files[var_file][var] = [
+                            variables_files[var_file][var]
+                        ]
 
             if erro_msg:
                 self.corpus_message.setText(erro_msg)

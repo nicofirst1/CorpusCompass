@@ -127,6 +127,7 @@ def save_postprocess(results: Dict, mem: Memory):
     binary_dataset_path = os.path.join(output_dir, "binary_dataset.csv")
     annotation_info_path = os.path.join(output_dir, "annotation_info.csv")
     missed_annotation_path = os.path.join(output_dir, "missed_annotations.csv")
+    unk_variables_path = os.path.join(output_dir, "unk_variables.csv")
 
     # write the csv
     results["dataset"].to_csv(
@@ -141,6 +142,9 @@ def save_postprocess(results: Dict, mem: Memory):
     results["binary_dataset"].to_csv(
         binary_dataset_path, index=False, sep=separator, encoding="utf16"
     )
+    results["unk_variables"].to_csv(
+        unk_variables_path, index=False, sep=separator, encoding="utf16"
+    )
 
     # save the new paths in the memory
     mem.postprocess_paths = dict(
@@ -148,6 +152,7 @@ def save_postprocess(results: Dict, mem: Memory):
         binary_dataset=binary_dataset_path,
         annotation_info=annotation_info_path,
         missed_annotations=missed_annotation_path,
+        unk_variables=unk_variables_path,
     )
 
 
