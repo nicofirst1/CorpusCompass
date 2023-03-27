@@ -51,6 +51,11 @@ def generate_dataset(
         )
         raise ValueError("The corpus is empty!")
 
+    corpus_statitstics = {}
+
+    # add statistics about corpus
+    corpus_statitstics["paragraphs"] = len(corpus)
+
     # get speaker of interest
     speakers_of_interest = speakers_variables.keys()
     # remove spaces
@@ -60,11 +65,15 @@ def generate_dataset(
         f"The selected speakers of interest are: {', '.join(speakers_of_interest)}"
     )
 
+    corpus_statitstics["speakers_of_interest"] = len(speakers_of_interest)
+
     # get interviewer/interviewees names
     all_speakers = [get_name(x, name_regex) for x in corpus]
     all_speakers = set(all_speakers)
     # filter out empty all_speakers
     all_speakers = [x for x in all_speakers if x != ""]
+
+    corpus_statitstics["all_speakers"] = len(all_speakers)
 
     all_speakers_dict = {
         k: set([get_name(x, name_regex) for x in v]) for k, v in corpus_dict.items()
@@ -110,6 +119,21 @@ def generate_dataset(
 
     del variable_dict
 
+    # get statistics about the number of variables
+    corpus_statitstics["dependent_variables"] = len(dependent_variables)
+    corpus_statitstics["independent_variables"] = len(independent_variables)
+    corpus_statitstics["variables"] =  len(dependent_variables) + len(independent_variables)
+
+
+    # get the number of values for each variable
+    corpus_statitstics["variables_values"] = len(idv)
+    corpus_statitstics["dependent_variable_values"] = sum(
+        [len(x) for x in dependent_variables.values()]
+    )
+    corpus_statitstics["independent_variable_values"] = sum(
+        [len(x) for x in independent_variables.values()]
+    )
+
     # Output file settings
     # Now it's time to create the output files.
     #
@@ -133,6 +157,10 @@ def generate_dataset(
 
     # Finding all the annotated words
     whole_corpus = "\n".join(corpus)
+    wc_clean, _ = remove_features(whole_corpus, square_regex, logger)
+
+    corpus_statitstics["words"] = len(wc_clean.split())
+    corpus_statitstics["characters"] = len(wc_clean)
 
     annotations = []
     err_msg = ""
@@ -160,6 +188,7 @@ def generate_dataset(
     annotation_counter = {k: dict(annotated=v) for k, v in annotation_counter.items()}
 
     logger.info(f"There is a total of  {len(annotation_counter)} unique annotations")
+    corpus_statitstics["unique_annotations"] = len(annotation_counter)
 
     # Now, we check the number of times the token appears annotated (following the REGEX rule) vs not, we do this for each annotated token.
 
@@ -196,6 +225,9 @@ def generate_dataset(
         f"Of those {not_annotated_interest} ({not_annotated_interest / not_annotated * 100:.2f}%) "
         f"are produced by a speakers of interest"
     )
+
+    corpus_statitstics["annotated_tokens"] = annotated
+
 
     # While the previous cell, counts all the tokens in the whole corpus, we probably want to differentiate between speakers.
     # For this reason, here we need to specify where we want to look for the missed tokens.
@@ -284,6 +316,7 @@ def generate_dataset(
 
     unk_variables = {}
     used_dep_vars = {cat: {v1: 0 for v1 in v} for cat, v in dependent_variables.items()}
+    speaker_n_words = {sp: 0 for sp in all_speakers}
 
     # for every paragraph in the transcript
     logger.info(f"Starting the main loop")
@@ -300,14 +333,16 @@ def generate_dataset(
 
             c = corpus[idx]
             cur_speaker = get_name(c, name_regex)
+            clean_p, wrong_tags = remove_features(c, square_regex, logger)
+
+            # get number of words for each speaker
+            speaker_n_words[cur_speaker] += len(clean_p.split(" "))
 
             # get the paragraph without features
             if cur_speaker in speakers_of_interest:
                 sp = corpus[idx - 1]
             else:
                 continue
-
-            clean_p, wrong_tags = remove_features(c, square_regex, logger)
 
             # get the features
             tags = feat_regex.finditer(c)
@@ -389,6 +424,9 @@ def generate_dataset(
                 csv_file.append(csv_line)
 
     # Saving the output
+
+    corpus_statitstics["speaker_n_words"] = speaker_n_words
+
     # Finally, we need to save the output in the csv file for all our results
 
     # generate the annotation info file
@@ -479,6 +517,7 @@ def generate_dataset(
         ),
         binary_dataset=df_encoded,
         unk_variables=unk_df,
+        corpus_stats=corpus_statitstics,
     )
 
     return to_return

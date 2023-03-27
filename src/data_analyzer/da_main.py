@@ -48,6 +48,10 @@ if __name__ == "__main__":
     speakers = [f"speaker:{s}" for s in speakers.keys()]
     speakers = [s for s in speakers if s in binary_df.columns]
 
+    missing= [c for c in binary_df.columns if c not in independent_variables + dependent_variables + speakers]
+    if len(missing) > 0:
+        print(f"Missing columns: {missing}")
+
     # sort alphabetically
     independent_variables.sort()
     dependent_variables.sort()

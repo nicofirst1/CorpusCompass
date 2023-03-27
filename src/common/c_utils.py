@@ -128,6 +128,7 @@ def save_postprocess(results: Dict, mem: Memory):
     annotation_info_path = os.path.join(output_dir, "annotation_info.csv")
     missed_annotation_path = os.path.join(output_dir, "missed_annotations.csv")
     unk_variables_path = os.path.join(output_dir, "unk_variables.csv")
+    corpus_stats_path = os.path.join(output_dir, "corpus_stats.json")
 
     # write the csv
     results["dataset"].to_csv(
@@ -145,6 +146,9 @@ def save_postprocess(results: Dict, mem: Memory):
     results["unk_variables"].to_csv(
         unk_variables_path, index=False, sep=separator, encoding="utf16"
     )
+    # write the corpus stats to json
+    with open(corpus_stats_path, "w", encoding="utf16") as f:
+        json.dump(results["corpus_stats"], f, indent=4)
 
     # save the new paths in the memory
     mem.postprocess_paths = dict(

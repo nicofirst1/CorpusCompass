@@ -15,7 +15,10 @@ from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
+from src.data_analyzer.da_utils import catch_exception
 
+
+@catch_exception
 def proportions_analysis(df, dependent_variables, custom_path):
     if not os.path.exists(custom_path):
         os.makedirs(custom_path)
@@ -31,6 +34,7 @@ def proportions_analysis(df, dependent_variables, custom_path):
     return results
 
 
+@catch_exception
 def cross_tabulation(df, dependent_variables, independent_variables, custom_path=None):
     results = {}
     for dep_var in dependent_variables:
@@ -39,12 +43,16 @@ def cross_tabulation(df, dependent_variables, independent_variables, custom_path
             results[(dep_var, ind_var)] = pd.crosstab(
                 df[dep_var],
                 df[ind_var],
+                margins=True,
+                margins_name="Total",
+                rownames=[dep_var],
+                colnames=[ind_var],
             )
 
     # save results to csv
     if custom_path:
         for key, table in results.items():
-            file_name = f"{key[0]}~~{key[1]}.csv"
+            file_name = f"{key[1]}~~{key[0]}.csv"
             file_name = file_name.replace(" ", "_").replace("/", "_")
             file_name = os.path.join(custom_path, file_name)
             table.to_csv(file_name)
@@ -52,6 +60,7 @@ def cross_tabulation(df, dependent_variables, independent_variables, custom_path
     return results
 
 
+@catch_exception
 def chi_square_test(df, dependent_variables, independent_variables, custom_path):
     if not os.path.exists(custom_path):
         os.makedirs(custom_path)
@@ -72,6 +81,7 @@ def chi_square_test(df, dependent_variables, independent_variables, custom_path)
     return results
 
 
+@catch_exception
 def logistic_regression(df, dependent_variables, independent_variables, custom_path):
     if not os.path.exists(custom_path):
         os.makedirs(custom_path)
@@ -105,6 +115,7 @@ def logistic_regression(df, dependent_variables, independent_variables, custom_p
     return results
 
 
+@catch_exception
 def point_biserial_correlation(
     df, dependent_variables, independent_variables, custom_path
 ):
@@ -128,6 +139,7 @@ def point_biserial_correlation(
     return results
 
 
+@catch_exception
 def kmeans_analysis(
     df: pd.DataFrame,
     tokens: pd.Series,
@@ -158,6 +170,8 @@ def kmeans_analysis(
             kmeans = KMeans(n_clusters=i, random_state=42, n_init=10)
             kmeans.fit(scaled_data)
             scores.append(silhouette_score(scaled_data, kmeans.labels_))
+
+        pbar.close()
 
         # plot the scores
         plt.plot(range(2, max_clusters), scores)
@@ -190,6 +204,8 @@ def kmeans_analysis(
     # remove duplicates from clusters
     for i in range(num_clusters):
         clusters[i] = list(set(clusters[i]))
+        # remove non string elements
+        clusters[i] = [x for x in clusters[i] if isinstance(x, str)]
 
     # save the clusters
     cluster_path = f"{custom_path}/clusters"
@@ -237,6 +253,7 @@ def kmeans_analysis(
     plt.clf()
 
 
+@catch_exception
 def pair_wise_frequency(
     df: pd.DataFrame,
     dependent_variables: List[str],
@@ -278,6 +295,7 @@ def pair_wise_frequency(
         writer.writerows(csv_lines)
 
 
+@catch_exception
 def poisson_regression(
     df: pd.DataFrame, independent_vars: List[str], speakers: List[str], custom_path: str
 ):

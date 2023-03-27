@@ -1,6 +1,8 @@
 import argparse
 import json
 import os
+import sys
+import traceback
 
 import pandas as pd
 
@@ -10,7 +12,7 @@ def load_all():
     parser = argparse.ArgumentParser(
         description="This script performs an analysis of the data in the csv file."
     )
-    parser.add_argument("preloaded_dir", help="The path to the preloaded dir")
+    parser.add_argument("variable_dir", help="The path to the variable directory")
     parser.add_argument(
         "binary_dataset_path", help="The path to the binary dataset pandas csv"
     )
@@ -28,21 +30,27 @@ def load_all():
     # get the binary dataset
     binary_df = pd.read_csv(args.binary_dataset_path, sep=separator, encoding=encoding)
 
+    # replace \ufeff with nothing
+    binary_df = binary_df.replace("\ufeff", "", regex=True)
+
+    # convert all strings to int
+    binary_df = binary_df.apply(pd.to_numeric, errors="ignore")
+
     # from the preloaded dir load the dependent variables
 
     dependent_variables = []
     independent_variables = []
     speaker = []
 
-    for file in os.listdir(args.preloaded_dir):
+    for file in os.listdir(args.variable_dir):
         if "independent_variables" in file:
-            with open(f"{args.preloaded_dir}/{file}", "r") as f:
+            with open(f"{args.variable_dir}/{file}", "r") as f:
                 independent_variables = json.load(f)
         elif "dependent_variables" in file:
-            with open(f"{args.preloaded_dir}/{file}", "r") as f:
+            with open(f"{args.variable_dir}/{file}", "r") as f:
                 dependent_variables = json.load(f)
         elif "speaker" in file:
-            with open(f"{args.preloaded_dir}/{file}", "r") as f:
+            with open(f"{args.variable_dir}/{file}", "r") as f:
                 speaker = json.load(f)
 
     # open the custom paths
@@ -71,8 +79,19 @@ def to_df_names(df, variables, sep=":"):
             if name in df.columns:
                 res.append(name)
 
+
+
     return res
 
 
 # decorator to catch exception and print them to stderr
+def catch_exception(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            print(repr(e), file=sys.stderr)
+            # print the traceback
+            traceback.print_exc(file=sys.stderr)
 
+    return wrapper
