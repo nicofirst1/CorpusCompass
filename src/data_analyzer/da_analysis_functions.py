@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 import sys
 from typing import List, Dict
@@ -8,7 +9,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
-from scipy.stats import chi2_contingency, pointbiserialr
+from scipy.stats import chi2_contingency, pointbiserialr, ttest_ind
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
@@ -30,6 +31,31 @@ def proportions_analysis(df, dependent_variables, custom_path):
     # save results to csv
     df = pd.DataFrame(results, index=["proportion in dataset"]).T
     df.to_csv(f"{custom_path}/proportions.csv")
+
+    return results
+
+
+@catch_exception
+def t_test(df, dependent_variables, independent_variables, custom_path):
+    if not os.path.exists(custom_path):
+        os.makedirs(custom_path)
+    results = {}
+    csv_header = ["dependent_variable", "independent_variable", "t_statistic", "pvalue"]
+    csv_lines = [csv_header]
+    for dep_var in dependent_variables:
+        for ind_var in independent_variables:
+
+            t_statistic, pvalue = ttest_ind(
+                df[dep_var],
+                df[ind_var],
+            )
+            csv_lines.append([dep_var, ind_var, t_statistic, pvalue])
+
+
+    # save results to csv
+    with open(f"{custom_path}/t_test.csv", "w") as f:
+        writer = csv.writer(f)
+        writer.writerows(csv_lines)
 
     return results
 
@@ -117,7 +143,7 @@ def logistic_regression(df, dependent_variables, independent_variables, custom_p
 
 @catch_exception
 def point_biserial_correlation(
-    df, dependent_variables, independent_variables, custom_path
+        df, dependent_variables, independent_variables, custom_path
 ):
     if not os.path.exists(custom_path):
         os.makedirs(custom_path)
@@ -141,11 +167,11 @@ def point_biserial_correlation(
 
 @catch_exception
 def kmeans_analysis(
-    df: pd.DataFrame,
-    tokens: pd.Series,
-    custom_path: str,
-    num_clusters: int,
-    max_clusters: int,
+        df: pd.DataFrame,
+        tokens: pd.Series,
+        custom_path: str,
+        num_clusters: int,
+        max_clusters: int,
 ):
     """
     Perform a k-means analysis on the data
@@ -255,11 +281,11 @@ def kmeans_analysis(
 
 @catch_exception
 def pair_wise_frequency(
-    df: pd.DataFrame,
-    dependent_variables: List[str],
-    independent_variables: List[str],
-    speakers: List[str],
-    custom_path: str,
+        df: pd.DataFrame,
+        dependent_variables: List[str],
+        independent_variables: List[str],
+        speakers: List[str],
+        custom_path: str,
 ) -> Dict[str, Dict[str, int]]:
     # make directory for the variables
     if not os.path.exists(custom_path):
@@ -297,7 +323,7 @@ def pair_wise_frequency(
 
 @catch_exception
 def poisson_regression(
-    df: pd.DataFrame, independent_vars: List[str], speakers: List[str], custom_path: str
+        df: pd.DataFrame, independent_vars: List[str], speakers: List[str], custom_path: str
 ):
     """
     This function performs a poisson regression on the dataframe.

@@ -8,7 +8,7 @@ from src.data_analyzer.da_analysis_functions import (
     cross_tabulation,
     chi_square_test,
     logistic_regression,
-    point_biserial_correlation,
+    point_biserial_correlation, t_test,
 )
 from src.data_analyzer.da_utils import load_all, to_df_names
 
@@ -56,6 +56,12 @@ if __name__ == "__main__":
     independent_variables.sort()
     dependent_variables.sort()
     speakers.sort()
+
+    if setting["t_test_analysis"]:
+        print("Analyzing the variables with t-test...")
+        os.makedirs(custom_paths["t_test"], exist_ok=True)
+        t_test(binary_df, dependent_variables, independent_variables, custom_paths["t_test"])
+        print("Done!")
 
     # analyze the dependent variables
     if setting["pair_wise_frequency_analysis"]:

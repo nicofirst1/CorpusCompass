@@ -27,3 +27,11 @@ src/analysis/
 src/postprocessed/
 
 dist/
+
+.corpus_compass/
+
+analysis/t_test/
+
+CorpusCompass.egg-info/
+
+postprocessed/

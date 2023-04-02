@@ -127,16 +127,16 @@ class Memory(QtCore.QObject):
             "kmean": os.path.join(self.analysis_dir, "kmean"),
             "poisson_regression": os.path.join(self.analysis_dir, "poisson_regression"),
             "pair_wise_frequency_analysis": os.path.join(
-                self.analysis_dir, "pair_wise_frequency_analysis"
+                self.analysis_dir, "pair_wise_frequency"
             ),
             "proportions_analysis": os.path.join(
                 self.analysis_dir, "proportions_analysis"
             ),
             "cross_tabulation_analysis": os.path.join(
-                self.analysis_dir, "cross_tabulation_analysis"
+                self.analysis_dir, "cross_tabulation"
             ),
             "chi_square_analysis": os.path.join(
-                self.analysis_dir, "chi_square_analysis"
+                self.analysis_dir, "chi_square"
             ),
             "logistic_regression_analysis": os.path.join(
                 self.analysis_dir, "logistic_regression_analysis"
@@ -144,6 +144,7 @@ class Memory(QtCore.QObject):
             "point_biserial_analysis": os.path.join(
                 self.analysis_dir, "point_biserial_analysis"
             ),
+            "t_test_analysis": os.path.join(self.analysis_dir, "t_test"),
         }
 
         # load the memory
@@ -186,6 +187,7 @@ class Memory(QtCore.QObject):
             "chi_square_analysis": True,
             "logistic_regression_analysis": True,
             "point_biserial_analysis": True,
+            "t_test_analysis": True,
         }
 
         self.settings_metadata = {
@@ -283,6 +285,10 @@ class Memory(QtCore.QObject):
                 "Perform point biserial analysis",
                 [True, False],
             ),
+            "t_test_analysis": (
+                "Perform t test analysis",
+                [True, False],
+            ),
         }
 
         self.setting_groups = dict(
@@ -318,6 +324,7 @@ class Memory(QtCore.QObject):
                 "chi_square_analysis",
                 "logistic_regression_analysis",
                 "point_biserial_analysis",
+                "t_test_analysis",
             ],
         )
 
