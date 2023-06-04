@@ -10,7 +10,7 @@ from src.common.Memory import Memory
 
 
 def multi_corpus_upload(
-    corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16"
+        corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16"
 ) -> Tuple[Dict[str, str], List[str]]:
     """
     Upload multiple corpus
@@ -79,7 +79,7 @@ def multi_corpus_upload(
 
 
 def load_postprocess(
-    paths: List[str], encoding: str, separator: str
+        paths: List[str], encoding: str, separator: str
 ) -> Tuple[List[Any], Optional[str]]:
     """
     Open the file and return the content
@@ -161,7 +161,7 @@ def save_postprocess(results: Dict, mem: Memory):
 
 
 def open_variables(
-    paths: List[str], encoding: str
+        paths: List[str], encoding: str
 ) -> Union[Tuple[Dict[str, Any], str], Tuple[Dict[str, Any], None]]:
     """
     Open the file and return the content
@@ -195,11 +195,13 @@ def open_variables(
 
 
 def create_input(
-    parent,
-    name: str,
-    mem: Memory,
-    arrange: Literal["vert", "horz"] = "horz",
-    delay: int = 2,
+        parent,
+        name: str,
+        mem: Memory,
+        arrange: Literal["vert", "horz"] = "horz",
+        delay: int = 2,
+        custom_class: Optional[QtWidgets.QWidget] = None,
+        predefined_value: Optional[Any] = None,
 ) -> Tuple[QtWidgets.QWidget, QtWidgets.QHBoxLayout]:
     """
     Create a widget for a setting
@@ -209,7 +211,7 @@ def create_input(
     :param delay: the delay for the timer
     """
     description, choices = mem.settings_metadata[name]
-    value = mem.settings.get(name, None)
+    value = mem.settings.get(name, predefined_value)
     pretty_name = to_pretty_name(name)
     save_setting_method = mem.save_setting(parent, name)
 
@@ -223,47 +225,56 @@ def create_input(
     label = QtWidgets.QLabel(pretty_name + ":")
     label.setAlignment(QtCore.Qt.AlignRight)
 
-    # check if choices is boolean
-    if len(choices) == 2 and isinstance(choices[0], bool):
-        widget = QtWidgets.QCheckBox("", parent)
+    if custom_class is not None:
+        widget = custom_class(parent)
         widget.setObjectName(name)
-        widget.setChecked(mem.settings[name])
-        widget.stateChanged.connect(save_setting_method)
-
-    elif len(choices) > 0:
-        # if choices are all integers
-        if all(isinstance(x, int) for x in choices):
-            widget = QtWidgets.QSpinBox()
+        widget.setText(str(value))
+        widget.textChanged.connect(save_setting_method)
+        layout.addWidget(widget)
+        layout.addWidget(label)
+        return widget, layout
+    else:
+        # check if choices is boolean
+        if len(choices) == 2 and isinstance(choices[0], bool):
+            widget = QtWidgets.QCheckBox("", parent)
             widget.setObjectName(name)
-            widget.setRange(min(choices), max(choices))
-            widget.setValue(value)
-            widget.valueChanged.connect(save_setting_method)
+            widget.setChecked(mem.settings[name])
+            widget.stateChanged.connect(save_setting_method)
+
+        elif len(choices) > 0:
+            # if choices are all integers
+            if all(isinstance(x, int) for x in choices):
+                widget = QtWidgets.QSpinBox()
+                widget.setObjectName(name)
+                widget.setRange(min(choices), max(choices))
+                widget.setValue(value)
+                widget.valueChanged.connect(save_setting_method)
+
+            else:
+                widget = QtWidgets.QComboBox()
+                widget.setObjectName(name)
+                widget.addItems([str(x) for x in choices])
+                widget.setCurrentIndex(choices.index(value))
+
+                # Find the width of the largest item text
+                width = 0
+                font = widget.font()
+                for item in choices:
+                    fm = QtGui.QFontMetrics(font)
+                    width = max(width, fm.horizontalAdvance(str(item)))
+
+                # Set the minimum width of the QComboBox
+                widget.setMinimumWidth(width + 50)
+
+                widget.currentIndexChanged.connect(save_setting_method)
 
         else:
-            widget = QtWidgets.QComboBox()
+            # todo: change from editingFinished to modified
+            widget = QtWidgets.QLineEdit()
             widget.setObjectName(name)
-            widget.addItems([str(x) for x in choices])
-            widget.setCurrentIndex(choices.index(value))
-
-            # Find the width of the largest item text
-            width = 0
-            font = widget.font()
-            for item in choices:
-                fm = QtGui.QFontMetrics(font)
-                width = max(width, fm.horizontalAdvance(str(item)))
-
-            # Set the minimum width of the QComboBox
-            widget.setMinimumWidth(width + 50)
-
-            widget.currentIndexChanged.connect(save_setting_method)
-
-    else:
-        # todo: change from editingFinished to modified
-        widget = QtWidgets.QLineEdit()
-        widget.setObjectName(name)
-        widget.setPlaceholderText("Enter a value...")
-        widget.setText(str(value))
-        widget.editingFinished.connect(save_setting_method)
+            widget.setPlaceholderText("Enter a value...")
+            widget.setText(str(value))
+            widget.editingFinished.connect(save_setting_method)
 
     timer = QtCore.QTimer(parent)
     timer.setSingleShot(True)

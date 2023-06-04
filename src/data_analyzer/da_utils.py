@@ -43,13 +43,13 @@ def load_all():
     speaker = []
 
     for file in os.listdir(args.variable_dir):
-        if "independent_variables" in file:
+        if file == "independent_variables.json":
             with open(f"{args.variable_dir}/{file}", "r") as f:
                 independent_variables = json.load(f)
-        elif "dependent_variables" in file:
+        elif file == "dependent_variables.json":
             with open(f"{args.variable_dir}/{file}", "r") as f:
                 dependent_variables = json.load(f)
-        elif "speaker" in file:
+        elif file == "speakers.json":
             with open(f"{args.variable_dir}/{file}", "r") as f:
                 speaker = json.load(f)
 
@@ -78,8 +78,6 @@ def to_df_names(df, variables, sep=":"):
             name = f"{k}{sep}{i}"
             if name in df.columns:
                 res.append(name)
-
-
 
     return res
 

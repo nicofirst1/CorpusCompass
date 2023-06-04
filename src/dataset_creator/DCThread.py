@@ -356,12 +356,12 @@ def generate_dataset(
 
                 # skip annotations that are not valid
                 if t.split(".")[-1] not in annotation_counter.keys():
-                    logger.waring(f"\nSkipping '{t}' because it is not valid")
+                    logger.warning(f"\nSkipping '{t}' because it is not valid")
                     continue
 
                 # skip any tags that are wrongly formatted
                 if any([t in wt for wt in wrong_tags]):
-                    logger.waring(f"\nSkipping '{t}' because it is wrongly formatted")
+                    logger.warning(f"\nSkipping '{t}' because it is wrongly formatted")
                     continue
 
                 # initialize empty row

@@ -339,8 +339,8 @@ def poisson_regression(
 
     independent_variables = []
     for c in df.columns:
-        c1 = c.split(":")[1]
-        if any([x in c for x in independent_vars]) or c1 in speakers:
+        cat_val = c.split(":")[1]
+        if any([x in c for x in independent_vars]) or cat_val in speakers:
             independent_variables.append(c)
 
     # get all the other columns in the df
@@ -355,6 +355,7 @@ def poisson_regression(
         .replace("/", "_")
         .replace(",", "_")
         .replace(".", "_")
+        .replace("+", "_")
     )
 
     # replace the spaces in the column names with underscores
@@ -366,8 +367,9 @@ def poisson_regression(
     for dv in independent_variables:
         # get the poisson regression results
         try:
+            formula=f"{dv} ~ {' + '.join(dependent_variables)}"
             poisson_results = smf.glm(
-                formula=f"{dv} ~ {' + '.join(dependent_variables)}",
+                formula=formula,
                 data=df,
                 family=sm.families.Poisson(),
             ).fit()

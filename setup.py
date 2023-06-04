@@ -1,7 +1,8 @@
 from setuptools import setup
 
 # common requirements for all packages
-common_requirements = ['pandas', 'numpy',"PySide6",'nltk', 'matplotlib', 'statsmodels', 'scikit-learn','tqdm', 'nltk']
+common_requirements = ['pandas', 'numpy', "PySide6", 'nltk', 'matplotlib', 'statsmodels', 'scikit-learn', 'tqdm',
+                       'nltk']
 
 setup(
     name='CorpusCompass',

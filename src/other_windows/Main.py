@@ -4,6 +4,7 @@ from src.annotation_fixer import AnnotationFixer
 from src.common import GeneralWindow, Memory, load_postprocess
 from src.data_analyzer import DataAnalyzer
 from src.dataset_creator import DatasetCreator
+from src.dataset_updater import DatasetUpdater
 from src.other_windows import LoadFiles, Settings
 from src.other_windows.AskLoaded import AskLoading
 
@@ -47,6 +48,12 @@ class Main(GeneralWindow):
         self.annotation_fixer_button.clicked.connect(self.open_window)
         self.annotation_fixer_button.setEnabled(False)
 
+        # create a button for the dataset updater
+        self.dataset_updater_button = QtWidgets.QPushButton("Dataset Updater")
+        self.dataset_updater_button.clicked.connect(self.open_window)
+        self.dataset_updater_button.setEnabled(False)
+
+
         # create a button for the data_analyzer
         self.data_analyzer_button = QtWidgets.QPushButton("Data Analyzer")
         self.data_analyzer_button.clicked.connect(self.open_window)
@@ -64,6 +71,7 @@ class Main(GeneralWindow):
         self.layout.addWidget(self.load_files_button)
         self.layout.addWidget(self.dataset_creator_button)
         self.layout.addWidget(self.annotation_fixer_button)
+        self.layout.addWidget(self.dataset_updater_button)
         self.layout.addWidget(self.data_analyzer_button)
         self.layout.addWidget(self.setting_button)
 
@@ -118,6 +126,7 @@ class Main(GeneralWindow):
         if self.postprocess_data is not None:
             self.annotation_fixer_button.setEnabled(True)
             self.data_analyzer_button.setEnabled(True)
+            self.dataset_updater_button.setEnabled(True)
 
     def open_window(self):
         # get the sender
@@ -148,3 +157,6 @@ class Main(GeneralWindow):
         elif sender == self.setting_button:
             self.window_settings = Settings(self.mem)
             self.window_settings.show()
+        elif sender == self.dataset_updater_button:
+            self.window_dataset_updater = DatasetUpdater(self.mem, self.preloaded_data, self.postprocess_data)
+            self.window_dataset_updater.show()
