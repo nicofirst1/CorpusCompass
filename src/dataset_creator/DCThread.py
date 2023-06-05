@@ -222,7 +222,7 @@ def generate_dataset(
         f"There is a total of {annotated} annotations in the corpus ({annotated / len(whole_corpus.split(' ')) * 100:.2f}% "
         f"of the corpus).\n"
         f"I found {not_annotated} not annotated words that where previously annotated.\n"
-        f"Of those {not_annotated_interest} ({not_annotated_interest / not_annotated * 100:.2f}%) "
+        f"Of those {not_annotated_interest} ({not_annotated_interest / (not_annotated+1e-10) * 100:.2f}%) "
         f"are produced by a speakers of interest"
     )
 
@@ -304,8 +304,9 @@ def generate_dataset(
             + annotation_counter[token]["not annotated"]
         )
         for speaker in speakers_of_interest:
-            annotation_counter[token][speaker + " annotated"] = 0
-            annotation_counter[token][speaker + " not annotated"] = 0
+            if speaker + " annotated" not in annotation_counter[token]:
+                annotation_counter[token][speaker + " annotated"] = 0
+                annotation_counter[token][speaker + " not annotated"] = 0
 
             if stop_flag.is_set():
                 logger.info("Dataset generation stopped.")
@@ -370,9 +371,13 @@ def generate_dataset(
                 # get independent variable information
                 cur_speaker_var = speakers_variables.get(cur_speaker, [])
                 for var in cur_speaker_var:
-                    category = idv[var]
-                    cat_idx = csv_header.index(category)
-                    csv_line[cat_idx] = var
+                    try:
+                        category = idv[var]
+                        cat_idx = csv_header.index(category)
+                        csv_line[cat_idx] = var
+                    except KeyError:
+                        logger.warning(f"\nSkipping '{var}' because it was not found as an independent variable")
+                        continue
 
                 # get the features
                 feats = t.rsplit(".", 1)
@@ -436,8 +441,7 @@ def generate_dataset(
         annotation_info.append([token] + list(v.values()))
 
     # save the not annotated log
-    missing_annotations = []
-    if len(not_annotated_log) > 0:
+    if any([len(x)>0 for x in not_annotated_log.values()]):
         header = ["file", "token"]
 
         # count the maximum length for all the values of the values of the dict
@@ -451,6 +455,8 @@ def generate_dataset(
         for path, vals in not_annotated_log.items():
             for token, context in vals.items():
                 missing_annotations.append([path, token] + context)
+    else:
+        missing_annotations = [["No missing annotations"]]
 
     # Binary Dataset
     # The original dataset likely had categorical variables with multiple possible values represented as text or numbers. In order to perform certain types of analysis or feed the data into a machine learning model, it's often helpful to convert these categorical variables into a numerical format. One way to do this is through one-hot encoding, where a new binary column is created for each possible value of a categorical variable. This new dataset will differ from the original in that it will have more columns, one for each possible value of the categorical variables. Additionally, each row will now contain only 0's and 1's. The benefit of having the dataset encoded in this format is that it allows for the data to be easily processed by many machine learning algorithms, since they often expect numerical data as input. Additionally, one-hot encoding can help improve the performance of certain types of models, such as decision trees, by allowing them to make splits on categorical variables without having to convert them to numerical values first.
@@ -506,7 +512,8 @@ def generate_dataset(
             f"Unknown dependent variables found in the corpus. Please check the unknown_vars.csv file for more information."
         )
     else:
-        unk_df = pd.DataFrame()
+        unk_df = [["No unknown variables found"]]
+        unk_df = pd.DataFrame(data=unk_df, columns=["No unknown variables found"])
 
     to_return = dict(
         dataset=pd.DataFrame(data=csv_file[1:], columns=csv_file[0]),
