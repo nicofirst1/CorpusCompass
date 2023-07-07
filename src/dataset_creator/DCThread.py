@@ -221,7 +221,7 @@ def generate_dataset(
     logger.info(
         f"There is a total of {annotated} annotations in the corpus ({annotated / len(whole_corpus.split(' ')) * 100:.2f}% "
         f"of the corpus).\n"
-        f"I found {not_annotated} not annotated words that where previously annotated.\n"
+        f"I found {not_annotated} not annotated words that were previously annotated.\n"
         f"Of those {not_annotated_interest} ({not_annotated_interest / (not_annotated+1e-10) * 100:.2f}%) "
         f"are produced by a speakers of interest"
     )
@@ -318,6 +318,7 @@ def generate_dataset(
     unk_variables = {}
     used_dep_vars = {cat: {v1: 0 for v1 in v} for cat, v in dependent_variables.items()}
     speaker_n_words = {sp: 0 for sp in all_speakers}
+    not_found_vars = []
 
     # for every paragraph in the transcript
     logger.info(f"Starting the main loop")
@@ -376,8 +377,10 @@ def generate_dataset(
                         cat_idx = csv_header.index(category)
                         csv_line[cat_idx] = var
                     except KeyError:
-                        logger.warning(f"\nSkipping '{var}' because it was not found as an independent variable")
+                        not_found_vars.append(var)
                         continue
+
+
 
                 # get the features
                 feats = t.rsplit(".", 1)
@@ -428,8 +431,10 @@ def generate_dataset(
                 csv_line[-1] = csv_line[-1].strip(",")
                 csv_file.append(csv_line)
 
+    not_found_vars=list(set(not_found_vars))
+    if len(not_found_vars) > 0:
+        logger.warning(f"\n\nThe following variables were not found in the independent variables file: {not_found_vars}")
     # Saving the output
-
     corpus_statitstics["speaker_n_words"] = speaker_n_words
 
     # Finally, we need to save the output in the csv file for all our results

@@ -95,6 +95,6 @@ and run `p2j notebook.py` in the directory of the python file.
 ### Compiling the app
 To compile the app you can use pyinstaller. 
 To do this, install pyinstaller with `pip install pyinstaller` and run 
-```bash
-pyinstaller main.py -n CorpusCompass  --windowed --icon=includes/icon.jpg 
+```bashpyinstaller main.py -n CorpusCompass  --windowed --icon=includes/icon.jpg 
+
 ```
