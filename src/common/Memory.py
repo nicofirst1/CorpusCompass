@@ -159,23 +159,27 @@ class Memory(QtCore.QObject):
             "text_font": "Arial",
             "text_size": 12,
             "window_size": (500, 500),
+
             # general
             "separator": ";",
             "encoding": "utf-16",
             "use_loaded": False,
             "annotation_regex": r"(\[\$[\S ]*?\])",
             "suppress_existent": True,
+
             # annotation fixer
             "minimum_repetitions": 1,
             "use_strict_rule": True,
             "data_source": "info",
             "auto_annotation_thr": 0.5,
+
             # dataset creator
             "feat_regex": r"\[\$([\S ]*?)\]",
             "name_regex": r"(^[A-z0-9?._]+) ",
             "previous_line": False,
             "ngram_prev": 10,
             "ngram_next": 10,
+
             # data analyzer
             "kmean_analysis": True,
             "kmean_n_clusters": -1,
@@ -188,6 +192,11 @@ class Memory(QtCore.QObject):
             "logistic_regression_analysis": True,
             "point_biserial_analysis": True,
             "t_test_analysis": True,
+
+            # dataset updater
+            "new_data_file": "",
+            "old_data_file": "",
+            "corpus_dir": "",
         }
 
         self.settings_metadata = {
@@ -289,6 +298,21 @@ class Memory(QtCore.QObject):
                 "Perform t test analysis",
                 [True, False],
             ),
+
+            # dataset updater
+            "new_data_file": (
+                "Modified dataset.csv file",
+                [],
+            ),
+            "old_data_file": (
+                "Original dataset.csv file",
+                [],
+            ),
+            "corpus_dir": (
+                "Directory containing the corpus",
+                [],
+            ),
+
         }
 
         self.setting_groups = dict(
@@ -325,6 +349,11 @@ class Memory(QtCore.QObject):
                 "logistic_regression_analysis",
                 "point_biserial_analysis",
                 "t_test_analysis",
+            ],
+            dataset_updater=[
+                "new_data_file",
+                "old_data_file",
+                "corpus_dir",
             ],
         )
 

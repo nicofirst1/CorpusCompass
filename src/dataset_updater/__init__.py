@@ -1,6 +1,6 @@
-from .DatasetCreator import DatasetCreator
+from .DatasetUpdater import DatasetUpdater
 
 
 __all__ = [
-    "DatasetCreator",
+    "DatasetUpdater",
 ]
