@@ -181,6 +181,7 @@ class Memory(QtCore.QObject):
             "kmean_n_clusters": -1,
             "kmean_max_clusters": 50,
             "pair_wise_frequency_analysis": True,
+            "pair_wise_frequency_normalizer_multiplier": 1000,
             "poisson_regression_analysis": True,
             "proportions_analysis": True,
             "cross_tabulation_analysis": True,
@@ -260,6 +261,10 @@ class Memory(QtCore.QObject):
                 "Perform analysis of the pair wise frequency of the annotations",
                 [True, False],
             ),
+            "pair_wise_frequency_normalizer_multiplier": (
+                "Multiplier to use for the normalizer of the pair wise frequency analysis",
+                list(range(1, 1000,100)),
+            ),
 
             "poisson_regression_analysis": (
                 "Perform poisson regression analysis",
@@ -318,6 +323,7 @@ class Memory(QtCore.QObject):
                 "kmean_n_clusters",
                 "kmean_max_clusters",
                 "pair_wise_frequency_analysis",
+                "pair_wise_frequency_normalizer_multiplier",
                 "poisson_regression_analysis",
                 "proportions_analysis",
                 "cross_tabulation_analysis",

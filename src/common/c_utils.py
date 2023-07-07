@@ -157,6 +157,7 @@ def save_postprocess(results: Dict, mem: Memory):
         annotation_info=annotation_info_path,
         missed_annotations=missed_annotation_path,
         unk_variables=unk_variables_path,
+        corpus_stats=corpus_stats_path,
     )
 
 

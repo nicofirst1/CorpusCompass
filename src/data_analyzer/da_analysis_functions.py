@@ -1,8 +1,7 @@
 import csv
-import json
 import os
 import sys
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -44,13 +43,11 @@ def t_test(df, dependent_variables, independent_variables, custom_path):
     csv_lines = [csv_header]
     for dep_var in dependent_variables:
         for ind_var in independent_variables:
-
             t_statistic, pvalue = ttest_ind(
                 df[dep_var],
                 df[ind_var],
             )
             csv_lines.append([dep_var, ind_var, t_statistic, pvalue])
-
 
     # save results to csv
     with open(f"{custom_path}/t_test.csv", "w") as f:
@@ -286,6 +283,7 @@ def pair_wise_frequency(
         independent_variables: List[str],
         speakers: List[str],
         custom_path: str,
+        normalization_dict: Optional[Dict[str, int]] = None,
 ) -> Dict[str, Dict[str, int]]:
     # make directory for the variables
     if not os.path.exists(custom_path):
@@ -305,6 +303,11 @@ def pair_wise_frequency(
 
         for oc in dependent_variables:
             rep = int(df_subset[oc].sum())
+
+            # normalize the count
+            if normalization_dict is not None:
+                rep = rep / normalization_dict[c]
+
             csv_row.append(rep)
 
         # add the repetition to the dictionary
@@ -315,8 +318,13 @@ def pair_wise_frequency(
     csv_row = ["total"] + [total_repetitions[oc] for oc in dependent_variables]
     csv_lines.append(csv_row)
 
+    file_name = f"{custom_path}/dependent_variable_count"
+    if normalization_dict is not None:
+        file_name += "_normalized"
+    file_name += ".csv"
+
     # save the csv
-    with open(f"{custom_path}/dependent_variable_count.csv", "w") as f:
+    with open(file_name, "w") as f:
         writer = csv.writer(f)
         writer.writerows(csv_lines)
 
@@ -367,7 +375,7 @@ def poisson_regression(
     for dv in independent_variables:
         # get the poisson regression results
         try:
-            formula=f"{dv} ~ {' + '.join(dependent_variables)}"
+            formula = f"{dv} ~ {' + '.join(dependent_variables)}"
             poisson_results = smf.glm(
                 formula=formula,
                 data=df,

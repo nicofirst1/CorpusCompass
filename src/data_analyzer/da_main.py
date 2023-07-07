@@ -13,7 +13,7 @@ from src.data_analyzer.da_analysis_functions import (
 from src.data_analyzer.da_utils import load_all, to_df_names
 
 if __name__ == "__main__":
-    setting, custom_paths, variables, data = load_all()
+    setting, custom_paths, variables, data, nomalization_num = load_all()
 
     dependent_variables, independent_variables, speakers = variables
     binary_df, tokens, context = data
@@ -73,6 +73,19 @@ if __name__ == "__main__":
             independent_variables,
             speakers,
             custom_paths["pair_wise_frequency_analysis"],
+        )
+        print("Done!")
+
+        print("Analyzing the dependent variables with normalized values...")
+        os.makedirs(custom_paths["pair_wise_frequency_analysis"], exist_ok=True)
+        pair_wise_frequency(
+            binary_df,
+            dependent_variables,
+            independent_variables,
+            speakers,
+            custom_paths["pair_wise_frequency_analysis"],
+            normalization_dict=nomalization_num,
+
         )
         print("Done!")
 

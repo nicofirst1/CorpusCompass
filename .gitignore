@@ -35,3 +35,5 @@ analysis/t_test/
 CorpusCompass.egg-info/
 
 postprocessed/
+
+*.zip

@@ -70,10 +70,10 @@ class DAProcess(QtCore.QProcess):
         cmd = [
             "-m",
             "src.data_analyzer.da_main",
-            self.mem.lfp['variables_dir'],
-            self.mem.postprocess_paths["binary_dataset"],
-            self.mem.file_settings,
-            self.mem.file_analysis_paths,
+            f"\"{self.mem.lfp['variables_dir']}\"",
+            f"\"{self.mem.file_postprocess_paths}\"",
+            f"\"{self.mem.file_settings}\"",
+            f"\"{self.mem.file_analysis_paths}\"",
         ]
 
         self.logger.debug(
