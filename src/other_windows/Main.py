@@ -4,7 +4,6 @@ from src.annotation_fixer import AnnotationFixer
 from src.common import GeneralWindow, Memory, load_postprocess
 from src.data_analyzer import DataAnalyzer
 from src.dataset_creator import DatasetCreator
-from src.dataset_updater import DatasetUpdater
 from src.other_windows import LoadFiles, Settings
 from src.other_windows.AskLoaded import AskLoading
 
@@ -157,6 +156,4 @@ class Main(GeneralWindow):
         elif sender == self.setting_button:
             self.window_settings = Settings(self.mem)
             self.window_settings.show()
-        elif sender == self.dataset_updater_button:
-            self.window_dataset_updater = DatasetUpdater(self.mem, self.preloaded_data, self.postprocess_data)
-            self.window_dataset_updater.show()
+
