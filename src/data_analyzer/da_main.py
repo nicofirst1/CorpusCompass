@@ -48,7 +48,7 @@ if __name__ == "__main__":
     speakers = [f"speaker:{s}" for s in speakers.keys()]
     speakers = [s for s in speakers if s in binary_df.columns]
 
-    missing= [c for c in binary_df.columns if c not in independent_variables + dependent_variables + speakers]
+    missing = [c for c in binary_df.columns if c not in independent_variables + dependent_variables + speakers]
     if len(missing) > 0:
         print(f"Missing columns: {missing}")
 
@@ -73,6 +73,8 @@ if __name__ == "__main__":
             independent_variables,
             speakers,
             custom_paths["pair_wise_frequency_analysis"],
+            speakers_properties=variables[2],
+
         )
         print("Done!")
 
@@ -83,8 +85,10 @@ if __name__ == "__main__":
             dependent_variables,
             independent_variables,
             speakers,
+
             custom_paths["pair_wise_frequency_analysis"],
             normalization_dict=nomalization_num,
+            speakers_properties=variables[2],
 
         )
         print("Done!")

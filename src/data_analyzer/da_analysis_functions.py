@@ -283,6 +283,7 @@ def pair_wise_frequency(
         independent_variables: List[str],
         speakers: List[str],
         custom_path: str,
+        speakers_properties: Optional[Dict[str, List[str]]] = None,
         normalization_dict: Optional[Dict[str, int]] = None,
 ) -> Dict[str, Dict[str, int]]:
     # make directory for the variables
@@ -321,6 +322,30 @@ def pair_wise_frequency(
     file_name = f"{custom_path}/dependent_variable_count"
     if normalization_dict is not None:
         file_name += "_normalized"
+
+    # load the csv lines into a dataframe with rows and columns names
+
+    df = pd.DataFrame(csv_lines[1:], columns=csv_lines[0])
+
+    # drop all rows that do not contain "speaker" in the first column
+    df = df[df['speaker/independent variable'].str.contains("speaker")]
+
+    indep_vars = [v for v in other_columns if "speaker" not in v]
+
+    for prp in indep_vars:
+        bool_l = []
+        v = prp.split(":")[1]
+        for sp in df['speaker/independent variable']:
+            sp = sp.split(":")[1]
+            props = speakers_properties[sp]
+            bool_l.append(v in props)
+
+        # make a new column with the boolean values
+        df[prp] = bool_l
+
+    # save the dataframe as a csv
+    df.to_csv(file_name + "_for_model.csv", index=False)
+
     file_name += ".csv"
 
     # save the csv

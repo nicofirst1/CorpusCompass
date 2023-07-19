@@ -263,7 +263,7 @@ class Memory(QtCore.QObject):
             ),
             "pair_wise_frequency_normalizer_multiplier": (
                 "Multiplier to use for the normalizer of the pair wise frequency analysis",
-                list(range(0, 1001,100)),
+                [1,10, 100, 1000, 10000, 100000],
             ),
 
             "poisson_regression_analysis": (
