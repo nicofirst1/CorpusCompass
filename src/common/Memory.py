@@ -78,10 +78,19 @@ class Memory(QtCore.QObject):
 
     def __init__(self):
         super().__init__()
-        self.dir = ".corpus_compass"
+        # get current working directory
+        self.dir = os.path.dirname(os.path.abspath(__file__))
 
-        # get absolute path
-        self.dir = os.path.abspath(self.dir)
+        # find the index of the corpus compass folder by splitting with the os separator
+        index = [ind for ind in range(len(self.dir.split(os.sep))) if "CorpusCompass" in self.dir.split(os.sep)[ind]][0]
+
+        # get the corpus compass folder
+        self.dir = os.sep.join(self.dir.split(os.sep)[:index+1])
+
+        # append the corpus compass folder
+        self.dir = os.path.join(self.dir, ".corpus_compass")
+
+
         # create dir if not exists
         if not os.path.exists(self.dir):
             os.mkdir(self.dir)
