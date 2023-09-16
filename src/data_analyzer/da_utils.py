@@ -88,7 +88,7 @@ def load_all():
             for sp_k, sp_v in speaker.items():
 
                 # if the value of the independent variable is in the speaker
-                if iv_v in sp_v:
+                if iv_v in sp_v and sp_k in speaker_words.keys():
                     # add the number of words of the speaker to the normalization number
                     normalization_num[f"{iv_k}:{iv_v}"] += speaker_words[sp_k]
 
