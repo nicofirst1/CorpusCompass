@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1298</width>
+    <height>781</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Corpus Compass</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/images/images/cc_logo_sd.png</normaloff>:/images/images/cc_logo_sd.png</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{
+	background-color: white;
+}
+
+/*QPushButton {
+    background-color:rgb(154, 217, 234) ;
+	color: white;
+    min-width: 80px;
+	min-height: 40px;
+	border-style: solid;
+	border-color: rgb(154, 217, 234);
+	border-width: 5px;
+	border-radius: 10px;
+}
+
+QPushButton:pressed {
+	background-color:rgb(134, 189, 203) ;
+	border-color: rgb(134, 189, 203);
+	color: rgb(245, 245, 245);
+}
+
+QPushButton:flat {
+    border: none; /* no border for a flat push button 
+}
+
+QPushButton:default {
+    border-color: navy; /* make the default button prominent 
+}
+*/</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>-1</number>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1298</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>

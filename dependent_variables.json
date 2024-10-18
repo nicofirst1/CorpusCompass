@@ -1,7 +1,0 @@
-{
-  "Typical Iraqi-Arabic": "TYP-IA",
-  "German" : ["G-DL", "G-EDU", "G-JOB"],
-  "Question word" : "Q-WORD",
-  "Gender": ["male","female"],
-  "Age" : ["old", "young"]
-}

@@ -1,0 +1,35 @@
+<RCC>
+  <qresource prefix="images">
+    <file>images/trash_icon_fat.png</file>
+    <file>images/import_icon.png</file>
+    <file>images/import_icon_white.png</file>
+    <file>images/edit_icon_white.png</file>
+    <file>images/exit_icon.png</file>
+    <file>images/exit_icon_white.png</file>
+    <file>images/export_icon_white.png</file>
+    <file>images/open_icon.png</file>
+    <file>images/open_icon_white.png</file>
+    <file>images/refresh_icon_white.png</file>
+    <file>images/refresh_icon.png</file>
+    <file>images/settings_symbol.png</file>
+    <file>images/warning_symbol.png</file>
+    <file>images/checked_icon.png</file>
+    <file>images/unchecked_icon.png</file>
+    <file>images/export_icon.png</file>
+    <file>images/edit_icon.png</file>
+    <file>images/trash_icon.png</file>
+    <file>images/cc_logo_write.png</file>
+    <file>images/cc_logo_bk_hd.png</file>
+    <file>images/cc_logo_box_black.png</file>
+    <file>images/cc_logo_box_white.png</file>
+    <file>images/cc_logo_round_black.png</file>
+    <file>images/cc_logo_round_white.png</file>
+    <file>images/cc_logo_sd.png</file>
+    <file>images/cc_logo_write.jpg</file>
+    <file>images/Home_Icon.svg</file>
+    <file>images/Plus_Icon.svg</file>
+    <file>images/CorpusCompass_Icon.svg</file>
+    <file>images/CorpusCompass Main Image.png</file>
+    <file>images/Help_Icon.svg</file>
+  </qresource>
+</RCC>

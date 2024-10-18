@@ -1,0 +1,6 @@
+PySide6
+pandas
+tqdm
+nltk
+PyInstaller
+pillow
