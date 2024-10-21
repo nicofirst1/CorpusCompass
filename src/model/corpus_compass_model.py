@@ -662,6 +662,9 @@ class Project(QObject):
         Args:
             file_paths (List[str]): A list of file paths, that should be loaded in.
         """
+        if len(files) == 0: # No files need to be updated
+            return
+
         self.file_loader = FileLoader(files_to_reload=files, use_signal=not is_synchronous)
 
         if not is_synchronous:
@@ -1491,11 +1494,17 @@ class Project(QObject):
                 worker_thread.quit()
         self.worker_threads = []
 
-    def create_datasets(self, files: List[File] = None) -> None:
+    def create_datasets(self, files: List[File] = None, is_synchronous: bool = False) -> None | dict:
         """Creates datasets from the corpora files. The resulting data is send
         via the 'corpus_analysis_data_signal'.
+        
         Args:
             files (List[File], optional): User can specify which files should be used for analysis. Defaults to None.
+            is_synchronous (bool, optional): If the method is executed in an extra thread. Defaults to False.
+
+        Returns:
+            None | dict: If the method is called synchronous, the resulting dataframes are returned. Otherwise
+                         the signal "corpus_analysis_data_signal" is emitted.
         """
         if not files:
             files = self.files
@@ -1510,7 +1519,13 @@ class Project(QObject):
         # Create the datasets
         self.dc_thread = DCThread(regex_input, corpus_dict, iv_dict, dv_dict, speaker_dict)
         self.dc_thread.start()
-        self.dc_thread.finished.connect(self.on_dataset_creation_finished)
+        
+        # Handle the returned values differently depending on "is_synchronous" parameter
+        if is_synchronous:
+            self.dc_thread.wait()
+            return self.dc_thread.results
+        else:
+            self.dc_thread.finished.connect(self.on_dataset_creation_finished)
 
     def on_dataset_creation_finished(self) -> None:
         """Is called when the thread for creating the analysis datasets of a corpus
@@ -1679,22 +1694,22 @@ class Project(QObject):
             proj_annotation_formats = project_dict["annotation_format"]
 
             # Load the independent variables
-            independent_variable_dict = file_utils.load_json_file(os.path.join(proj_path, project_dict["independent_variables_filepath"]))
+            independent_variable_dict = file_utils.load_json_file(project_dict["independent_variables_filepath"])
 
             # Load the dependent variables
-            dependent_variable_dict = file_utils.load_json_file(os.path.join(proj_path, project_dict["dependent_variables_filepath"]))
+            dependent_variable_dict = file_utils.load_json_file(project_dict["dependent_variables_filepath"])
 
             # Load the speakers
-            speaker_dict = file_utils.load_json_file(os.path.join(proj_path, project_dict["speakers_filepath"]))
+            speaker_dict = file_utils.load_json_file(project_dict["speakers_filepath"])
 
             # Load the information about the files
-            file_dict = file_utils.load_json_file(os.path.join(proj_path, project_dict["files_filepath"]))
+            file_dict = file_utils.load_json_file(project_dict["files_filepath"])
 
             # Load the detected speakers
-            detected_speakers = pd.read_csv(os.path.join(proj_path, project_dict["detected_speakers_filepath"]))
+            detected_speakers = pd.read_csv(project_dict["detected_speakers_filepath"])
 
             # Load the detected annotations
-            detected_annotations = pd.read_csv(os.path.join(proj_path, project_dict["detected_annotations_filepath"]))
+            detected_annotations = pd.read_csv(project_dict["detected_annotations_filepath"])
             detected_annotations['identifier'] = detected_annotations.identifier.apply(ast.literal_eval)
 
             independent_variables = {}
@@ -1750,9 +1765,6 @@ class Project(QObject):
                     file = File(file_name=file_name, encoding=file_data["encoding"], file_path=file_data["path"], file_version=file_data["version"])
                     if file.was_file_moved():
                         # TODO: Implement a method to handle moved files
-                        continue
-                    if file.was_file_modified():
-                        # TODO: Implement a method to handle modified files  
                         continue
                     files.append(file)
 

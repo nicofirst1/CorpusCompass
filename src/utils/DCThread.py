@@ -474,12 +474,13 @@ def generate_dataset(
     df = df.drop(to_drop, axis=1)
     sep = ":"
     df_encoded = pd.get_dummies(df, columns=df.columns, prefix_sep=sep)
+    
+    if df_encoded.size != 0:
+        # drop all columns that have nothing after : in name
+        df_encoded = df_encoded.loc[:, ~df_encoded.columns.str.contains(f"{sep}$")]
 
-    # drop all columns that have nothing after : in name
-    df_encoded = df_encoded.loc[:, ~df_encoded.columns.str.contains(f"{sep}$")]
-
-    df_encoded["token"] = tokens
-    df_encoded["context"] = context
+        df_encoded["token"] = tokens
+        df_encoded["context"] = context
 
     # todo: add check for values that are not used in the corpus but appear in the variable file
     # todo: add number of annotations per speaker

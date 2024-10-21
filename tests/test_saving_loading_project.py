@@ -1,21 +1,25 @@
 import unittest
-
+import os
 from src.model.files import File
 from src.model.corpus_compass_model import Project
 
 class SavingLoadingTestCase(unittest.TestCase):
     """Test if a project can be saved and loaded correctly"""
 
-    def test_saving_a_project(self):
+    def test_project_saving(self):
         """Test if a project can be saved correctly
         """
-        project = Project("TestProject", "This is a test project used for testing the saving and loading of projects.")
+        project = Project("TestProject", "This is a test project used for testing the saving and loading of projects.", "./tests/test_data")
 
         # Add some files to the project
         f1 = File("File1", "utf8", "./tests/test_data/TestProject/file1.txt", 1.0, "Speaker A: Hey, how are you? Speaker B: I'm fine thanks, what about you? Speaker C: I'm good, thank [$you.VAL1].")
         f2 = File("File2", "utf8", "./tests/test_data/TestProject/file2.txt", 2.0, "Speaker C: Have you already learned for the exam next week? Speaker D: [$Nah.VAL2], I will rely on my [$luck.VAL3].")
         project.add_file(f1)
         project.add_file(f2)
+
+        # Create the project folder
+        os.makedirs("./tests/test_data/TestProject", exist_ok=True)
+
         # Also save the files so that they can be used for loading the project
         f1.save_as_txt()
         f2.save_as_txt()
@@ -48,7 +52,7 @@ class SavingLoadingTestCase(unittest.TestCase):
         # Save the project
         project.save_project("./tests/test_data")
     
-    def test_loading_a_project(self):
+    def test_reloading_a_project(self):
         """Test if a project can be loaded correctly
         """
         project = Project.load_project("./tests/test_data/TestProject", is_synchronous=True)
