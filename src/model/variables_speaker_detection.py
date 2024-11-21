@@ -179,7 +179,7 @@ class AnnotationDetector():
         Args:
             file (File): The file in which the annotations should be detected
             annot_str (str): How the annotation format looks like, e.g. "[$token.identifier]"
-            annot_re (str): The regular expression that is used to detect the annotation, e.g. r"\[$(?P<token>\w+)\.(?P<identifier>\w+)\]"
+            annot_re (str): The regular expression that is used to detect the annotation, e.g. r"\\[$(?P<token>\\w+)\\.(?P<identifier>\\w+)\\]"
             annot_sep (str): The separator for multiple identifiers, e.g. "_"
             max_amount (int, optional): After detecting the given amount of annotations, the method stops
                                 searching for more annotations. If not provided, the method searches for all

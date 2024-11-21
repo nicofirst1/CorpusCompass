@@ -155,8 +155,8 @@ class Project(QObject):
 
         # Create the project in files if wanted by the user
         if proj_dir:
-            if not os.path.exists(proj_dir):
-                os.makedirs(proj_dir)
+            if not os.path.exists(self.proj_directory):
+                os.makedirs(self.proj_directory)
     
     def close(self) -> None:
         """Closes the current project
@@ -1537,6 +1537,7 @@ class Project(QObject):
         if type(results) == str:
             self.error_occurred_signal.emit(results)
             self.corpus_analysis_data_signal.emit({})
+            return
         
         # Otherwise send the result of the analysis with a signal
         self.corpus_analysis_data_signal.emit(results)

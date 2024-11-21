@@ -12,6 +12,7 @@ from src.view.corpus_compass_view import CorpusCompassView
 from src.view.tabs import Tab
 import pandas as pd
 import logging
+from pathlib import Path
 
 
 
@@ -115,6 +116,9 @@ class Controller(QObject):
         analysis_settings_tab.checkBox_showspeakers.toggled.connect(self.on_underline_speakers_clicked)
         analysis_settings_tab.checkBox_showfileindicators.toggled.connect(self.view.analysis_settings_tab.toggle_file_indicator)
 
+        # TODO: Implement these button functions later, for now they are deactivated
+        start_screen_tab.open_project.setEnabled(False)
+
     
     def on_highlight_dvs_clicked(self, toggled: bool):
         """
@@ -164,7 +168,9 @@ class Controller(QObject):
         Args:
             proj_name (str): The name of the project.
         """
-        proj_dir = str(QFileDialog.getExistingDirectory(self.view, "Select Directory"))
+        # Choose the home directory as the main directory
+        # Alternative: Ask for directory #str(QFileDialog.getExistingDirectory(self.view, "Select Directory")) 
+        proj_dir = os.path.join(Path.home(), "CorpusCompassProjects")
         self.model.create_new_project(proj_name, proj_dir=proj_dir)
         self.view.switch_to_tab(Tab.HOME_TAB)
         self.view.proj_name_changed.emit(proj_name)
@@ -210,7 +216,7 @@ class Controller(QObject):
         Is called when the user clicks on "import project" in the start-tab.
         Opens a dialog window for importing an existing project.
         """
-        proj_dir = str(QFileDialog.getExistingDirectory(self.view, "Select Directory"))
+        proj_dir = str(QFileDialog.getExistingDirectory(parent=self.view, caption="Select Directory", dir=os.path.join(Path.home())))
         self.model.import_project(proj_dir)
         self.connect_signals_to_project()
         self.model.current_project.send_update_to_frontend()
@@ -257,6 +263,11 @@ class Controller(QObject):
             data (dict): The analysis data from the model.
         """
         self.view.home_menu_tab.btn_home_analysecorpus.setEnabled(True)
+
+        # If the analysis was no success
+        if len(data) == 0:
+            return
+        
         self.view.create_analysis_success_dialog()
         self.view.analysis_success_dialog.btn_savelocation.clicked.connect(self.view.analysis_success_dialog.on_select_target_file_path_clicked)
         self.view.analysis_success_dialog.exec()
