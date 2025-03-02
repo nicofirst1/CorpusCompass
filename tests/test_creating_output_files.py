@@ -10,14 +10,25 @@ class GetOutputFilesTestCase(unittest.TestCase):
         """Test if the main dataset can be created correctly"""
         project = Project("Testproject")
 
-        #project.load_files(["./tests/test_data/Carsten.txt"], is_synchronous=True)
+        # project.load_files(["./tests/test_data/Carsten.txt"], is_synchronous=True)
         # Add some files to the project
         file_content = "SpeakerA: Ich gehe heute zur [$UniBib.DE+UNIWORD], um dort an meinem [$Masterprojekt.DE+UNIWORD] weiterarbeiten.\nSpeakerB: Ach [$schön.DE]! \nSpeakerA: Übrigens, wusstest du, dass dieses Gespräch aufgenommen und [$analysiert.UNBEKANNTEVARIABLE] wird? \nSpeakerB: Na klar, deshalb sag ich mal das Wort UniBib, damit der Nutzer ein Beispiel für ein Nicht-markiertes Wort hat"
-        
-        f1 = File("File1", "utf8", "./tests/test_data/TestProject/file1.txt", 1.0, file_content)
+
+        f1 = File(
+            "File1",
+            "utf8",
+            "./tests/test_data/TestProject/file1.txt",
+            1.0,
+            file_content,
+        )
         project.add_file(f1)
 
-        project.add_annotation_format(annotation_str="[$TOKEN.IDENTIFIER]", token="TOKEN", identifier="IDENTIFIER", multiple_identifier_separator="+")
+        project.add_annotation_format(
+            annotation_str="[$TOKEN.IDENTIFIER]",
+            token="TOKEN",
+            identifier="IDENTIFIER",
+            multiple_identifier_separator="+",
+        )
         project.detect_annotations()
 
         # Group the detected annotations to a dependent variable
@@ -43,5 +54,9 @@ class GetOutputFilesTestCase(unittest.TestCase):
 
         # Save the datasets
         os.makedirs("./tests/test_data/TestOutputGerman", exist_ok=True)
-        project.save_datasets("./tests/test_data/TestOutputGerman", results,
-                              encoding="cp1252", separator=";")
+        project.save_datasets(
+            "./tests/test_data/TestOutputGerman",
+            results,
+            encoding="cp1252",
+            separator=";",
+        )

@@ -77,7 +77,7 @@ def check_correct_annotations(
     def custom_print(to_print):
         err_msg = ""
         if verbose:
-            err_msg = f"\nError in the corpus {corpus_path}: \n" f"{to_print}\n"
+            err_msg = f"\nError in the corpus {corpus_path}: \n{to_print}\n"
         return err_msg
 
     ngram_params = (+50, 50)
@@ -116,7 +116,8 @@ def remove_features(corpus: str, feat_regex_dict: dict, logger):
                 corpus = corpus.replace(w.group(0), text)
             except IndexError:
                 logger.error(
-                    f"I found an error for the tag '{w}'. Please check the tag and try again.")
+                    f"I found an error for the tag '{w}'. Please check the tag and try again."
+                )
                 wrong_tags.append(w)
                 continue
 

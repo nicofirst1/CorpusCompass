@@ -2,13 +2,13 @@ import unittest
 
 from src.model.variables_speakers import Speaker, Variable, VariableValue
 
-class VariableTestCase(unittest.TestCase):
 
+class VariableTestCase(unittest.TestCase):
     def test_finding_iv_values(self):
         iv = Variable(name="Age", variable_values=["Young", "Old"])
         self.assertTrue(iv.has_variable_value("Young"))
         self.assertFalse(iv.has_variable_value("Student"))
-    
+
     def test_adding_a_iv_value(self):
         iv = Variable(name="Age", variable_values=["Young"])
 
@@ -50,7 +50,7 @@ class SpeakerTestCase(unittest.TestCase):
 
         # Currently the speaker should have zero iv-values assigned
         self.assertTrue(len(speaker.get_iv_values()) == 0)
-        self.assertFalse(speaker.has_iv_value("Cool"))        
+        self.assertFalse(speaker.has_iv_value("Cool"))
 
         speaker.add_iv_value(iv.get_variable_value("Cool"))
 

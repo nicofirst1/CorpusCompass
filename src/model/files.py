@@ -4,7 +4,7 @@ from typing import List
 import os
 
 
-class File():
+class File:
     """Class that represents a file with the following attributes:
     - name: The name of the file, including the file extension
     - encoding: The encoding of the file
@@ -13,7 +13,15 @@ class File():
     - version: The version of the file, which is the time of the last modification
     - number_of_chars: The number of characters in the file
     """
-    def __init__(self, file_name: str, encoding: str, file_path: str, file_version: float = None, file_content: str = None) -> None:
+
+    def __init__(
+        self,
+        file_name: str,
+        encoding: str,
+        file_path: str,
+        file_version: float = None,
+        file_content: str = None,
+    ) -> None:
         self.name = file_name
         self.encoding = encoding
         self.content = file_content
@@ -25,7 +33,7 @@ class File():
             self.number_of_chars = len(self.content)
         else:
             self.number_of_chars = 0
-    
+
     def get_file_name(self, include_extension: bool = True) -> str:
         """Returns the name of the file.
 
@@ -38,7 +46,7 @@ class File():
         if include_extension:
             return self.name
         return os.path.splitext(self.name)[0]
-    
+
     def get_file_content(self) -> str | None:
         """Returns the content of the file.
 
@@ -47,7 +55,6 @@ class File():
         """
         return self.content
 
-
     def get_file_version(self) -> float:
         """Returns the version of the file.
 
@@ -55,7 +62,7 @@ class File():
             float: The version of the file
         """
         return self.version
-    
+
     def get_file_path(self) -> str:
         """Returns the path of the file.
 
@@ -71,7 +78,7 @@ class File():
             bool: True if the file was modified, False otherwise
         """
         return self.version != File.get_version_from_filepath(self.path)
-    
+
     def was_file_moved(self) -> bool:
         """Returns True if the file is not found under the given path.
 
@@ -79,7 +86,7 @@ class File():
             bool: True if the file cannot be found under the given path, False otherwise
         """
         return not os.path.isfile(self.path)
-    
+
     def update_file_content(self, content: str) -> None:
         """Updates the content of the file and the version.
 
@@ -92,9 +99,8 @@ class File():
         self.number_of_chars = len(self.content)
 
     def save_as_txt(self) -> None:
-        """Saves the file as a .txt file. Is mainly used for testing purposes.
-        """
-        with open(self.path, 'w', encoding=self.encoding) as outfile:
+        """Saves the file as a .txt file. Is mainly used for testing purposes."""
+        with open(self.path, "w", encoding=self.encoding) as outfile:
             outfile.write(self.content)
 
     def __repr__(self) -> str:
@@ -118,7 +124,7 @@ class File():
                 "encoding": file.encoding,
                 "path": file.path,
                 "version": file.version,
-                "number_of_chars": file.number_of_chars
+                "number_of_chars": file.number_of_chars,
             }
             file_list.append(file_data)
         return res
@@ -136,31 +142,36 @@ class File():
         return os.path.getmtime(file_path)
 
 
-
 class FileLoader(QThread):
     """Class that loads a file in a separate thread. The loaded file can be received
     synchronously or asynchronously. If the file is received asynchronously, the signals
     loading_file_finished and loading_file_failed are emitted. If the file is received
     synchronously, the method get_result can be called to get the loaded file.
     """
+
     loading_file_finished = Signal(File)
     loading_file_failed = Signal(Exception)
 
-    def __init__(self, file_paths: List[str] = None, files_to_reload: List[File] = None, use_signal: bool = True) -> List | None:
+    def __init__(
+        self,
+        file_paths: List[str] = None,
+        files_to_reload: List[File] = None,
+        use_signal: bool = True,
+    ) -> List | None:
         super().__init__()
         self.file_paths = file_paths
         self.use_signal = use_signal
         self.files_to_reload = files_to_reload
-    
+
     def run(self) -> List | None:
         if self.file_paths:
             return self.load_files_from_paths()
         elif self.files_to_reload:
             return self.reload_files()
-    
+
     def reload_files(self) -> None | List[File]:
         """Reloads the files in the files_to_reload list. If the file is loaded successfully
-        and the use_signal attribute is set to True, the signal loading_file_finished 
+        and the use_signal attribute is set to True, the signal loading_file_finished
         is emitted. If the file could not be loaded, the signal loading_file_failed is emitted.
         """
         results = []
@@ -169,9 +180,13 @@ class FileLoader(QThread):
 
             # Check if the file exists
             if not os.path.exists(file_path):
-                self.loading_file_failed.emit(FileNotFoundError(f'Unable to find a file under the given path: "{file_path}"'))
+                self.loading_file_failed.emit(
+                    FileNotFoundError(
+                        f'Unable to find a file under the given path: "{file_path}"'
+                    )
+                )
                 return
-            
+
             file_extension = os.path.splitext(file_path)[1]
             file_encoding = file.encoding
 
@@ -180,7 +195,11 @@ class FileLoader(QThread):
                 # Load the file
                 file_text, encoding, error = decode_txt_file(file_path, file_encoding)
             else:
-                self.loading_file_failed.emit(NotImplementedError(f'The following File-extension is not supported for loading in: "{file_extension}"'))
+                self.loading_file_failed.emit(
+                    NotImplementedError(
+                        f'The following File-extension is not supported for loading in: "{file_extension}"'
+                    )
+                )
                 return
 
             file.update_file_content(file_text)
@@ -190,13 +209,13 @@ class FileLoader(QThread):
                 self.loading_file_finished.emit(file)
             else:
                 results.append(file)
-        
+
         if not self.use_signal:
             return results
 
     def load_files_from_paths(self) -> List | None:
         """Loads the files in the file_paths list. If the file is loaded successfully
-        and the use_signal attribute is set to True, the signal loading_file_finished 
+        and the use_signal attribute is set to True, the signal loading_file_finished
         is emitted. If the file could not be loaded, the signal loading_file_failed is emitted.
         """
         # Will only be used to store the result if the use_signal attribute is set to False
@@ -206,9 +225,13 @@ class FileLoader(QThread):
         for file_path in self.file_paths:
             # Check if the file exists
             if not os.path.exists(file_path):
-                self.loading_file_failed.emit(FileNotFoundError(f'Unable to find a file under the given path: "{file_path}"'))
+                self.loading_file_failed.emit(
+                    FileNotFoundError(
+                        f'Unable to find a file under the given path: "{file_path}"'
+                    )
+                )
                 return
-            
+
             file_path_no_ext, file_extension = os.path.splitext(file_path)
             file_name = os.path.basename(file_path_no_ext)
 
@@ -217,19 +240,25 @@ class FileLoader(QThread):
                 # Load the file
                 file_text, encoding, error = decode_txt_file(file_path)
             else:
-                self.loading_file_failed.emit(NotImplementedError(f'The following File-extension is not supported for loading in: "{file_extension}"'))
+                self.loading_file_failed.emit(
+                    NotImplementedError(
+                        f'The following File-extension is not supported for loading in: "{file_extension}"'
+                    )
+                )
                 return
 
-            file = File(file_name=file_name + file_extension, 
-                        encoding=encoding, 
-                        file_content=file_text, 
-                        file_path=file_path)
+            file = File(
+                file_name=file_name + file_extension,
+                encoding=encoding,
+                file_content=file_text,
+                file_path=file_path,
+            )
 
             # Emit the signal or set the result
             if self.use_signal:
                 self.loading_file_finished.emit(file)
             else:
                 results.append(file)
-        
+
         if not self.use_signal:
             return results

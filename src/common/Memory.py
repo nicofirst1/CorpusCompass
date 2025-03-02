@@ -65,9 +65,9 @@ class SettingValue:
     @value.setter
     def value(self, value):
         if self.choices is not None:
-            assert (
-                value in self.choices
-            ), f"Value {value} not in the choices {self.choices}"
+            assert value in self.choices, (
+                f"Value {value} not in the choices {self.choices}"
+            )
         self._value = value
 
 
@@ -82,14 +82,17 @@ class Memory(QtCore.QObject):
         self.dir = os.path.dirname(os.path.abspath(__file__))
 
         # find the index of the corpus compass folder by splitting with the os separator
-        index = [ind for ind in range(len(self.dir.split(os.sep))) if "CorpusCompass" in self.dir.split(os.sep)[ind]][0]
+        index = [
+            ind
+            for ind in range(len(self.dir.split(os.sep)))
+            if "CorpusCompass" in self.dir.split(os.sep)[ind]
+        ][0]
 
         # get the corpus compass folder
-        self.dir = os.sep.join(self.dir.split(os.sep)[:index+1])
+        self.dir = os.sep.join(self.dir.split(os.sep)[: index + 1])
 
         # append the corpus compass folder
         self.dir = os.path.join(self.dir, ".corpus_compass")
-
 
         # create dir if not exists
         if not os.path.exists(self.dir):
@@ -144,9 +147,7 @@ class Memory(QtCore.QObject):
             "cross_tabulation_analysis": os.path.join(
                 self.analysis_dir, "cross_tabulation"
             ),
-            "chi_square_analysis": os.path.join(
-                self.analysis_dir, "chi_square"
-            ),
+            "chi_square_analysis": os.path.join(self.analysis_dir, "chi_square"),
             "logistic_regression_analysis": os.path.join(
                 self.analysis_dir, "logistic_regression_analysis"
             ),
@@ -272,9 +273,8 @@ class Memory(QtCore.QObject):
             ),
             "pair_wise_frequency_normalizer_multiplier": (
                 "Multiplier to use for the normalizer of the pair wise frequency analysis",
-                [1,10, 100, 1000, 10000, 100000],
+                [1, 10, 100, 1000, 10000, 100000],
             ),
-
             "poisson_regression_analysis": (
                 "Perform poisson regression analysis",
                 [True, False],

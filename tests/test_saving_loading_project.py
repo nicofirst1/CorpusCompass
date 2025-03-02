@@ -3,17 +3,33 @@ import os
 from src.model.files import File
 from src.model.corpus_compass_model import Project
 
+
 class SavingLoadingTestCase(unittest.TestCase):
     """Test if a project can be saved and loaded correctly"""
 
     def test_project_saving(self):
-        """Test if a project can be saved correctly
-        """
-        project = Project("TestProject", "This is a test project used for testing the saving and loading of projects.", "./tests/test_data")
+        """Test if a project can be saved correctly"""
+        project = Project(
+            "TestProject",
+            "This is a test project used for testing the saving and loading of projects.",
+            "./tests/test_data",
+        )
 
         # Add some files to the project
-        f1 = File("File1", "utf8", "./tests/test_data/TestProject/file1.txt", 1.0, "Speaker A: Hey, how are you? Speaker B: I'm fine thanks, what about you? Speaker C: I'm good, thank [$you.VAL1].")
-        f2 = File("File2", "utf8", "./tests/test_data/TestProject/file2.txt", 2.0, "Speaker C: Have you already learned for the exam next week? Speaker D: [$Nah.VAL2], I will rely on my [$luck.VAL3].")
+        f1 = File(
+            "File1",
+            "utf8",
+            "./tests/test_data/TestProject/file1.txt",
+            1.0,
+            "Speaker A: Hey, how are you? Speaker B: I'm fine thanks, what about you? Speaker C: I'm good, thank [$you.VAL1].",
+        )
+        f2 = File(
+            "File2",
+            "utf8",
+            "./tests/test_data/TestProject/file2.txt",
+            2.0,
+            "Speaker C: Have you already learned for the exam next week? Speaker D: [$Nah.VAL2], I will rely on my [$luck.VAL3].",
+        )
         project.add_file(f1)
         project.add_file(f2)
 
@@ -25,13 +41,15 @@ class SavingLoadingTestCase(unittest.TestCase):
         f2.save_as_txt()
 
         # Add a Dependent Variable to the project by detecting the variables in the files
-        project.add_annotation_format(annotation_str="[$TOKEN.IDENTIFIER]",
-                                      token="TOKEN",
-                                      identifier="IDENTIFIER")
-        project.add_annotation_format(annotation_str="{!TOKEN:IDENTIFIER!}",
-                                      token="TOKEN",
-                                      identifier="IDENTIFIER",
-                                      multiple_identifier_separator="_")
+        project.add_annotation_format(
+            annotation_str="[$TOKEN.IDENTIFIER]", token="TOKEN", identifier="IDENTIFIER"
+        )
+        project.add_annotation_format(
+            annotation_str="{!TOKEN:IDENTIFIER!}",
+            token="TOKEN",
+            identifier="IDENTIFIER",
+            multiple_identifier_separator="_",
+        )
         project.detect_annotations()
         project.add_dv("DV1")
         project.assign_dv_value_to_dv("DV1", "VAL1")
@@ -43,7 +61,9 @@ class SavingLoadingTestCase(unittest.TestCase):
         project.add_iv("Age", ["Young", "Old"])
 
         # Add Speakers to the project
-        project.add_speaker("Speaker A", )
+        project.add_speaker(
+            "Speaker A",
+        )
         project.add_speaker("Speaker B", ["Old"])
 
         # Detect speakers in the files
@@ -51,15 +71,19 @@ class SavingLoadingTestCase(unittest.TestCase):
 
         # Save the project
         project.save_project("./tests/test_data")
-    
+
     def test_reloading_a_project(self):
-        """Test if a project can be loaded correctly
-        """
-        project = Project.load_project("./tests/test_data/TestProject", is_synchronous=True)
+        """Test if a project can be loaded correctly"""
+        project = Project.load_project(
+            "./tests/test_data/TestProject", is_synchronous=True
+        )
 
         self.assertEqual(project.get_name(), "TestProject")
         self.assertEqual(project.get_speaker_format(), "STANDARD")
-        self.assertEqual(project.get_description(), "This is a test project used for testing the saving and loading of projects.")
+        self.assertEqual(
+            project.get_description(),
+            "This is a test project used for testing the saving and loading of projects.",
+        )
         self.assertEqual(len(project.files), 2)
         self.assertEqual(len(project.dependent_variable_values), 3)
         self.assertEqual(len(project.independent_variables), 1)
@@ -92,17 +116,23 @@ class SavingLoadingTestCase(unittest.TestCase):
         f1 = project.files[0]
         self.assertEqual(f1.name, "File1")
         self.assertEqual(f1.encoding, "utf8")
-        self.assertEqual(f1.content, "Speaker A: Hey, how are you? Speaker B: I'm fine thanks, what about you? Speaker C: I'm good, thank [$you.VAL1].\n")
+        self.assertEqual(
+            f1.content,
+            "Speaker A: Hey, how are you? Speaker B: I'm fine thanks, what about you? Speaker C: I'm good, thank [$you.VAL1].\n",
+        )
 
         f2 = project.files[1]
         self.assertEqual(f2.name, "File2")
         self.assertEqual(f2.encoding, "utf8")
-        self.assertEqual(f2.content, "Speaker C: Have you already learned for the exam next week? Speaker D: [$Nah.VAL2], I will rely on my [$luck.VAL3].\n")
+        self.assertEqual(
+            f2.content,
+            "Speaker C: Have you already learned for the exam next week? Speaker D: [$Nah.VAL2], I will rely on my [$luck.VAL3].\n",
+        )
 
         # Check if the dependent variable values are loaded correctly
         dv1 = project.get_dv_value("VAL1")
         self.assertEqual(dv1.name, "VAL1")
-        
+
 
 if __name__ == "__main__":
     unittest.main()

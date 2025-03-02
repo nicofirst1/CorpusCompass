@@ -13,7 +13,10 @@ def load_all():
         description="This script performs an analysis of the data in the csv file."
     )
     parser.add_argument("variable_dir", help="The path to the variable directory")
-    parser.add_argument("postprocess_paths", help="The path to the file containing the post process paths")
+    parser.add_argument(
+        "postprocess_paths",
+        help="The path to the file containing the post process paths",
+    )
 
     parser.add_argument("setting_file", help="The path to the setting file")
     parser.add_argument("custom_paths", help="The path to the paths file")
@@ -32,11 +35,13 @@ def load_all():
         postprocess_paths = json.load(f)
 
     # get the corpus stats
-    with open(postprocess_paths['corpus_stats'], "r", encoding=encoding) as f:
+    with open(postprocess_paths["corpus_stats"], "r", encoding=encoding) as f:
         corpus_stats = json.load(f)
 
     # get the binary dataset
-    binary_df = pd.read_csv(postprocess_paths['binary_dataset'], sep=separator, encoding=encoding)
+    binary_df = pd.read_csv(
+        postprocess_paths["binary_dataset"], sep=separator, encoding=encoding
+    )
 
     # replace \ufeff with nothing
     binary_df = binary_df.replace("\ufeff", "", regex=True)
@@ -79,22 +84,22 @@ def load_all():
 
     # for every independent variable
     for iv_k, iv_list in independent_variables.items():
-
         # for every value of the independent variable
         for iv_v in iv_list:
             normalization_num[f"{iv_k}:{iv_v}"] = 0
 
             # for every speaker
             for sp_k, sp_v in speaker.items():
-
                 # if the value of the independent variable is in the speaker
                 if iv_v in sp_v and sp_k in speaker_words.keys():
                     # add the number of words of the speaker to the normalization number
                     normalization_num[f"{iv_k}:{iv_v}"] += speaker_words[sp_k]
 
-
-    #divide all for the multiplier
-    normalization_num={k:v/setting['pair_wise_frequency_normalizer_multiplier'] for k,v in normalization_num.items()}
+    # divide all for the multiplier
+    normalization_num = {
+        k: v / setting["pair_wise_frequency_normalizer_multiplier"]
+        for k, v in normalization_num.items()
+    }
 
     return setting, custom_paths, variables, data, normalization_num
 

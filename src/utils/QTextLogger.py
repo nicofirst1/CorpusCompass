@@ -52,7 +52,6 @@ class QTextLogger(QtCore.QObject):
         self.formatter = HtmlColorFormatter("%(message)s")
         self.text_edit_stream = FakeStream(self.signal)
 
-
     def debug(self, msg):
         if self.level > logging.DEBUG:
             return
@@ -106,7 +105,7 @@ class QTextEditLog(QtWidgets.QTextEdit):
         self.setAcceptRichText(True)
         self.setReadOnly(True)
 
-    def connect_signal(self, signal:QtCore.Signal):
+    def connect_signal(self, signal: QtCore.Signal):
         signal.connect(self.write)
 
     def write(self, string):

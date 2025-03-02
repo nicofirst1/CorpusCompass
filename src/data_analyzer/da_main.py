@@ -8,7 +8,8 @@ from src.data_analyzer.da_analysis_functions import (
     cross_tabulation,
     chi_square_test,
     logistic_regression,
-    point_biserial_correlation, t_test,
+    point_biserial_correlation,
+    t_test,
 )
 from src.data_analyzer.da_utils import load_all, to_df_names
 
@@ -48,7 +49,11 @@ if __name__ == "__main__":
     speakers = [f"speaker:{s}" for s in speakers.keys()]
     speakers = [s for s in speakers if s in binary_df.columns]
 
-    missing = [c for c in binary_df.columns if c not in independent_variables + dependent_variables + speakers]
+    missing = [
+        c
+        for c in binary_df.columns
+        if c not in independent_variables + dependent_variables + speakers
+    ]
     if len(missing) > 0:
         print(f"Missing columns: {missing}")
 
@@ -60,7 +65,12 @@ if __name__ == "__main__":
     if setting["t_test_analysis"]:
         print("Analyzing the variables with t-test...")
         os.makedirs(custom_paths["t_test"], exist_ok=True)
-        t_test(binary_df, dependent_variables, independent_variables, custom_paths["t_test"])
+        t_test(
+            binary_df,
+            dependent_variables,
+            independent_variables,
+            custom_paths["t_test"],
+        )
         print("Done!")
 
     # analyze the dependent variables
@@ -74,7 +84,6 @@ if __name__ == "__main__":
             speakers,
             custom_paths["pair_wise_frequency_analysis"],
             speakers_properties=variables[2],
-
         )
         print("Done!")
 
@@ -85,11 +94,9 @@ if __name__ == "__main__":
             dependent_variables,
             independent_variables,
             speakers,
-
             custom_paths["pair_wise_frequency_analysis"],
             normalization_dict=nomalization_num,
             speakers_properties=variables[2],
-
         )
         print("Done!")
 

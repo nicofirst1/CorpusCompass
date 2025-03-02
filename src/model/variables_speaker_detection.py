@@ -7,8 +7,8 @@ import re
 
 
 class SpeakerFormats(Enum):
-    """Enum that contains the currently supported Speaker Formats
-    """
+    """Enum that contains the currently supported Speaker Formats"""
+
     STANDARD = "STANDARD"
     PRAAT = "PRAAT"
     ELAN = "ELAN"
@@ -17,16 +17,21 @@ class SpeakerFormats(Enum):
 
 
 class SpeakerDetector(QObject):
-    """Class that can find the speaker name and the text that is spoken by a 
+    """Class that can find the speaker name and the text that is spoken by a
     speaker in a corpora/file. The speaker format provides the speaker detection
     a regular expression, on how to detect the speaker.
     """
-    def __init__(self, current_format: SpeakerFormats = SpeakerFormats.STANDARD) -> None:
+
+    def __init__(
+        self, current_format: SpeakerFormats = SpeakerFormats.STANDARD
+    ) -> None:
         super().__init__()
         self.current_format: SpeakerFormats = current_format
         self.custom_format: str = None
-    
-    def detect_speakers(self, files: List[File], speaker_format: str | SpeakerFormats = None) -> pd.DataFrame | None:
+
+    def detect_speakers(
+        self, files: List[File], speaker_format: str | SpeakerFormats = None
+    ) -> pd.DataFrame | None:
         """Searches in one or multiple files for speakers and their spoken text.
         Returns the results as a dataframe with the following structure:
 
@@ -39,7 +44,7 @@ class SpeakerDetector(QObject):
         file_name         | name of file where speaker was found | str   |\n
         file_version      | version of the file                  | float |
 
-        Start- and end-positions of the speaker and the spoken text are both 
+        Start- and end-positions of the speaker and the spoken text are both
         inclusive.
 
         Args:
@@ -56,8 +61,26 @@ class SpeakerDetector(QObject):
         re_speaker = self.get_re_speaker(speaker_format)
 
         # Set up the dataframe, that will contain the detected speaker info
-        type_conversion_dict = {'speaker_name': str, 'speaker_start': int, 'speaker_end': int, 'spoken_text_start': int, 'spoken_text_end': int, 'file_name': str, 'file_version': float}
-        detected_speakers_df = pd.DataFrame(columns=["speaker_name", "speaker_start", "speaker_end", "spoken_text_start", "spoken_text_end", "file_name", "file_version"])
+        type_conversion_dict = {
+            "speaker_name": str,
+            "speaker_start": int,
+            "speaker_end": int,
+            "spoken_text_start": int,
+            "spoken_text_end": int,
+            "file_name": str,
+            "file_version": float,
+        }
+        detected_speakers_df = pd.DataFrame(
+            columns=[
+                "speaker_name",
+                "speaker_start",
+                "speaker_end",
+                "spoken_text_start",
+                "spoken_text_end",
+                "file_name",
+                "file_version",
+            ]
+        )
         detected_speakers_df = detected_speakers_df.astype(type_conversion_dict)
 
         # Search for speakers in every file provided
@@ -66,27 +89,42 @@ class SpeakerDetector(QObject):
             detected_speakers = re.finditer(re_speaker, file.content)
 
             # Put the matches and additional info in a dataframe
-            data = [(detected_speaker.group("name"), detected_speaker.span()[0], detected_speaker.span()[1]) for detected_speaker in detected_speakers]
-            temp_df = pd.DataFrame(data, columns=["speaker_name", "speaker_start", "speaker_end"])
+            data = [
+                (
+                    detected_speaker.group("name"),
+                    detected_speaker.span()[0],
+                    detected_speaker.span()[1],
+                )
+                for detected_speaker in detected_speakers
+            ]
+            temp_df = pd.DataFrame(
+                data, columns=["speaker_name", "speaker_start", "speaker_end"]
+            )
             temp_df["spoken_text_start"] = temp_df["speaker_end"] + 1
-            temp_df["spoken_text_end"] = temp_df["speaker_start"].shift(-1, fill_value=file.number_of_chars) - 1
+            temp_df["spoken_text_end"] = (
+                temp_df["speaker_start"].shift(-1, fill_value=file.number_of_chars) - 1
+            )
             temp_df["file_name"] = file.name
             temp_df["file_version"] = file.version
             # Add detected speaker for the current file to the result-dataframe
-            detected_speakers_df = pd.concat([detected_speakers_df, temp_df], ignore_index=True)
+            detected_speakers_df = pd.concat(
+                [detected_speakers_df, temp_df], ignore_index=True
+            )
         return detected_speakers_df
-    
-    def set_speaker_format(self, new_format: SpeakerFormats | str, custom_format: str = None) -> None:
+
+    def set_speaker_format(
+        self, new_format: SpeakerFormats | str, custom_format: str = None
+    ) -> None:
         if type(new_format) == str:
             new_format = SpeakerFormats(new_format)
         self.current_format = new_format
 
         if new_format == SpeakerFormats.CUSTOM:
             self.custom_format = custom_format
-    
+
     def get_speaker_format(self) -> SpeakerFormats:
         return self.current_format
-    
+
     def get_speaker_format_str(self) -> str:
         return self.current_format.value
 
@@ -98,12 +136,14 @@ class SpeakerDetector(QObject):
         elif speaker_format == SpeakerFormats.CUSTOM:
             return self.custom_format
         elif speaker_format != None:
-            return r"(?P<name>\w+(\s\w+)?):" # TODO: Should be deleted later, is only used for debugging
+            return r"(?P<name>\w+(\s\w+)?):"  # TODO: Should be deleted later, is only used for debugging
         else:
-            raise NotImplementedError(f'The given Speaker Format "{self.speaker_format}" is currently not supported!')
+            raise NotImplementedError(
+                f'The given Speaker Format "{self.speaker_format}" is currently not supported!'
+            )
 
 
-class AnnotationDetector():
+class AnnotationDetector:
     """Class that can find annotations in a corpora/file. The annotation format
     provides the annotation detection a regular expression, on how to detect the
     annotation. The annotation can contain multiple identifiers, which are separated
@@ -115,7 +155,7 @@ class AnnotationDetector():
 
         Args:
             annotation_formats (Dict[str, Tuple[str, str]], optional): A dictionary that contains the annotation formats.
-            The key contains the annotation format as a string, the value is a tuple that contains the regular expression 
+            The key contains the annotation format as a string, the value is a tuple that contains the regular expression
             and the separator for multiple identifiers. Defaults to None.
         """
         if annotation_formats:
@@ -123,7 +163,12 @@ class AnnotationDetector():
         else:
             self.annotation_formats = {}
 
-    def detect_annotations(self, files: List[File], annotation_formats: Dict[str, Tuple[str, str]] = None, max_amount: int = None) -> pd.DataFrame:
+    def detect_annotations(
+        self,
+        files: List[File],
+        annotation_formats: Dict[str, Tuple[str, str]] = None,
+        max_amount: int = None,
+    ) -> pd.DataFrame:
         """Searches in one or multiple files for annotations and their spoken text.
         Returns the results as a dataframe with the following structure:
 
@@ -153,8 +198,26 @@ class AnnotationDetector():
         Returns:
             pd.DataFrame: Contains the detected speakers
         """
-        detected_annotations_df = pd.DataFrame(columns=["token", "identifier", "annotation_start", "annotation_end", "annotation_string", "file_name", "file_version"])
-        type_conversion_dict = {'token': str, 'identifier': object, 'annotation_start': int, 'annotation_end': int, 'annotation_string': str, 'file_name': str, 'file_version': float}
+        detected_annotations_df = pd.DataFrame(
+            columns=[
+                "token",
+                "identifier",
+                "annotation_start",
+                "annotation_end",
+                "annotation_string",
+                "file_name",
+                "file_version",
+            ]
+        )
+        type_conversion_dict = {
+            "token": str,
+            "identifier": object,
+            "annotation_start": int,
+            "annotation_end": int,
+            "annotation_string": str,
+            "file_name": str,
+            "file_version": float,
+        }
         detected_annotations_df = detected_annotations_df.astype(type_conversion_dict)
         if not annotation_formats:
             annotation_formats = self.annotation_formats
@@ -165,15 +228,30 @@ class AnnotationDetector():
                 if max_amount and len(detected_annotations_df) >= max_amount:
                     detected_annotations_df = detected_annotations_df.head(max_amount)
                     break
-                
+
                 # Detect the annotations in the file and add them to the dataframe
                 re_annotation, annotation_separator = annotation_format
-                temp_df = self.detect_annotations_in_file(file, annotation_str, re_annotation, annotation_separator, max_amount)
-                detected_annotations_df = pd.concat([detected_annotations_df, temp_df], ignore_index=True)
-        
+                temp_df = self.detect_annotations_in_file(
+                    file,
+                    annotation_str,
+                    re_annotation,
+                    annotation_separator,
+                    max_amount,
+                )
+                detected_annotations_df = pd.concat(
+                    [detected_annotations_df, temp_df], ignore_index=True
+                )
+
         return detected_annotations_df
 
-    def detect_annotations_in_file(self, file: File, annot_str: str, annot_re: str, annot_sep: str, max_amount: int = None) -> pd.DataFrame:
+    def detect_annotations_in_file(
+        self,
+        file: File,
+        annot_str: str,
+        annot_re: str,
+        annot_sep: str,
+        max_amount: int = None,
+    ) -> pd.DataFrame:
         """Detects annotations in a single file.
 
         Args:
@@ -190,21 +268,34 @@ class AnnotationDetector():
         """
         # Find all annotations using the regular expression
         detected_annotations = re.finditer(annot_re, file.content)
-        
+
         # Put the matches and additional info in a dataframe
         data = []
         counter = 0
         for detected_annotation in detected_annotations:
             counter += 1
-            data.append((detected_annotation.group("token"), detected_annotation.group("identifier"), detected_annotation.span()[0], detected_annotation.span()[1]))
+            data.append(
+                (
+                    detected_annotation.group("token"),
+                    detected_annotation.group("identifier"),
+                    detected_annotation.span()[0],
+                    detected_annotation.span()[1],
+                )
+            )
             if max_amount and counter >= max_amount:
                 break
-        detected_annot_df = pd.DataFrame(data, columns=["token", "identifier", "annotation_start", "annotation_end"])
+        detected_annot_df = pd.DataFrame(
+            data, columns=["token", "identifier", "annotation_start", "annotation_end"]
+        )
         # Put the identifiers in a list (can be multiple)
         if annot_sep != "":
-            detected_annot_df["identifier"] = detected_annot_df["identifier"].str.split(annot_sep)
+            detected_annot_df["identifier"] = detected_annot_df["identifier"].str.split(
+                annot_sep
+            )
         else:
-            detected_annot_df["identifier"] = detected_annot_df["identifier"].apply(lambda x: [x])
+            detected_annot_df["identifier"] = detected_annot_df["identifier"].apply(
+                lambda x: [x]
+            )
         # Add additional information to the dataframe
         detected_annot_df["annotation_string"] = annot_str
         detected_annot_df["file_name"] = file.name
@@ -225,7 +316,7 @@ class AnnotationDetector():
         if annotation_format_str in self.annotation_formats:
             return self.annotation_formats[annotation_format_str]
         return None
-    
+
     def get_annotation_formats(self) -> Dict[str, Tuple[str, str]]:
         """Returns all annotation formats that are currently supported.
 
@@ -234,7 +325,7 @@ class AnnotationDetector():
             as keys and the regular expression and the separator for multiple identifiers as values.
         """
         return self.annotation_formats
-    
+
     def add_backslash_to_re_characters(self, string: str) -> str:
         """Adds a backslash to all characters that are used in regular expressions.
 
@@ -262,8 +353,13 @@ class AnnotationDetector():
             del self.annotation_formats[annotation_str]
             return True
         return False
-    
-    def add_annotation_format_regex(self, annotation_str: str, annotation_re: str, multiple_identifier_separator: str = None) -> bool:
+
+    def add_annotation_format_regex(
+        self,
+        annotation_str: str,
+        annotation_re: str,
+        multiple_identifier_separator: str = None,
+    ) -> bool:
         """Adds a new annotation format to the annotation formats. The annotation format
         is defined by the annotation string and the regular expression. The annotation format
         can contain multiple identifiers, which are separated by a separator. The separator
@@ -279,18 +375,23 @@ class AnnotationDetector():
         """
         if annotation_str in self.annotation_formats:
             return False
-        
+
         if not multiple_identifier_separator:
             multiple_identifier_separator = ""
-        
-        self.annotation_formats[annotation_str] = (annotation_re, multiple_identifier_separator)
+
+        self.annotation_formats[annotation_str] = (
+            annotation_re,
+            multiple_identifier_separator,
+        )
         return True
 
-    def get_regex_from_annotation_format(self, 
-                                         annotation_str: str,
-                                         token: Tuple[int, int]| str,
-                                         identifier: Tuple[int, int] | str,
-                                         multiple_identifier_separator: str = None) -> str:
+    def get_regex_from_annotation_format(
+        self,
+        annotation_str: str,
+        token: Tuple[int, int] | str,
+        identifier: Tuple[int, int] | str,
+        multiple_identifier_separator: str = None,
+    ) -> str:
         """Creates a regular expression from an annotation format. The annotation format
         is defined by the annotation string, the position of the token and the identifier
         in the annotation string. The annotation format can contain multiple identifiers,
@@ -301,7 +402,7 @@ class AnnotationDetector():
         The annotation string is "[$token.identifier]"
         The token position is (1, 5)
         The identifier position is (7, 15)
-        The multiple identifier separator is "_"	
+        The multiple identifier separator is "_"
 
         Args:
             annotation_str (str): The annotation format as a string
@@ -321,7 +422,7 @@ class AnnotationDetector():
             token_start = annotation_str.find(token)
             token_end = token_start + len(token) - 1
             token_pos = (token_start, token_end)
-        
+
         if type(identifier) == str:
             identifier_start = annotation_str.find(identifier)
             identifier_end = identifier_start + len(identifier) - 1
@@ -334,9 +435,9 @@ class AnnotationDetector():
         second_pos = identifier_pos if token_before_identifier else token_pos
 
         # Split the annotation string into prefix, infix and suffix, separated by the token and identifier
-        prefix = annotation_str[ : first_pos[0]]
+        prefix = annotation_str[: first_pos[0]]
         infix = annotation_str[first_pos[1] + 1 : second_pos[0]]
-        suffix = annotation_str[second_pos[1] + 1 : ]
+        suffix = annotation_str[second_pos[1] + 1 :]
 
         prefix = self.add_backslash_to_re_characters(prefix)
         infix = self.add_backslash_to_re_characters(infix)
@@ -345,8 +446,14 @@ class AnnotationDetector():
         # Create the regular expression for the annotation
         token_re = r"(?P<token>\w+)"
         if multiple_identifier_separator:
-            multiple_identifier_separator_backslash = self.add_backslash_to_re_characters(multiple_identifier_separator)
-            identifier_re = r"(?P<identifier>\w+(" + multiple_identifier_separator_backslash +  r"\w+)*)"
+            multiple_identifier_separator_backslash = (
+                self.add_backslash_to_re_characters(multiple_identifier_separator)
+            )
+            identifier_re = (
+                r"(?P<identifier>\w+("
+                + multiple_identifier_separator_backslash
+                + r"\w+)*)"
+            )
         else:
             multiple_identifier_separator = ""
             identifier_re = r"(?P<identifier>\w+)"
@@ -357,11 +464,13 @@ class AnnotationDetector():
             annotation_re = prefix + identifier_re + infix + token_re + suffix
         return annotation_re
 
-    def add_annotation_format_token_identifier(self, 
-                                               annotation_str: str,
-                                               token: Tuple[int, int]| str,
-                                               identifier: Tuple[int, int] | str,
-                                               multiple_identifier_separator: str = None) -> bool:
+    def add_annotation_format_token_identifier(
+        self,
+        annotation_str: str,
+        token: Tuple[int, int] | str,
+        identifier: Tuple[int, int] | str,
+        multiple_identifier_separator: str = None,
+    ) -> bool:
         """Adds a new annotation format to the annotation formats. The annotation format
         is defined by the annotation string, the position of the token and the identifier
         in the annotation string. The annotation format can contain multiple identifiers,
@@ -372,7 +481,7 @@ class AnnotationDetector():
         The annotation string is "[$token.identifier]"
         The token position is (1, 5)
         The identifier position is (7, 15)
-        The multiple identifier separator is "_"	
+        The multiple identifier separator is "_"
 
         Args:
             annotation_str (str): The annotation format as a string
@@ -385,10 +494,15 @@ class AnnotationDetector():
         """
         if annotation_str in self.annotation_formats:
             return False
-        
-        annotation_re = self.get_regex_from_annotation_format(annotation_str, token, identifier, multiple_identifier_separator)
-        
-        self.annotation_formats[annotation_str] = (annotation_re, multiple_identifier_separator)
+
+        annotation_re = self.get_regex_from_annotation_format(
+            annotation_str, token, identifier, multiple_identifier_separator
+        )
+
+        self.annotation_formats[annotation_str] = (
+            annotation_re,
+            multiple_identifier_separator,
+        )
         return True
 
     def add_annotation_format_word(self) -> str:
@@ -396,6 +510,5 @@ class AnnotationDetector():
         pass
 
     def reset_annotation_formats(self) -> None:
-        """Resets the annotation formats to an empty dictionary.
-        """
+        """Resets the annotation formats to an empty dictionary."""
         self.annotation_formats = {}

@@ -4,7 +4,9 @@ import json
 import os
 
 
-def decode_txt_file(file_path: str, encoding: Optional[str] = "utf-16", print_messages: bool = False) -> Tuple[str, str, str]:
+def decode_txt_file(
+    file_path: str, encoding: Optional[str] = "utf-16", print_messages: bool = False
+) -> Tuple[str, str, str]:
     buffered_file = open(file_path, "rb")
     file_binary = buffered_file.read()
     buffered_file.close()
@@ -66,9 +68,12 @@ def decode_txt_file(file_path: str, encoding: Optional[str] = "utf-16", print_me
     return corpus, used_encoding, err
 
 
-def save_json_file(filepath: str, data: dict,) -> None:
+def save_json_file(
+    filepath: str,
+    data: dict,
+) -> None:
     with open(filepath, "w") as outfile:
-            json.dump(data, outfile, indent=4)
+        json.dump(data, outfile, indent=4)
 
 
 def load_json_file(filepath: str) -> dict:

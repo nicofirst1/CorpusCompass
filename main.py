@@ -1,6 +1,7 @@
 """
 Main module to start Corpus Compass
 """
+
 import sys
 from src.corpus_compass_app import CorpusCompassApp
 

@@ -1,7 +1,8 @@
 """
-The module contains classes for the gui of CorpussCompass. The main class is 
+The module contains classes for the gui of CorpussCompass. The main class is
 "CorpusCompassView".
 """
+
 from typing import Any, Dict, List, Tuple
 from src.view.tabs import Tab
 from src.model.variables_speakers import Variable, Speaker, VariableValue
@@ -13,12 +14,18 @@ from src.view.generated.ui_main_window import Ui_MainWindow
 from src.view.generated.ui_settings_tab import Ui_SettingsTab
 from src.view.generated.ui_project_information_dialog import Ui_ProjectInformationDialog
 from src.view.generated.ui_speaker_format_tab import Ui_SpeakerIdTab
-from src.view.generated.ui_annotation_format_table_tab import Ui_AnnotationFormatTableTab
+from src.view.generated.ui_annotation_format_table_tab import (
+    Ui_AnnotationFormatTableTab,
+)
 from src.view.generated.ui_load_files_tab import Ui_LoadFilesTab
 from src.view.generated.ui_variable_management_tab import Ui_VariableManagementTab
 from src.view.generated.ui_analysis_settings_tab import Ui_AnalysisSettingsTab
-from src.view.generated.ui_annotationformat_editor_dialog import Ui_EditorAnnotationformatDialog
-from src.view.generated.ui_annotformat_deletion_dialog import Ui_AnnotationFormatRemoveDialog
+from src.view.generated.ui_annotationformat_editor_dialog import (
+    Ui_EditorAnnotationformatDialog,
+)
+from src.view.generated.ui_annotformat_deletion_dialog import (
+    Ui_AnnotationFormatRemoveDialog,
+)
 from src.view.generated.ui_iv_editor_dialog import Ui_IVEditorDialog
 from src.view.generated.ui_dv_editor_dialog import Ui_DVEditorDialog
 from src.view.generated.ui_speaker_editor_dialog import Ui_SpeakerEditorDialog
@@ -27,18 +34,61 @@ from src.view.generated.ui_detecting_dvvariants_dialog import Ui_DetectVariantsD
 from src.view.generated.ui_open_project_dialog import Ui_OpenProjectDialog
 from src.view.generated.ui_generic_warning_dialog import Ui_GenericWarningDialog
 from src.view.generated.ui_analysis_success_dialog import Ui_AnalysisSuccessDialog
-from src.view.generated.ui_analysis_settings_confirmation_dialog import Ui_AnalysisSettingsConfirmationDialog
+from src.view.generated.ui_analysis_settings_confirmation_dialog import (
+    Ui_AnalysisSettingsConfirmationDialog,
+)
 from src.view.generated.ui_annotation_help_dialog import Ui_AnnotationHelpDialog
 from src.view.generated.ui_import_metadata_dialog import Ui_ImportMetadataDialog
 from src.view.generated.ui_export_metadata_dialog import Ui_ExportMetadataDialog
-from src.view.generated.ui_metadata_deletion_warning_dialog import Ui_MetadataDeletionWarningDialog
-from src.view.generated.ui_variable_detection_help_dialog import Ui_VariableDetectionHelpDialog
-from src.view.generated.ui_invalid_input_warning_dialog import Ui_InvalidInputWarningDialog
+from src.view.generated.ui_metadata_deletion_warning_dialog import (
+    Ui_MetadataDeletionWarningDialog,
+)
+from src.view.generated.ui_variable_detection_help_dialog import (
+    Ui_VariableDetectionHelpDialog,
+)
+from src.view.generated.ui_invalid_input_warning_dialog import (
+    Ui_InvalidInputWarningDialog,
+)
 
 
-from PySide6.QtWidgets import QPushButton, QGridLayout, QSizePolicy, QMainWindow, QWidget, QDialog, QFileDialog, QTextEdit, QComboBox, QMessageBox, QHeaderView, QTableWidgetItem, QColorDialog, QTableWidgetItem, QListWidget, QListWidgetItem, QTreeWidgetItem, QTableWidget, QDialogButtonBox, QCheckBox, QPlainTextEdit, QLabel, QToolTip, QScrollArea, QLayoutItem
+from PySide6.QtWidgets import (
+    QPushButton,
+    QGridLayout,
+    QSizePolicy,
+    QMainWindow,
+    QWidget,
+    QDialog,
+    QFileDialog,
+    QTextEdit,
+    QComboBox,
+    QMessageBox,
+    QHeaderView,
+    QTableWidgetItem,
+    QColorDialog,
+    QTableWidgetItem,
+    QListWidget,
+    QListWidgetItem,
+    QTreeWidgetItem,
+    QTableWidget,
+    QDialogButtonBox,
+    QCheckBox,
+    QPlainTextEdit,
+    QLabel,
+    QToolTip,
+    QScrollArea,
+    QLayoutItem,
+)
 from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QSize, QRect, QTimer, QEvent
-from PySide6.QtGui import QFont, QKeyEvent, QTextCharFormat, QColor, QTextCursor, QStandardItemModel, QDragEnterEvent, QDropEvent
+from PySide6.QtGui import (
+    QFont,
+    QKeyEvent,
+    QTextCharFormat,
+    QColor,
+    QTextCursor,
+    QStandardItemModel,
+    QDragEnterEvent,
+    QDropEvent,
+)
 
 import re
 import random
@@ -53,6 +103,7 @@ import random
 
 #     return parts
 
+
 def split_string_with_token_and_identifier(input_string):
     substrings = ["token", "identifier"]
     result = []
@@ -62,7 +113,7 @@ def split_string_with_token_and_identifier(input_string):
         # Check if the current position matches any of the special substrings
         matched = False
         for substring in substrings:
-            if input_string[i:i+len(substring)] == substring:
+            if input_string[i : i + len(substring)] == substring:
                 result.append(substring)
                 i += len(substring)
                 matched = True
@@ -70,14 +121,17 @@ def split_string_with_token_and_identifier(input_string):
         if not matched:
             result.append(input_string[i])
             i += 1
-    
+
     return result
+
 
 def set_checkbox_stylesheet(checkbox: QCheckBox):
     """
-    Is used as a standardized function to set the stylesheet of checkboxes in the application. 
+    Is used as a standardized function to set the stylesheet of checkboxes in the application.
     """
-    checkbox.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)  # Set size policy to fixed
+    checkbox.setSizePolicy(
+        QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
+    )  # Set size policy to fixed
     checkbox.setMaximumWidth(32)  # Set maximum width to 32
     checkbox.setStyleSheet("""
                 QCheckBox { 
@@ -106,13 +160,14 @@ def set_checkbox_stylesheet(checkbox: QCheckBox):
                 }
             """)
 
+
 def set_expand_button_stylesheet(expand_button: QPushButton, init_expanded: bool):
     """
-    Is used as a standardized function to set the stylesheet of expand buttons in the application. 
+    Is used as a standardized function to set the stylesheet of expand buttons in the application.
     """
     expand_button.setCheckable(True)
     if init_expanded:
-        expand_button.setText("▼") 
+        expand_button.setText("▼")
         expand_button.setStyleSheet("""
             QPushButton {
                 background-color: white;
@@ -137,7 +192,7 @@ def set_expand_button_stylesheet(expand_button: QPushButton, init_expanded: bool
         """)
         expand_button.setChecked(True)
     else:
-        expand_button.setText("▶") 
+        expand_button.setText("▶")
         expand_button.setStyleSheet("""
                 QPushButton {
                     background-color: white;
@@ -165,6 +220,7 @@ def set_expand_button_stylesheet(expand_button: QPushButton, init_expanded: bool
             """)
         expand_button.setChecked(False)
 
+
 def expand_button_clicked(expand_target: QWidget, expand_button: QPushButton):
     """
     Handle the click event of the expand button.
@@ -175,7 +231,7 @@ def expand_button_clicked(expand_target: QWidget, expand_button: QPushButton):
     """
     if expand_button.isChecked():
         expand_target.setHidden(False)
-        expand_button.setText("▼") 
+        expand_button.setText("▼")
         expand_button.setStyleSheet("""
             QPushButton {
                 background-color: white;
@@ -201,7 +257,7 @@ def expand_button_clicked(expand_target: QWidget, expand_button: QPushButton):
 
     else:
         expand_target.setHidden(True)
-        expand_button.setText("▶")     
+        expand_button.setText("▶")
         expand_button.setStyleSheet("""
             QPushButton {
                 background-color: white;
@@ -225,7 +281,10 @@ def expand_button_clicked(expand_target: QWidget, expand_button: QPushButton):
             }
         """)
 
-def set_abbreviate_label(label: QLabel, name: str, max_size: int, abbreviat_end: bool = True):
+
+def set_abbreviate_label(
+    label: QLabel, name: str, max_size: int, abbreviat_end: bool = True
+):
     """
     Is used to abbreviate the text of a QLabel if it exceeds a certain length, in order to prevent the text from overflowing the label.
     Sets the text of the label and a tooltip that displays the full text when hovering over the label.
@@ -238,13 +297,13 @@ def set_abbreviate_label(label: QLabel, name: str, max_size: int, abbreviat_end:
     """
     if abbreviat_end:
         if len(name) > max_size:
-            label.setText(name[:max_size - 3] + '...')
+            label.setText(name[: max_size - 3] + "...")
             label.setToolTip(name)
         else:
             label.setText(name)
     else:
         if len(name) > max_size:
-            label.setText('...' + name[-max_size + 3:])
+            label.setText("..." + name[-max_size + 3 :])
             label.setToolTip(name)
         else:
             label.setText(name)
@@ -259,10 +318,12 @@ class FontColors:
     TOKEN = QColor(58, 60, 202)
     IDENTIFIER = QColor(185, 68, 185)
 
+
 class FontConfig:
     """
     Class that returns the used fonts for the different text formats in the application.
     """
+
     @staticmethod
     def get_standardized_font(font_size: int, set_bold: bool) -> QFont:
         """
@@ -274,7 +335,7 @@ class FontConfig:
         font.setFamily("Segoe UI")
         return font
 
-    # Alternative (but could be worse as font sizes could vary a lot in the application)    
+    # Alternative (but could be worse as font sizes could vary a lot in the application)
     # standardized_font = None
 
     # @classmethod
@@ -292,16 +353,14 @@ class FontConfig:
 
 class CorpusCompassView(QMainWindow, Ui_MainWindow):
     """
-    The Main Window of the Corpus Compass application. Initializes all Tabs and 
+    The Main Window of the Corpus Compass application. Initializes all Tabs and
     Dialog windows
     """
 
     # Catching Signals from Controller
     proj_name_changed = Signal(str)
 
-    def __init__(self, 
-                 parent: QWidget = None) -> None:
-        
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
@@ -326,7 +385,7 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         self.stackedWidget.addWidget(self.analysis_settings_tab)
         self.stackedWidget.addWidget(self.general_settings_tab)
 
-        # Initialize Dialogs (None for initialization, as they are later created on demand) 
+        # Initialize Dialogs (None for initialization, as they are later created on demand)
         # --> Dialogs are created dynamically when needed and stored in instance variables of the view, as they are not needed all the time and should be deleted when not needed anymore
         # --> Implication for the controller: All signals from the dialogs must be connected in the controller, as the view does not know when the dialogs are created
         self.create_proj_dialog = None
@@ -349,7 +408,7 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         self.dv_detection_help_dialog = None
         self.metadata_deletion_warning_dialog = None
         self.invalid_input_warning_dialog = None
-    
+
     def switch_to_tab(self, tab: Tab):
         """
         Switches to a new tab. For this method to work properly, the order in
@@ -362,11 +421,13 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
             tab (Tab): The tab the view should change to
         """
         self.stackedWidget.setCurrentIndex(tab.value)
-    
+
     def open_file_explorer(self, dir: str) -> list:
-        corpus_files = QFileDialog.getOpenFileNames(self, "Select Corpus Files", dir, "Text Files (*.txt);;All Files (*.*)")[0]
+        corpus_files = QFileDialog.getOpenFileNames(
+            self, "Select Corpus Files", dir, "Text Files (*.txt);;All Files (*.*)"
+        )[0]
         return corpus_files
-    
+
     def display_error_message(self, message: str):
         error_message = QMessageBox()
         error_message.setIcon(QMessageBox.Icon.Critical)
@@ -374,22 +435,20 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         error_message.setWindowTitle("Error")
         error_message.exec()
 
-
-
-# Functions for creating dialogs "on demand" dynamically
-# --> Each function creates a dialog window object, stores it in an instance variable of the view and sets initial properties of the object (what to show/hide, what elements to fill lists with, ...)
-# --> Delete functions just remove the reference from the instance variables to the objects so that the garbage collector can delete them
+    # Functions for creating dialogs "on demand" dynamically
+    # --> Each function creates a dialog window object, stores it in an instance variable of the view and sets initial properties of the object (what to show/hide, what elements to fill lists with, ...)
+    # --> Delete functions just remove the reference from the instance variables to the objects so that the garbage collector can delete them
 
     def create_addsymbol_dialog(self, current_symbol_list):
         """
         Creates a new instance of the addsymbol_dialog and sets initial properties of the object.
-        
+
         Args:
             current_symbol_list (list): The list of symbols to populate the dialog with.
         """
         self.add_symbol_dialog = AddSymbolDialog(self)
 
-        # Set initial data --> Add all symbols to the list 
+        # Set initial data --> Add all symbols to the list
         self.add_symbol_dialog.add_all_symbols_to_list(current_symbol_list)
 
         # show/hide initial elements
@@ -413,7 +472,9 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         """
         self.create_proj_dialog = None
 
-    def create_project_information_dialog(self, proj_name: str = "My Name", proj_descr: str = "My Description"):
+    def create_project_information_dialog(
+        self, proj_name: str = "My Name", proj_descr: str = "My Description"
+    ):
         """
         Creates a new instance of the project_information_dialog
         """
@@ -427,7 +488,9 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         """
         self.project_information_dialog = None
 
-    def create_annotation_specify_dialog(self, symbols: List[str], formats: Dict[str, List[str]] = None): # Formats needed to check if a newly added format is a duplicate
+    def create_annotation_specify_dialog(
+        self, symbols: List[str], formats: Dict[str, List[str]] = None
+    ):  # Formats needed to check if a newly added format is a duplicate
         """
         Creates a dialog for adding a new annotation format.
 
@@ -443,7 +506,9 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         self.annotationformat_editor_dialog.comboBox_selectformat.hide()
         self.annotationformat_editor_dialog.label_ivselect.hide()
         self.annotationformat_editor_dialog.btn_delete_annotformat.hide()
-        self.annotationformat_editor_dialog.widget_specificationcontents.setEnabled(True)
+        self.annotationformat_editor_dialog.widget_specificationcontents.setEnabled(
+            True
+        )
         # self.annotationformat_editor_dialog.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
 
         # formats = {
@@ -456,10 +521,13 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         for format_name, format_symbols in formats.items():
             # check if multiple separator symbols are stored, if so, set an entry in the list that tracks the state of the checkbox
             if len(format_symbols) >= 1:
-                self.annotationformat_editor_dialog.current_format_checkboxes_temp[format_name] = True
+                self.annotationformat_editor_dialog.current_format_checkboxes_temp[
+                    format_name
+                ] = True
             else:
-                self.annotationformat_editor_dialog.current_format_checkboxes_temp[format_name] = False
-
+                self.annotationformat_editor_dialog.current_format_checkboxes_temp[
+                    format_name
+                ] = False
 
         # Fill the symbol list with the symbols from the model
         self.annotationformat_editor_dialog.fill_symbol_list(symbols)
@@ -470,7 +538,13 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         """
         self.annotationformat_editor_dialog = None
 
-    def create_annotationformat_editor_dialog(self, row: int, column: int, symbols: List[str], formats: Dict[str, List[str]] = None): # TODO: Needs: List of current annotation formats from Model
+    def create_annotationformat_editor_dialog(
+        self,
+        row: int,
+        column: int,
+        symbols: List[str],
+        formats: Dict[str, List[str]] = None,
+    ):  # TODO: Needs: List of current annotation formats from Model
         """
         Creates and displays the annotation format editor dialog.
 
@@ -487,31 +561,46 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         Therefore the function sets the selected item in the dialog's combobox based on the text of the selected item in the table.
         - It then manually triggers the combobox reactions, as the signals are only connected after the create function is finished.
         """
-        self.annotationformat_editor_dialog = AnnotationformatEditorDialog(self)    
-        # NOTE: Testing temporary storage of changes in the dialog object 
+        self.annotationformat_editor_dialog = AnnotationformatEditorDialog(self)
+        # NOTE: Testing temporary storage of changes in the dialog object
 
         self.annotationformat_editor_dialog.current_formats_temp = formats
 
         for format_name, format_symbols in formats.items():
             # add all formats to the combobox
-            self.annotationformat_editor_dialog.comboBox_selectformat.addItem(format_name)
+            self.annotationformat_editor_dialog.comboBox_selectformat.addItem(
+                format_name
+            )
 
         for format_name, format_symbols in formats.items():
             # check if multiple separator symbols are stored, if so, set an entry in the list that tracks the state of the checkbox
             if len(format_symbols) >= 1:
-                self.annotationformat_editor_dialog.current_format_checkboxes_temp[format_name] = True
+                self.annotationformat_editor_dialog.current_format_checkboxes_temp[
+                    format_name
+                ] = True
             else:
-                self.annotationformat_editor_dialog.current_format_checkboxes_temp[format_name] = False
+                self.annotationformat_editor_dialog.current_format_checkboxes_temp[
+                    format_name
+                ] = False
 
         # if row/column != -1 --> Edit-Dialog was called by double clicking on an item in the table
         if row != -1 and column != -1:
-            annotation_format_text = self.annotation_format_tab.tableWidget_annotformats.item(row, 0).text()
-            for index in range(self.annotationformat_editor_dialog.comboBox_selectformat.count()):
-                combobox_text = self.annotationformat_editor_dialog.comboBox_selectformat.itemText(index)
+            annotation_format_text = (
+                self.annotation_format_tab.tableWidget_annotformats.item(row, 0).text()
+            )
+            for index in range(
+                self.annotationformat_editor_dialog.comboBox_selectformat.count()
+            ):
+                combobox_text = (
+                    self.annotationformat_editor_dialog.comboBox_selectformat.itemText(
+                        index
+                    )
+                )
                 if annotation_format_text == combobox_text:
-                    self.annotationformat_editor_dialog.comboBox_selectformat.setCurrentIndex(index)
-                    break            
-
+                    self.annotationformat_editor_dialog.comboBox_selectformat.setCurrentIndex(
+                        index
+                    )
+                    break
 
             # manually trigger combobox-reactions, as signals are only connected after create-function is finished
             self.annotationformat_editor_dialog.on_combobox_activated()
@@ -556,12 +645,16 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         self.iv_editor_dialog.btn_delete_iv.hide()
         self.iv_editor_dialog.label_ivselect.hide()
         self.iv_editor_dialog.label_ivname.setText("Input IV-Name:")
-        self.iv_editor_dialog.lineEdit_nameinput.setPlaceholderText("Input Variable-Name...")
+        self.iv_editor_dialog.lineEdit_nameinput.setPlaceholderText(
+            "Input Variable-Name..."
+        )
         self.iv_editor_dialog.lineEdit_nameinput.setEnabled(True)
         self.iv_editor_dialog.lineEdit_valueinput.setEnabled(True)
         self.iv_editor_dialog.btn_addvalue.setEnabled(True)
         # Disable Save-Button initially if "Add IV" is pressed -> Cannot save "empty" variable directly after the editor is opened
-        self.iv_editor_dialog.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
+        self.iv_editor_dialog.buttonBox.button(
+            QDialogButtonBox.StandardButton.Save
+        ).setEnabled(False)
 
     def delete_add_iv_dialog(self):
         """
@@ -569,7 +662,12 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         """
         self.iv_editor_dialog = None
 
-    def create_edit_iv_dialog(self, clicked_item: QTreeWidgetItem, column, current_variables: Dict[str, List[str]] = None):
+    def create_edit_iv_dialog(
+        self,
+        clicked_item: QTreeWidgetItem,
+        column,
+        current_variables: Dict[str, List[str]] = None,
+    ):
         """
         Opens a dialog for editing or deleting an independent variable (IV).
 
@@ -589,14 +687,16 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
             to update the dialog based on the selected IV.
         """
         self.iv_editor_dialog = IVEditorDialog(self)
-        
+
         # populate dialog with current variables
 
         # current_variables = {"IV1": ["Value1", "Value2", "Value3"], "IV2": ["Value4", "Value5", "Value6"]}
 
         self.iv_editor_dialog.current_ivs_temp = current_variables
         # add variable text to combobox
-        self.iv_editor_dialog.comboBox_selectiv.addItems([var for var in current_variables.keys()])
+        self.iv_editor_dialog.comboBox_selectiv.addItems(
+            [var for var in current_variables.keys()]
+        )
 
         if clicked_item is not None:
             item_text = clicked_item.text(column)
@@ -615,7 +715,11 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         """
         self.iv_editor_dialog = None
 
-    def create_add_dv_dialog(self, detected_variants: Dict[str, Tuple[int, str, str]] = None, current_variables: Dict[str, Tuple[List[str], List[str]]] = None): # TODO: Needs: List of DVs Variants with Colors and their current associated DV from Model. ALSO NEEDS: List of all current DVs to check for duplicates
+    def create_add_dv_dialog(
+        self,
+        detected_variants: Dict[str, Tuple[int, str, str]] = None,
+        current_variables: Dict[str, Tuple[List[str], List[str]]] = None,
+    ):  # TODO: Needs: List of DVs Variants with Colors and their current associated DV from Model. ALSO NEEDS: List of all current DVs to check for duplicates
         """
         Creates a dialog for adding a new DV (Dependent Variable).
 
@@ -636,26 +740,40 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
 
         # manually add variants to the table as the combobox trigger for adding variants for a DV cannot be called for adding a DV as the combobox is hidden
         # set the stored values for the selected IV
-        self.dv_editor_dialog.tableWidget_dialog_dvaddvariants.setRowCount(0) # clear the table widget to load all variants of the selected DV again
-
+        self.dv_editor_dialog.tableWidget_dialog_dvaddvariants.setRowCount(
+            0
+        )  # clear the table widget to load all variants of the selected DV again
 
         # disconnect the cellChanged signal to prevent that the filling of the table triggers any changes in the model
-        self.dv_editor_dialog.tableWidget_dialog_dvaddvariants.cellChanged.disconnect(self.dv_editor_dialog.update_dv_grouping)
-        for variant, variant_data in self.dv_editor_dialog.detected_variants_temp.items():
+        self.dv_editor_dialog.tableWidget_dialog_dvaddvariants.cellChanged.disconnect(
+            self.dv_editor_dialog.update_dv_grouping
+        )
+        for (
+            variant,
+            variant_data,
+        ) in self.dv_editor_dialog.detected_variants_temp.items():
             # add all variants of the selected DV to the table with "False" as the default value for the checkbox, as new DVs have no variants selected by default
-            self.dv_editor_dialog.add_item_to_variant_list(item_text=variant, is_grouped_to_dv=False, variant_color=variant_data[2])
-        self.dv_editor_dialog.tableWidget_dialog_dvaddvariants.cellChanged.connect(self.dv_editor_dialog.update_dv_grouping)
+            self.dv_editor_dialog.add_item_to_variant_list(
+                item_text=variant, is_grouped_to_dv=False, variant_color=variant_data[2]
+            )
+        self.dv_editor_dialog.tableWidget_dialog_dvaddvariants.cellChanged.connect(
+            self.dv_editor_dialog.update_dv_grouping
+        )
 
-        # Show/Hide elements, as generic editor dialog holds elements 
+        # Show/Hide elements, as generic editor dialog holds elements
         self.dv_editor_dialog.comboBox_selectdv.hide()
         self.dv_editor_dialog.btn_editconfirm.hide()
         self.dv_editor_dialog.btn_delete_dv.hide()
         self.dv_editor_dialog.label_selectdv.hide()
         self.dv_editor_dialog.label_dvname.setText("Input DV-Name:")
-        self.dv_editor_dialog.lineEdit_nameinput.setPlaceholderText("Input Variable-Name...")
+        self.dv_editor_dialog.lineEdit_nameinput.setPlaceholderText(
+            "Input Variable-Name..."
+        )
         self.dv_editor_dialog.lineEdit_nameinput.setEnabled(True)
         self.dv_editor_dialog.tableWidget_dialog_dvaddvariants.setEnabled(True)
-        self.dv_editor_dialog.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
+        self.dv_editor_dialog.buttonBox.button(
+            QDialogButtonBox.StandardButton.Save
+        ).setEnabled(False)
 
     def delete_add_dv_dialog(self):
         """
@@ -663,7 +781,13 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         """
         self.dv_editor_dialog = None
 
-    def create_edit_dv_dialog(self, clicked_item: QTreeWidgetItem, column, detected_variants: Dict[str, Tuple[int, str, str]] = None, current_variables: Dict[str, Tuple[List[str], List[str]]] = None): # TODO: Needs: List of DVs Variants with Colors and their current associated DV from Model, as well as list of all current DVs and their grouped variants
+    def create_edit_dv_dialog(
+        self,
+        clicked_item: QTreeWidgetItem,
+        column,
+        detected_variants: Dict[str, Tuple[int, str, str]] = None,
+        current_variables: Dict[str, Tuple[List[str], List[str]]] = None,
+    ):  # TODO: Needs: List of DVs Variants with Colors and their current associated DV from Model, as well as list of all current DVs and their grouped variants
         """
         Opens a dialog for editing or deleting a dependent variable (DV).
 
@@ -691,9 +815,13 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         # detected_variants = {"Var1": (2, "DV1", "#FF0000"), "Var2": (4, "DV1", "#00FF00"), "Val3": (3, "DV2", "#0000FF")}
         self.dv_editor_dialog.detected_variants_temp = detected_variants
 
-        self.dv_editor_dialog.comboBox_selectdv.addItems([var for var in current_variables.keys()])
+        self.dv_editor_dialog.comboBox_selectdv.addItems(
+            [var for var in current_variables.keys()]
+        )
 
-        if clicked_item is not None: # is not None == method called from double-clicking the item -> Open edit for item directly, otherwise disable buttons and start with item selection
+        if (
+            clicked_item is not None
+        ):  # is not None == method called from double-clicking the item -> Open edit for item directly, otherwise disable buttons and start with item selection
             item_text = clicked_item.text(column)
             for index in range(self.dv_editor_dialog.comboBox_selectdv.count()):
                 combobox_text = self.dv_editor_dialog.comboBox_selectdv.itemText(index)
@@ -710,7 +838,11 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         """
         self.dv_editor_dialog = None
 
-    def create_add_speaker_dialog(self, current_speakers: Dict[str, Tuple[Dict[str, str], str]] = None, current_ivs: Dict[str, List[str]] = None):
+    def create_add_speaker_dialog(
+        self,
+        current_speakers: Dict[str, Tuple[Dict[str, str], str]] = None,
+        current_ivs: Dict[str, List[str]] = None,
+    ):
         """
         Creates a dialog for adding a new speaker.
 
@@ -737,15 +869,23 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         self.speaker_editor_dialog.label_speakername.setText("Input Speaker-Name:")
         self.speaker_editor_dialog.btn_changecolor.setEnabled(True)
         self.speaker_editor_dialog.scrollArea_ivscontents.setEnabled(True)
-        self.speaker_editor_dialog.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
-    
+        self.speaker_editor_dialog.buttonBox.button(
+            QDialogButtonBox.StandardButton.Save
+        ).setEnabled(False)
+
     def delete_add_speaker_dialog(self):
         """
         Deletes the speaker_editor_dialog instance.
         """
         self.speaker_editor_dialog = None
 
-    def create_edit_speaker_dialog(self, clicked_item: QTreeWidgetItem, column, current_speakers: Dict[str, Tuple[Dict[str, str], str]] = None, current_ivs: Dict[str, List[str]] = None): # TODO: Needs: List of IVs and their values so that the editor can display Ivs and their values for the user to select for a speaker. List of all current speakers and their set attributes
+    def create_edit_speaker_dialog(
+        self,
+        clicked_item: QTreeWidgetItem,
+        column,
+        current_speakers: Dict[str, Tuple[Dict[str, str], str]] = None,
+        current_ivs: Dict[str, List[str]] = None,
+    ):  # TODO: Needs: List of IVs and their values so that the editor can display Ivs and their values for the user to select for a speaker. List of all current speakers and their set attributes
         """
         Opens a dialog for editing or deleting a speaker.
 
@@ -772,33 +912,42 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         self.speaker_editor_dialog.current_ivs_temp = current_ivs
 
         # add all items to combobox
-        self.speaker_editor_dialog.comboBox_selectspeaker.addItems([var for var in current_speakers.keys()])
+        self.speaker_editor_dialog.comboBox_selectspeaker.addItems(
+            [var for var in current_speakers.keys()]
+        )
 
         # add all iv comboboxes to the scroll area
         for iv_name, iv_values in current_ivs.items():
             # get the all selected values for each iv for the current speaker --> Initially set default values for each, as on_combobox_activated will be called if the user selects a speaker initially and on each change
             self.speaker_editor_dialog.add_iv_item_row(iv_name, iv_values)
 
-            
         if clicked_item is not None:
             item_text = clicked_item.text(column)
-            for index in range(self.speaker_editor_dialog.comboBox_selectspeaker.count()):
-                combobox_text = self.speaker_editor_dialog.comboBox_selectspeaker.itemText(index)
+            for index in range(
+                self.speaker_editor_dialog.comboBox_selectspeaker.count()
+            ):
+                combobox_text = (
+                    self.speaker_editor_dialog.comboBox_selectspeaker.itemText(index)
+                )
                 if item_text == combobox_text:
-                    self.speaker_editor_dialog.comboBox_selectspeaker.setCurrentIndex(index)
+                    self.speaker_editor_dialog.comboBox_selectspeaker.setCurrentIndex(
+                        index
+                    )
                     break
             # manually trigger combobox-reactions, as signals are only connected after create-function is finished
             self.speaker_editor_dialog.on_combobox_activated()
-        
+
     def delete_edit_speaker_dialog(self):
         """
-        Deletes the speaker_editor_dialog instance. 
-        
+        Deletes the speaker_editor_dialog instance.
+
         Currently a copy the delete_add_speaker_dialog function, as different behaviour may be implemented in the future.
         """
         self.speaker_editor_dialog = None
 
-    def create_detect_variants_dialog(self, detected_variants: Dict[str, Tuple[int, str, str]] = None):
+    def create_detect_variants_dialog(
+        self, detected_variants: Dict[str, Tuple[int, str, str]] = None
+    ):
         """
         Creates a new instance of the detect_variants_dialog and fills it with the correct data, which in this case are the detected variants.
 
@@ -854,13 +1003,19 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         """
         self.analysis_success_dialog = None
 
-    def create_analysis_settings_confirmation_dialog(self, selected_dvs: List[str], selected_speakers: List[str]):
+    def create_analysis_settings_confirmation_dialog(
+        self, selected_dvs: List[str], selected_speakers: List[str]
+    ):
         """
         Creates a new instance of the analysis_settings_confirmation_dialog.
         """
-        self.analysis_settings_confirmation_dialog = AnalysisSettingsConfirmationDialog(self)
+        self.analysis_settings_confirmation_dialog = AnalysisSettingsConfirmationDialog(
+            self
+        )
         self.analysis_settings_confirmation_dialog.add_all_dvs_to_list(selected_dvs)
-        self.analysis_settings_confirmation_dialog.add_all_speakers_to_list(selected_speakers)
+        self.analysis_settings_confirmation_dialog.add_all_speakers_to_list(
+            selected_speakers
+        )
 
     def delete_analysis_settings_confirmation_dialog(self):
         """
@@ -923,11 +1078,17 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         self.metadata_deletion_warning_dialog = MetadataDeletionWarningDialog(self)
 
         if called_from == "IV":
-            self.metadata_deletion_warning_dialog.label_effect.setText("Speakers will lose their attributes for this IV")
+            self.metadata_deletion_warning_dialog.label_effect.setText(
+                "Speakers will lose their attributes for this IV"
+            )
         elif called_from == "DV":
-            self.metadata_deletion_warning_dialog.label_effect.setText("Analysis results will be lost for this DV")
+            self.metadata_deletion_warning_dialog.label_effect.setText(
+                "Analysis results will be lost for this DV"
+            )
         else:
-            self.metadata_deletion_warning_dialog.label_effect.setText("Words that are mapped to this speaker will not be considered in the analysis anymore")
+            self.metadata_deletion_warning_dialog.label_effect.setText(
+                "Words that are mapped to this speaker will not be considered in the analysis anymore"
+            )
 
     def delete_metadata_deletion_warning_dialog(self):
         """
@@ -940,28 +1101,32 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         Creates a new instance of the invalid_input_warning_dialog.
         """
         self.invalid_input_warning_dialog = InvalidInputWarningDialog(self)
-        
+
     def delete_invalid_input_warning_dialog(self):
         """
         Deletes the invalid_input_warning_dialog instance.
         """
         self.invalid_input_warning_dialog = None
 
+
 class StartScreenTab(QWidget, Ui_StartScreenTab):
     """
     Class for the start-screen tab. This is the first window the user sees and
     it contains the options to create or load a project
     """
+
     def __init__(self, parent: CorpusCompassView) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.view = parent
 
+
 class HomeMenuTab(QWidget, Ui_HomeMenuTab):
     """
-    Class for the home-menu tab. This window contains information about the 
+    Class for the home-menu tab. This window contains information about the
     current project and shows diffent options for the analysis of a corpus.
     """
+
     def __init__(self, parent: CorpusCompassView) -> None:
         super().__init__(parent)
         self.setupUi(self)
@@ -978,8 +1143,7 @@ class HomeMenuTab(QWidget, Ui_HomeMenuTab):
             proj_name (str): The project name, which should be displayed
         """
         # shorten name in view if it is too long, but add tooltip as compensation
-        set_abbreviate_label(self.proj_name_label, "Project: <" + proj_name  + ">", 30)
-
+        set_abbreviate_label(self.proj_name_label, "Project: <" + proj_name + ">", 30)
 
     def update_loaded_files(self, length: int) -> None:
         """
@@ -992,7 +1156,6 @@ class HomeMenuTab(QWidget, Ui_HomeMenuTab):
         else:
             self.label_warning_loaded_files.hide()
             self.label_loadedfiles.setStyleSheet("color: green;")
-
 
     def update_speakers(self, length: int) -> None:
         """
@@ -1041,7 +1204,7 @@ class HomeMenuTab(QWidget, Ui_HomeMenuTab):
         else:
             self.label_warning_ivs.hide()
             self.label_ivs.setStyleSheet("color: green;")
-    
+
     def update_iv_values(self, length: int) -> None:
         """
         Updates the displayed number of detected independent variable values in the home-menu tab. Also hides/shows the warning label if necessary.
@@ -1078,26 +1241,31 @@ class HomeMenuTab(QWidget, Ui_HomeMenuTab):
             self.label_warning_annotationformats.hide()
             self.label_annotationformat.setStyleSheet("color: green;")
 
+
 class GeneralSettingsTab(QWidget, Ui_SettingsTab):
     """
     Class for the general-settings-tab. This window contains control-
-    elements to change settings for the current project, use of the 
+    elements to change settings for the current project, use of the
     tool etc.
     """
+
     def __init__(self, parent: CorpusCompassView) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.view = parent
+
 
 class ProjectInformationDialog(QDialog, Ui_ProjectInformationDialog):
     """
     Class for the project-information-dialog. This window allows the user to
     check and specify the project name and description, alongside other project related information.
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("Project Information")
+
 
 class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
     """
@@ -1105,6 +1273,7 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
     specify the transcription format in order to detect speakers and associate
     them with their spoken text.
     """
+
     def __init__(self, parent: CorpusCompassView) -> None:
         super().__init__(parent)
         self.setupUi(self)
@@ -1113,7 +1282,7 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
         # show/hide elements
         self.tableWidget_distinctspeakers.hide()
         self.tableWidget_unassignedwords.hide()
-        
+
         # self.add_speaker_table_row("Speaker 1", 10)
         # self.add_speaker_table_row("Speaker 2", 5)
 
@@ -1123,11 +1292,13 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
         self.add_all_words_to_table({"File 1": 11, "File 2": 2})
         self.update_labels(2, 13)
 
-
-
         for column in range(self.tableWidget_distinctspeakers.columnCount()):
-            self.tableWidget_distinctspeakers.horizontalHeader().setSectionResizeMode(column, QHeaderView.ResizeMode.Fixed)
-            self.tableWidget_unassignedwords.horizontalHeader().setSectionResizeMode(column, QHeaderView.ResizeMode.Fixed)
+            self.tableWidget_distinctspeakers.horizontalHeader().setSectionResizeMode(
+                column, QHeaderView.ResizeMode.Fixed
+            )
+            self.tableWidget_unassignedwords.horizontalHeader().setSectionResizeMode(
+                column, QHeaderView.ResizeMode.Fixed
+            )
 
     def get_selected_format(self) -> str:
         """
@@ -1137,11 +1308,14 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
         Returns:
         - str: The selected transcription format.
         """
-        if self.radbtn_sp_standard.isChecked(): return "STANDARD"
-        if self.radbtn_sp_praat.isChecked(): return "PRAAT"
-        if self.radbtn_sp_elan.isChecked(): return "ELAN"
-        if self.radbtn_sp_flex.isChecked(): return "FLEX"
-
+        if self.radbtn_sp_standard.isChecked():
+            return "STANDARD"
+        if self.radbtn_sp_praat.isChecked():
+            return "PRAAT"
+        if self.radbtn_sp_elan.isChecked():
+            return "ELAN"
+        if self.radbtn_sp_flex.isChecked():
+            return "FLEX"
 
     def update_labels(self, speaker_count: int, word_count: int):
         """
@@ -1158,13 +1332,17 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
         """
         Is called when the user clicks on the expand button for showing more information about the detected speakers.
         """
-        expand_button_clicked(self.tableWidget_distinctspeakers, self.btn_expand_speakerinfo)
+        expand_button_clicked(
+            self.tableWidget_distinctspeakers, self.btn_expand_speakerinfo
+        )
 
     def on_words_expand_clicked(self):
         """
         Is called when the user clicks on the expand button for showing more information about undetected words in the corpus.
         """
-        expand_button_clicked(self.tableWidget_unassignedwords, self.btn_expand_wordinfo)
+        expand_button_clicked(
+            self.tableWidget_unassignedwords, self.btn_expand_wordinfo
+        )
 
     def add_all_speakers_to_table(self, speakers: Dict[str, int]):
         """
@@ -1180,7 +1358,7 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
 
     def add_speaker_table_row(self, left_column_data: str, right_column_data: int):
         """
-        Adds a new row to the table widget containing the detected speakers. 
+        Adds a new row to the table widget containing the detected speakers.
 
         Parameters:
         - left_column_data (str): The data for the left column of the new row.
@@ -1194,12 +1372,16 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
 
         left_item = QTableWidgetItem(left_column_data)
         left_item.setFont(FontConfig.get_standardized_font(font_size, False))
-        left_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        left_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
         self.tableWidget_distinctspeakers.setItem(current_row_count, 0, left_item)
 
         right_item = QTableWidgetItem(str(right_column_data))
         right_item.setFont(FontConfig.get_standardized_font(font_size, False))
-        right_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        right_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
         self.tableWidget_distinctspeakers.setItem(current_row_count, 1, right_item)
 
     def add_all_words_to_table(self, words: Dict[str, int]):
@@ -1216,7 +1398,7 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
 
     def add_words_table_row(self, left_column_data: str, right_column_data: int):
         """
-        Adds a new row to the table widget containing the undetected words. Used explicit function as 
+        Adds a new row to the table widget containing the undetected words. Used explicit function as
         this table may differ in style from the speaker table.
 
         Parameters:
@@ -1234,7 +1416,9 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
         # TODO: Change color depending on the amount of undetected words (second column value) in a meaningful way only once as well
         if right_column_data > 5:
             left_item.setForeground(QColor(255, 0, 0))
-        left_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        left_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
         self.tableWidget_unassignedwords.setItem(current_row_count, 0, left_item)
 
         right_item = QTableWidgetItem(str(right_column_data))
@@ -1242,7 +1426,9 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
         # TODO: Change color depending on the amount of undetected words (second column value) in a meaningful way only once as well
         if right_column_data > 5:
             right_item.setForeground(QColor(255, 0, 0))
-        right_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        right_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
         self.tableWidget_unassignedwords.setItem(current_row_count, 1, right_item)
 
     def clear_words_table(self):
@@ -1257,24 +1443,27 @@ class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
         """
         self.tableWidget_distinctspeakers.setRowCount(0)
 
+
 class AnnotationFormatTableTab(QWidget, Ui_AnnotationFormatTableTab):
     """
     Class for the annotation-format-tab. This window serves for
-    checking and managing the specified annotation formats for a 
+    checking and managing the specified annotation formats for a
     project.
     """
+
     def __init__(self, parent: CorpusCompassView) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.view = parent
 
         # show/hide
-        self.btn_annotformat_cancel.hide() # Hide Cancel button for now to make workflow more clear
+        self.btn_annotformat_cancel.hide()  # Hide Cancel button for now to make workflow more clear
 
         # Fix column size
         for column in range(self.tableWidget_annotformats.columnCount()):
-            self.tableWidget_annotformats.horizontalHeader().setSectionResizeMode(column, QHeaderView.ResizeMode.Fixed)
-
+            self.tableWidget_annotformats.horizontalHeader().setSectionResizeMode(
+                column, QHeaderView.ResizeMode.Fixed
+            )
 
     def add_format_to_table(self, format: str, regex: str):
         """
@@ -1288,29 +1477,32 @@ class AnnotationFormatTableTab(QWidget, Ui_AnnotationFormatTableTab):
         str_regex = regex
 
         format_item = QTableWidgetItem(str_annot_format)
-        format_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        format_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
         regex_item = QTableWidgetItem(str_regex)
-        regex_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        regex_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
 
         current_row_count = self.tableWidget_annotformats.rowCount()
         self.tableWidget_annotformats.insertRow(current_row_count)
 
         self.tableWidget_annotformats.setItem(current_row_count, 0, format_item)
-        self.tableWidget_annotformats.setItem(current_row_count, 1, regex_item)     
-
+        self.tableWidget_annotformats.setItem(current_row_count, 1, regex_item)
 
     def remove_format_item_from_table(self, remove_row_formats):
         """
-        Removes the selected annotation-format-items from the 
+        Removes the selected annotation-format-items from the
         table widget that contains all annotation formats.
 
         Parameters:
         - remove_row_formats (List[str]): A list of annotation formats to be removed.
-        """    
-        for row in range(self.tableWidget_annotformats.rowCount()- 1, -1, -1):
+        """
+        for row in range(self.tableWidget_annotformats.rowCount() - 1, -1, -1):
             if self.tableWidget_annotformats.item(row, 0).text() in remove_row_formats:
                 self.tableWidget_annotformats.removeRow(row)
-            
+
     def clear_table(self):
         """
         Clears the table widget that contains all annotation formats.
@@ -1328,16 +1520,17 @@ class AnnotationFormatTableTab(QWidget, Ui_AnnotationFormatTableTab):
         for format, regex in formats.items():
             self.add_format_to_table(format, regex)
 
+
 class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
     """
     Class for the annotation-specification-dialog. This window enables choosing
     and specifying a (custom) annotation format.
     """
 
-    # Signal --> emitted when the user changes the input format in the dialog 
+    # Signal --> emitted when the user changes the input format in the dialog
     format_changed = Signal()
 
-    def __init__(self, parent: QWidget=None) -> None:
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
@@ -1345,7 +1538,9 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
 
         # save the original drop event functions to call them after the custom drop event function (otherwise the event will not be handled correctly and the drop will not be executed (Bug?))
         self.old_input_drop_event = self.listwidget_annotdial_inputformat.dropEvent
-        self.old_symbol_drop_event = self.listwidget_annotdial_separatorsymbols.dropEvent
+        self.old_symbol_drop_event = (
+            self.listwidget_annotdial_separatorsymbols.dropEvent
+        )
         self.old_trashcan_drop_event = self.listwidget_annotformat_removeelems.dropEvent
 
         # Data structure that stores a temporary list of all symbols, formats, ... --> used for saving modifications to the data without overwriting the original data before the user confirms the changes
@@ -1436,8 +1631,9 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
         """
         for symbol in symbol_list:
             self.add_symbol_to_list(symbol)
-        self.listwidget_annotformat_symbolcontainer.sortItems(order= Qt.SortOrder.DescendingOrder)
-
+        self.listwidget_annotformat_symbolcontainer.sortItems(
+            order=Qt.SortOrder.DescendingOrder
+        )
 
     def clear_input_format(self):
         """
@@ -1449,39 +1645,40 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
         self.listwidget_annotformat_tokenidentcontainer.clear()
         self.add_init_token_identifier()
         # manually call reactions to a change input-format, as listwidget.itemChanged.connect() does not automatically detected listwidget.clear() calls, only drag-and-drop
-        # -> if input is cleared, then listwidget-items change (undetected due to clear) -> explicit call necessary 
+        # -> if input is cleared, then listwidget-items change (undetected due to clear) -> explicit call necessary
         # => Programmer-Note: Explicit call necessary whenever (!) listwidget is cleared/added in the code (so no drag and drop)
         self.on_format_changed()
         self.update_temporary_formats()
 
         # print("COUNT: ", self.listwidget_annotdial_separatorsymbols.count())
-        
+
     def clear_separator_symbols(self):
         """
-        Clears the field for separator symbols in the annotation format editor dialog. 
+        Clears the field for separator symbols in the annotation format editor dialog.
         This function is called when the user clicks the reset button to clear the separator symbols.
         """
         # manually call reactions to a change input-format, as listwidget.itemChanged.connect() does not automatically detected listwidget.clear() calls, only drag-and-drop
         self.listwidget_annotdial_separatorsymbols.clear()
         self.on_format_changed()
         self.update_temporary_formats()
-        
+
     def trashcan_separator_drag_enter_event(self, event: QDragEnterEvent):
         """
-        Handles the drop event in the annotation format editor dialog. 
+        Handles the drop event in the annotation format editor dialog.
         This function is called when the user drags any item into the "trashcan" list widget or the multiple annotation symbols list widget.
 
         Description:
         - This function checks if the mime data has the format 'application/x-qabstractitemmodeldatalist', which is the format of the items in the list widgets.
-        - It extracts the item name from fitting events and checks if the item is not "token" or "identifier", as these items should not be moved into the trashcan or the multiple annotation symbols list widget. 
+        - It extracts the item name from fitting events and checks if the item is not "token" or "identifier", as these items should not be moved into the trashcan or the multiple annotation symbols list widget.
         Otherwise, the event is accepted.
         """
-        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-
+        if event.mimeData().hasFormat("application/x-qabstractitemmodeldatalist"):
             # --> Retrieves the item name from the event where the mimeData has format application/x-qabstractitemmodeldatalist (can't do .text() due to the format)
             data = event.mimeData()
             source_item = QStandardItemModel()
-            source_item.dropMimeData(data, Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+            source_item.dropMimeData(
+                data, Qt.DropAction.CopyAction, 0, 0, QModelIndex()
+            )
             item_text = source_item.item(0, 0).text()
 
             if not (item_text == "token" or item_text == "identifier"):
@@ -1493,19 +1690,20 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
 
     def input_drag_enter_event(self, event: QDragEnterEvent):
         """
-        Handles the drag enter event in the annotation format editor dialog. 
+        Handles the drag enter event in the annotation format editor dialog.
         This function is called when the user drags any item into the input format list widget.
 
         Description:
         - This function checks if the mime data has the format 'application/x-qabstractitemmodeldatalist', which is the format of the items in the list widgets.
         - It checks the source of the drag-event and ignores any events where the source is the input for the separator symbols list widget.
         """
-        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-
+        if event.mimeData().hasFormat("application/x-qabstractitemmodeldatalist"):
             # --> Retrieves the item name from the event where the mimeData has format application/x-qabstractitemmodeldatalist (can't do .text() due to the format)
             data = event.mimeData()
             source_item = QStandardItemModel()
-            source_item.dropMimeData(data, Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+            source_item.dropMimeData(
+                data, Qt.DropAction.CopyAction, 0, 0, QModelIndex()
+            )
             item_text = source_item.item(0, 0).text()
 
             if event.source() != self.listwidget_annotdial_separatorsymbols:
@@ -1533,32 +1731,37 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
         self.update_temporary_formats()
         self.on_format_changed()
 
-
     def trashcan_drop_event(self, event: QDropEvent):
         """
-        Handles the drop event in the annotation format editor dialog. 
+        Handles the drop event in the annotation format editor dialog.
         This function is called when the user drags and drops any item into the "trashcan" list widget or the multiple annotation symbols list widget.
 
         Description:
         - This function checks if the mime data has the format 'application/x-qabstractitemmodeldatalist', which is the format of the items in the list widgets.
-        - It extracts the item name from fitting events and checks if the item is not "token" or "identifier", as these items should not be moved into the trashcan or the multiple annotation symbols list widget. 
+        - It extracts the item name from fitting events and checks if the item is not "token" or "identifier", as these items should not be moved into the trashcan or the multiple annotation symbols list widget.
         Otherwise, the event is accepted.
         """
-        if event.mimeData().hasFormat('application/x-qabstractitemmodeldatalist'):
-
+        if event.mimeData().hasFormat("application/x-qabstractitemmodeldatalist"):
             # --> Retrieves the item name from the event where the mimeData has format application/x-qabstractitemmodeldatalist (can't do .text() due to the format)
             data = event.mimeData()
             source_item = QStandardItemModel()
-            source_item.dropMimeData(data, Qt.DropAction.CopyAction, 0, 0, QModelIndex())
+            source_item.dropMimeData(
+                data, Qt.DropAction.CopyAction, 0, 0, QModelIndex()
+            )
             item_text = source_item.item(0, 0).text()
 
             # accept the event if the item is a symbol (not token or identifier) and the source is not the symbol list widget (as the symbol list widget should not be able to receive items from itself, only from the input format list widget. Also, symbols should not be moved from the container to the trashcan)
             if not (item_text == "token" or item_text == "identifier"):
-                self.old_trashcan_drop_event(event) # --> Accepts the event and adds the item to the list widget (otherwise the drop will not be executed)
+                self.old_trashcan_drop_event(
+                    event
+                )  # --> Accepts the event and adds the item to the list widget (otherwise the drop will not be executed)
                 # NOTE: JUST A TEMPORARY FIX --> If the event is accepted, the item is not immediately removed from the listwidget, but only after the event is handled, which comes after the drop-event in the internal event-handling of the PySide-framework
                 # --> Check if item is the last item in the separator symbols list widget, if so, send the information to the format_change_handler that this drop event empties the list widget
                 # An accepted event either means that the item was dropped into the trashcan or the multiple annotation symbols list widget. The PySide-framework does not send the correct signal if the item is dropped into the trashcan, so the event is handled here.
-                if self.listwidget_annotdial_separatorsymbols.count() <= 1 and event.source() == self.listwidget_annotdial_separatorsymbols:
+                if (
+                    self.listwidget_annotdial_separatorsymbols.count() <= 1
+                    and event.source() == self.listwidget_annotdial_separatorsymbols
+                ):
                     self.on_format_changed(removing_last_separator=True)
                     self.update_temporary_formats()
                 else:
@@ -1569,7 +1772,7 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
         else:
             event.ignore()
 
-# Edit-Functions
+    # Edit-Functions
     def remove_selected_format(self):
         """
         Remove the selected format from the combo box and add it to the list of removed formats.
@@ -1579,9 +1782,13 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
         when a format is selected.
         """
         selected_index = self.comboBox_selectformat.currentIndex()
-        if selected_index != -1:  # Check if an item is selected (should always be as delete-button only enabled if format is selected)
+        if (
+            selected_index != -1
+        ):  # Check if an item is selected (should always be as delete-button only enabled if format is selected)
             del self.current_formats_temp[self.comboBox_selectformat.currentText()]
-            del self.current_format_checkboxes_temp[self.comboBox_selectformat.currentText()]
+            del self.current_format_checkboxes_temp[
+                self.comboBox_selectformat.currentText()
+            ]
             self.currently_edited_format = "CALLED_FROM_REMOVE"
             self.comboBox_selectformat.removeItem(selected_index)
 
@@ -1596,7 +1803,7 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
             item = self.listwidget_annotdial_inputformat.item(index)
             current_format += item.text()
         return current_format
-    
+
     def fetch_current_separator_symbols(self):
         """
         Fetches the current separator symbols from the separator symbols list widget.
@@ -1613,55 +1820,73 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
     def update_temporary_dialog_model(self):
         """
         Saves the current format and separator symbols in the temporary data structure and changes the variables that track the current input format data and separator symbols for the currently selected format.
-        
+
         Returns: Returns True if the format that is about to be saved is a duplicate, otherwise False.
         """
 
         # HERE: Check if the input for just the current format is valid (not empty etc.), if so, proceed, otherwise saving will not be done in order to not save invalid data
-        if not self.check_for_valid_currently_edited_format(): # if the changes made the format invalid, no data is saved and the software continues like no changes were made NOTE: Later an impl can be added to show an error message to the user
+        if not self.check_for_valid_currently_edited_format():  # if the changes made the format invalid, no data is saved and the software continues like no changes were made NOTE: Later an impl can be added to show an error message to the user
             return False
 
         # fetch the current format and separator symbols from the list widgets again to get the data for the format that was previously selected in the combobox
         # --> changes to the listwidget are only done in this function after this point, so the data is still valid
         self.update_temporary_formats()
-        
-        if self.currently_edited_format != "CALLED_FROM_REMOVE": # NOTE: Quickfix to prevent saving a previously removed format
+
+        if (
+            self.currently_edited_format != "CALLED_FROM_REMOVE"
+        ):  # NOTE: Quickfix to prevent saving a previously removed format
             # save the data from the old format before changing the combobox
             if self.currently_edited_format == self.current_input_format:
                 # only update the symbols as the input format stayed the same
-                self.current_formats_temp[self.currently_edited_format] = self.current_separator_symbols
+                self.current_formats_temp[self.currently_edited_format] = (
+                    self.current_separator_symbols
+                )
                 return False
-            elif self.current_input_format in self.current_formats_temp.keys(): 
+            elif self.current_input_format in self.current_formats_temp.keys():
                 # if the input format was changed to a format that was already in the temp data --> error case (requires future handling) TODO: Implement error handling
                 # current error handling: Data changes are just not saved after switching to another format/saving it for the edited format
                 if self.comboBox_selectformat.isVisible():
-                    self.comboBox_selectformat.setCurrentText(self.currently_edited_format)
-                return True # --> returning here, as the combobox was set back to the old format
-            else: # new format is different form all others --> delete the currently edited format (old) and add the new one
-                if self.comboBox_selectformat.isVisible(): # --> if combobox is visible, then the user edits a format which results in the deletion of the old format and the addition of the new one
-                    self.current_formats_temp[self.current_input_format] = self.current_separator_symbols
-                    self.current_format_checkboxes_temp[self.current_input_format] = self.checkbox_annotdial_multipleannot.isChecked()
+                    self.comboBox_selectformat.setCurrentText(
+                        self.currently_edited_format
+                    )
+                return True  # --> returning here, as the combobox was set back to the old format
+            else:  # new format is different form all others --> delete the currently edited format (old) and add the new one
+                if self.comboBox_selectformat.isVisible():  # --> if combobox is visible, then the user edits a format which results in the deletion of the old format and the addition of the new one
+                    self.current_formats_temp[self.current_input_format] = (
+                        self.current_separator_symbols
+                    )
+                    self.current_format_checkboxes_temp[self.current_input_format] = (
+                        self.checkbox_annotdial_multipleannot.isChecked()
+                    )
                     del self.current_formats_temp[self.currently_edited_format]
-                    del self.current_format_checkboxes_temp[self.currently_edited_format]
+                    del self.current_format_checkboxes_temp[
+                        self.currently_edited_format
+                    ]
                     # also change the name of the format in the combobox by finding the index of the currently_edited_format and changing the text
-                    index = self.comboBox_selectformat.findText(self.currently_edited_format)
-                    self.comboBox_selectformat.setItemText(index, self.current_input_format)
-                else: # if not visible, then the user adds a new format, which results in the addition of the new format without deleting the old one (can be done because duplicate check is done before)
-                    self.current_formats_temp[self.current_input_format] = self.current_separator_symbols
-                    self.current_format_checkboxes_temp[self.current_input_format] = self.checkbox_annotdial_multipleannot.isChecked()
+                    index = self.comboBox_selectformat.findText(
+                        self.currently_edited_format
+                    )
+                    self.comboBox_selectformat.setItemText(
+                        index, self.current_input_format
+                    )
+                else:  # if not visible, then the user adds a new format, which results in the addition of the new format without deleting the old one (can be done because duplicate check is done before)
+                    self.current_formats_temp[self.current_input_format] = (
+                        self.current_separator_symbols
+                    )
+                    self.current_format_checkboxes_temp[self.current_input_format] = (
+                        self.checkbox_annotdial_multipleannot.isChecked()
+                    )
                 return False
         else:
             return False
 
-
     def on_combobox_activated(self):
         """
-        View-Changes if an element in the combobox is selected. 
+        View-Changes if an element in the combobox is selected.
         En-/Disables elements and controls text in the dialog.
 
         """
         if self.comboBox_selectformat.currentIndex() != -1:
-            
             # fetch the current format and separator symbols from the list widgets again to get the data for the format that was previously selected in the combobox
             self.update_temporary_dialog_model()
 
@@ -1670,26 +1895,29 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
             self.listwidget_annotformat_tokenidentcontainer.clear()
             self.listwidget_annotdial_inputformat.clear()
             self.listwidget_annotdial_separatorsymbols.clear()
-            format_as_array = split_string_with_token_and_identifier(self.comboBox_selectformat.currentText())
-            separator_symbols = self.get_separator_symbols_from_temp(self.comboBox_selectformat.currentText())
+            format_as_array = split_string_with_token_and_identifier(
+                self.comboBox_selectformat.currentText()
+            )
+            separator_symbols = self.get_separator_symbols_from_temp(
+                self.comboBox_selectformat.currentText()
+            )
             # Add all elements of the annotation format to the input format if "edit-format"-option is chosen
             for elem in format_as_array:
-                add_item = QListWidgetItem(elem)  
+                add_item = QListWidgetItem(elem)
                 if elem == "token":
                     add_item.setForeground(FontColors.TOKEN)
                 elif elem == "identifier":
                     add_item.setForeground(FontColors.IDENTIFIER)
-                self.listwidget_annotdial_inputformat.addItem(add_item) 
+                self.listwidget_annotdial_inputformat.addItem(add_item)
 
-            if(len(separator_symbols) > 0):
+            if len(separator_symbols) > 0:
                 for elem in separator_symbols:
                     add_item = QListWidgetItem(elem)
                     add_item.setFont(FontConfig.get_standardized_font(16, True))
                     self.listwidget_annotdial_separatorsymbols.addItem(add_item)
                 self.checkbox_annotdial_multipleannot.setChecked(True)
-            else: # if no separator symbols are stored for the selected format, uncheck the checkbox as the user can only save empty separator symbol lists if the checkbox is unchecked
+            else:  # if no separator symbols are stored for the selected format, uncheck the checkbox as the user can only save empty separator symbol lists if the checkbox is unchecked
                 self.checkbox_annotdial_multipleannot.setChecked(False)
-
 
             # manually call reactions to a change input-format, as this is not automatically detected for explicit listwidget.add/clear calls, only for drag-and-drop
             # -> if combobox changes, the input-format changes, which means that the listwidget-items change (undetected), which is why this call is necessary
@@ -1711,8 +1939,12 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
             self.btn_save.setEnabled(True)
             self.btn_cancel.setEnabled(True)
             # self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
-            self.listwidget_annotdial_inputformat.setStyleSheet("QListWidget{ border: 1px solid black ; }")
-            self.listwidget_annotdial_separatorsymbols.setStyleSheet("QListWidget{ border: 1px solid black ; }")
+            self.listwidget_annotdial_inputformat.setStyleSheet(
+                "QListWidget{ border: 1px solid black ; }"
+            )
+            self.listwidget_annotdial_separatorsymbols.setStyleSheet(
+                "QListWidget{ border: 1px solid black ; }"
+            )
             self.add_init_token_identifier()
 
     def update_temporary_formats(self):
@@ -1732,13 +1964,16 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
         """
         # return if combobox is empty (all formats deleted), as format-change is initiated by the system due to the deletion of the last format (not the user) as no format to display is left
         # --> is handled in on_combobox_activated(), which is the source of the "exception"
-        if self.comboBox_selectformat.count() == 0 and self.comboBox_selectformat.isVisible():
+        if (
+            self.comboBox_selectformat.count() == 0
+            and self.comboBox_selectformat.isVisible()
+        ):
             return
 
         if self.listwidget_annotdial_inputformat.count() != 0:
             has_token = False
             has_identifier = False
-            
+
             # Iterate over items in the list
             for index in range(self.listwidget_annotdial_inputformat.count()):
                 item = self.listwidget_annotdial_inputformat.item(index)
@@ -1746,60 +1981,90 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
                     has_token = True
                 elif item.text() == "identifier":
                     has_identifier = True
-            
+
             # Check if both "token" and "identifier" are present
             if has_token and has_identifier:
                 # only needs to be checked if the checkbox for multiple annotations is checked, as they are only relevant in this case (e.g. empty separator symbol list is valid if checkbox is not checked)
                 if self.checkbox_annotdial_multipleannot.isChecked():
-                    separator_symbols_valid = self.check_separator_symbols(removing_last_separator=removing_last_separator)
+                    separator_symbols_valid = self.check_separator_symbols(
+                        removing_last_separator=removing_last_separator
+                    )
                     if not separator_symbols_valid:
-                        self.listwidget_annotdial_separatorsymbols.setStyleSheet("QListWidget { border: 2px solid red; }")
-                        self.label_inputwarningmessage.setStyleSheet("QLabel { color: red; }")
-                        self.label_inputwarningmessage.setText("Invalid Separator Symbols!")
+                        self.listwidget_annotdial_separatorsymbols.setStyleSheet(
+                            "QListWidget { border: 2px solid red; }"
+                        )
+                        self.label_inputwarningmessage.setStyleSheet(
+                            "QLabel { color: red; }"
+                        )
+                        self.label_inputwarningmessage.setText(
+                            "Invalid Separator Symbols!"
+                        )
                         # self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False) # NOTE: For simplicity commented out, but includes logic for enabling/disabling save button based on validitiy of input
                         # return if separator symbols are invalid, as the input is invalid in this case, otherwise the code below would be executed as well
                         return
                     else:
-                        self.listwidget_annotdial_separatorsymbols.setStyleSheet("QListWidget { border: 2px solid green; }")
+                        self.listwidget_annotdial_separatorsymbols.setStyleSheet(
+                            "QListWidget { border: 2px solid green; }"
+                        )
                 # this is done if input and separator symbols are valid
-                self.listwidget_annotdial_inputformat.setStyleSheet("QListWidget { border: 2px solid green; }")
+                self.listwidget_annotdial_inputformat.setStyleSheet(
+                    "QListWidget { border: 2px solid green; }"
+                )
                 self.label_inputwarningmessage.setStyleSheet("QLabel { color: green; }")
                 self.label_inputwarningmessage.setText("Input is valid")
                 # self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(True) # NOTE: For simplicity commented out, but includes logic for enabling/disabling save button based on validitiy of input
             else:
-                self.listwidget_annotdial_inputformat.setStyleSheet("QListWidget { border: 2px solid red; }")
+                self.listwidget_annotdial_inputformat.setStyleSheet(
+                    "QListWidget { border: 2px solid red; }"
+                )
                 self.label_inputwarningmessage.setStyleSheet("QLabel { color: red; }")
                 self.label_inputwarningmessage.setText("Missing Token/Identifier!")
                 # self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False) # NOTE: For simplicity commented out, but includes logic for enabling/disabling save button based on validitiy of input
-                
+
                 # --> Needed for the case where user clicks on reset button for the separator symbols but the input listwidget ist already invalid. In this case, the separator symbols listwidget needs to be updated here
                 if self.checkbox_annotdial_multipleannot.isChecked():
-                    separator_symbols_valid = self.check_separator_symbols(removing_last_separator=removing_last_separator)
+                    separator_symbols_valid = self.check_separator_symbols(
+                        removing_last_separator=removing_last_separator
+                    )
                     if not separator_symbols_valid:
-                        self.listwidget_annotdial_separatorsymbols.setStyleSheet("QListWidget { border: 2px solid red; }")
-                        self.label_inputwarningmessage.setStyleSheet("QLabel { color: red; }")
+                        self.listwidget_annotdial_separatorsymbols.setStyleSheet(
+                            "QListWidget { border: 2px solid red; }"
+                        )
+                        self.label_inputwarningmessage.setStyleSheet(
+                            "QLabel { color: red; }"
+                        )
                         return
                     else:
-                        self.listwidget_annotdial_separatorsymbols.setStyleSheet("QListWidget { border: 2px solid green; }")
+                        self.listwidget_annotdial_separatorsymbols.setStyleSheet(
+                            "QListWidget { border: 2px solid green; }"
+                        )
 
         # If the list is empty, the input is invalid
         else:
-            self.listwidget_annotdial_inputformat.setStyleSheet("QListWidget { border: 2px solid red; }")
+            self.listwidget_annotdial_inputformat.setStyleSheet(
+                "QListWidget { border: 2px solid red; }"
+            )
             self.label_inputwarningmessage.setStyleSheet("QLabel { color: red; }")
             self.label_inputwarningmessage.setText("Format cannot be empty!")
             # self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False) # NOTE: For simplicity commented out, but includes logic for enabling/disabling save button based on validitiy of input
 
             # --> Needed for the case where user clicks on reset button for the separator symbols but the input listwidget ist already invalid. In this case, the separator symbols listwidget needs to be updated here
             if self.checkbox_annotdial_multipleannot.isChecked():
-                separator_symbols_valid = self.check_separator_symbols(removing_last_separator=removing_last_separator)
+                separator_symbols_valid = self.check_separator_symbols(
+                    removing_last_separator=removing_last_separator
+                )
                 if not separator_symbols_valid:
-                    self.listwidget_annotdial_separatorsymbols.setStyleSheet("QListWidget { border: 2px solid red; }")
-                    self.label_inputwarningmessage.setStyleSheet("QLabel { color: red; }")
+                    self.listwidget_annotdial_separatorsymbols.setStyleSheet(
+                        "QListWidget { border: 2px solid red; }"
+                    )
+                    self.label_inputwarningmessage.setStyleSheet(
+                        "QLabel { color: red; }"
+                    )
                     return
                 else:
-                    self.listwidget_annotdial_separatorsymbols.setStyleSheet("QListWidget { border: 2px solid green; }")
-
-
+                    self.listwidget_annotdial_separatorsymbols.setStyleSheet(
+                        "QListWidget { border: 2px solid green; }"
+                    )
 
     def check_separator_symbols(self, removing_last_separator):
         """
@@ -1813,19 +2078,22 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
         - removing_last_separator (bool): A boolean value that indicates if the current call of the function is due to the removal of the last separator symbol in the list widget.
         This is done to catch the case where the last separator symbol is removed, but the list widget is not updated yet, as the event is not handled yet, which leads to a count of 1 for the separator symbols list widget.
         """
-        if self.listwidget_annotdial_separatorsymbols.count() == 0 or (self.listwidget_annotdial_separatorsymbols.count() == 1 and removing_last_separator):
+        if self.listwidget_annotdial_separatorsymbols.count() == 0 or (
+            self.listwidget_annotdial_separatorsymbols.count() == 1
+            and removing_last_separator
+        ):
             return False
         else:
             return True
-        
+
     def clear_trashcan_symbols(self):
         """
-        Clears the trashcan list widget in the annotation format editor dialog. 
+        Clears the trashcan list widget in the annotation format editor dialog.
         This function is called when the user clicks the reset button to clear the trashcan.
         """
         self.listwidget_annotformat_removeelems.takeItem(0)
         # self.on_format_changed(removing_last_separator=False)
-        
+
     def on_multiple_annot_checked(self):
         """
         Handles the event when the "Multiple Annotations" checkbox is checked or unchecked.
@@ -1837,21 +2105,26 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
             self.label_separator.setEnabled(True)
             self.btn_resetseparator.setEnabled(True)
         else:
-            self.listwidget_annotdial_separatorsymbols.setStyleSheet("QListWidget{ border: 1px solid black ; }")
+            self.listwidget_annotdial_separatorsymbols.setStyleSheet(
+                "QListWidget{ border: 1px solid black ; }"
+            )
             self.listwidget_annotdial_separatorsymbols.setEnabled(False)
             self.label_separator.setEnabled(False)
             self.btn_resetseparator.setEnabled(False)
 
         # if the dialog is called for edit, the checking of a checkbox needs to be stored in the corresponding temporary data structure
         if self.comboBox_selectformat.isVisible():
-            self.current_format_checkboxes_temp[self.comboBox_selectformat.currentText()] = self.checkbox_annotdial_multipleannot.isChecked()
+            self.current_format_checkboxes_temp[
+                self.comboBox_selectformat.currentText()
+            ] = self.checkbox_annotdial_multipleannot.isChecked()
         # if the checkbox is changed, the separator symbols have to be checked as well, as they are only relevant if multiple annotations are allowed
         self.on_format_changed()
         # also update the current formats
         self.update_temporary_formats()
 
-
-    def add_row_preview_table(self, left_column_data: str, middle_column_data: str, right_column_data: str):
+    def add_row_preview_table(
+        self, left_column_data: str, middle_column_data: str, right_column_data: str
+    ):
         """
         Adds a new row to the preview table widget in the annotation format editor dialog.
 
@@ -1867,18 +2140,30 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
 
         left_item = QTableWidgetItem(left_column_data)
         left_item.setFont(FontConfig.get_standardized_font(font_size, True))
-        left_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
-        self.tablewidget_annotdial_corpuspreview.setItem(current_row_count, 0, left_item)
+        left_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
+        self.tablewidget_annotdial_corpuspreview.setItem(
+            current_row_count, 0, left_item
+        )
 
         middle_item = QTableWidgetItem(middle_column_data)
         middle_item.setFont(FontConfig.get_standardized_font(font_size, True))
-        middle_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
-        self.tablewidget_annotdial_corpuspreview.setItem(current_row_count, 1, middle_item)
+        middle_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
+        self.tablewidget_annotdial_corpuspreview.setItem(
+            current_row_count, 1, middle_item
+        )
 
         right_item = QTableWidgetItem(str(right_column_data))
         right_item.setFont(FontConfig.get_standardized_font(font_size, True))
-        right_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
-        self.tablewidget_annotdial_corpuspreview.setItem(current_row_count, 2, right_item)
+        right_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
+        self.tablewidget_annotdial_corpuspreview.setItem(
+            current_row_count, 2, right_item
+        )
 
     def clear_preview_table(self):
         """
@@ -1912,7 +2197,7 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
             if item == format:
                 return values
         return []
-    
+
     def get_updated_data(self):
         """
         Retrieves the updated annotation formats from the dialog.
@@ -1931,7 +2216,7 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
         super().accept()
 
     def check_for_valid_currently_edited_format(self):
-        """"
+        """ "
         Checks just the currently edited format if it is valid.
 
         Returns: True if the format is valid, False otherwise.
@@ -1941,7 +2226,7 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
         # if not empty, check if it contains the token and identifier blocks
         if self.listwidget_annotdial_inputformat.count() != 0:
             has_token = False
-            has_identifier = False 
+            has_identifier = False
             # Iterate over items in the list
             for index in range(self.listwidget_annotdial_inputformat.count()):
                 item = self.listwidget_annotdial_inputformat.item(index)
@@ -1954,11 +2239,13 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
             if not (has_token and has_identifier):
                 return False
         # if the checkbox for multiple annotations is checked, the separator symbols have to be checked as well
-        if self.checkbox_annotdial_multipleannot.isChecked() and self.listwidget_annotdial_separatorsymbols.count() == 0:
+        if (
+            self.checkbox_annotdial_multipleannot.isChecked()
+            and self.listwidget_annotdial_separatorsymbols.count() == 0
+        ):
             return False
         else:
             return True
-        
 
     def check_for_valid_formats(self):
         """
@@ -1971,20 +2258,30 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
         if self.comboBox_selectformat.isVisible():
             # Check if all formats are valid
             for format, symbols in self.current_formats_temp.items():
-                # First invalidity check: The format is either empty or does not include the token and identifier symbols 
-                if (len(format) == 0 or "token" not in format or "identifier" not in format):
+                # First invalidity check: The format is either empty or does not include the token and identifier symbols
+                if (
+                    len(format) == 0
+                    or "token" not in format
+                    or "identifier" not in format
+                ):
                     return False
                 # Second invalidity check: The format is valid, but the separator symbols are not (which means they are empty and the checkbox for multiple annotations is checked)
                 if self.current_format_checkboxes_temp[format] and len(symbols) == 0:
-                    return False     
-        if self.comboBox_selectformat.isHidden() or (self.comboBox_selectformat.isVisible() and self.comboBox_selectformat.currentIndex() != -1): # if the combobox is visible but no formats exist, checks for an empty format would always return true therefore dont check
+                    return False
+        if (
+            self.comboBox_selectformat.isHidden()
+            or (
+                self.comboBox_selectformat.isVisible()
+                and self.comboBox_selectformat.currentIndex() != -1
+            )
+        ):  # if the combobox is visible but no formats exist, checks for an empty format would always return true therefore dont check
             # check if the input format is empty
             if self.listwidget_annotdial_inputformat.count() == 0:
                 return False
             # if not empty, check if it contains the token and identifier blocks
             if self.listwidget_annotdial_inputformat.count() != 0:
                 has_token = False
-                has_identifier = False 
+                has_identifier = False
                 # Iterate over items in the list
                 for index in range(self.listwidget_annotdial_inputformat.count()):
                     item = self.listwidget_annotdial_inputformat.item(index)
@@ -1997,11 +2294,14 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
                 if not (has_token and has_identifier):
                     return False
             # if the checkbox for multiple annotations is checked, the separator symbols have to be checked as well
-            if self.checkbox_annotdial_multipleannot.isChecked() and self.listwidget_annotdial_separatorsymbols.count() == 0:
+            if (
+                self.checkbox_annotdial_multipleannot.isChecked()
+                and self.listwidget_annotdial_separatorsymbols.count() == 0
+            ):
                 return False
-            
+
         return True
-    
+
     def get_current_format_as_string(self):
         """
         Retrieves the current format as a string.
@@ -2016,19 +2316,19 @@ class AnnotationformatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
 
         return format_text
 
+
 class AnnotationRemovalDialog(QDialog, Ui_AnnotationFormatRemoveDialog):
     """
     Class for the annotation-specification-dialog. This window informs user
     about the irreversibility of deleting a format.
-    """    
+    """
 
     remove_format_accepted = Signal(bool)
 
-    def __init__(self, parent: QWidget=None) -> None:
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("Warning: Deletion of Annotation Format")
-
 
     def accept(self) -> None:
         """
@@ -2050,7 +2350,8 @@ class DetectVariantsDialog(QDialog, Ui_DetectVariantsDialog):
     Class for the detected-variants-dialog. Opens a dialog window that displays
     all detected variants for the selected annotation formats.
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("Detected Variants")
@@ -2059,17 +2360,22 @@ class DetectVariantsDialog(QDialog, Ui_DetectVariantsDialog):
         self.tableWidget_variants.setColumnWidth(0, 500)
         self.tableWidget_variants.setColumnWidth(1, 200)
 
-
         # Fix column size
         for column in range(self.tableWidget_variants.columnCount()):
-            self.tableWidget_variants.horizontalHeader().setSectionResizeMode(column, QHeaderView.ResizeMode.Fixed)
+            self.tableWidget_variants.horizontalHeader().setSectionResizeMode(
+                column, QHeaderView.ResizeMode.Fixed
+            )
 
         # NOTE: Hide for simplicity, can be removed if features need to be included later
         self.btn_extractlater.hide()
         self.widget_recommendation.hide()
 
-        self.update_label({"Variant 1": (5, "asdasd", "dddasd"), "Variant2": (3, "asdasd", "dddasd")})
-        self.add_all_to_table({"Variant 1": (5, "asdasd", "dddasd"), "Variant2": (3, "asdasd", "dddasd")})
+        self.update_label(
+            {"Variant 1": (5, "asdasd", "dddasd"), "Variant2": (3, "asdasd", "dddasd")}
+        )
+        self.add_all_to_table(
+            {"Variant 1": (5, "asdasd", "dddasd"), "Variant2": (3, "asdasd", "dddasd")}
+        )
         # self.add_row_to_table("Variant 1", "5")
         # self.add_row_to_table("Variant 2", "3")
         # self.add_row_to_table("Variant 3", "2")
@@ -2095,7 +2401,6 @@ class DetectVariantsDialog(QDialog, Ui_DetectVariantsDialog):
             num_detected_annotations += detected_variants[variant][0]
         num_detected_variants = len(detected_variants)
 
-
         text = (
             f"With the specified annotation format(s), <i>CorpusCompass</i> was able to detect "
             f"<b>{num_detected_annotations}</b> annotations and <b>{num_detected_variants}</b> Dependent Variable - Variants for these annotations."
@@ -2117,12 +2422,16 @@ class DetectVariantsDialog(QDialog, Ui_DetectVariantsDialog):
 
         left_item = QTableWidgetItem(detected_variant)
         left_item.setFont(FontConfig.get_standardized_font(font_size, True))
-        left_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        left_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
         self.tableWidget_variants.setItem(current_row_count, 0, left_item)
 
         right_item = QTableWidgetItem(occurences)
         right_item.setFont(FontConfig.get_standardized_font(font_size, True))
-        right_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        right_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
         self.tableWidget_variants.setItem(current_row_count, 1, right_item)
 
     def reject(self) -> None:
@@ -2149,21 +2458,21 @@ class DetectVariantsDialog(QDialog, Ui_DetectVariantsDialog):
         self.clear_table()
         for dv_name, dv_data in detected_variants.items():
             self.add_row_to_table(dv_name, str(dv_data[0]))
-    
+
+
 class AddSymbolDialog(QDialog, Ui_AddSymbolsDialog):
     """
     Class for the annotation-specification-dialog. Opens a further dialog window
     in which symbols for the annotation format builder can be added.
-    """    
-    def __init__(self, parent: QWidget=None) -> None:
+    """
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
         self.setWindowTitle("Add Symbols")
 
-
-
-    # TODO: Check if symbol was already in current symbols before adding, Propagate Changes 
+    # TODO: Check if symbol was already in current symbols before adding, Propagate Changes
 
     def add_symbol_to_list_old_symbols(self, symbol):
         """
@@ -2180,13 +2489,13 @@ class AddSymbolDialog(QDialog, Ui_AddSymbolsDialog):
         new_item = QListWidgetItem(symbol)
         new_item.setFont(FontConfig.get_standardized_font(16, True))
         self.listwidget_annotformat_symbolcontainer.addItem(new_item)
-        
+
     def on_add_symbol_clicked(self):
         """
-        Is called when the "add symbol"-button is clicked in the 
+        Is called when the "add symbol"-button is clicked in the
         dialog adding symbols in the annotation builder. Checks if
         1. there is no input 2. the input is not a character
-        3. the input is not already in the model. If none of 
+        3. the input is not already in the model. If none of
         the above apply, then the character can be added
         to the list of symbols in the model and the view.
         """
@@ -2196,9 +2505,24 @@ class AddSymbolDialog(QDialog, Ui_AddSymbolsDialog):
             self.label_symbolalreadyadded.setText("No symbol input!")
             self.label_symbolalreadyadded.show()
         elif new_symbol.isalpha() or new_symbol.isdigit():
-            self.label_symbolalreadyadded.setText("Alphabetic symbols and digits should not be used for marking annotations!")
+            self.label_symbolalreadyadded.setText(
+                "Alphabetic symbols and digits should not be used for marking annotations!"
+            )
             self.label_symbolalreadyadded.show()
-        elif len(self.listwidget_annotformat_oldsymbols.findItems(new_symbol, Qt.MatchFlag.MatchCaseSensitive)) > 0 or len(self.listwidget_annotformat_symbolcontainer.findItems(new_symbol, Qt.MatchFlag.MatchCaseSensitive)) > 0:
+        elif (
+            len(
+                self.listwidget_annotformat_oldsymbols.findItems(
+                    new_symbol, Qt.MatchFlag.MatchCaseSensitive
+                )
+            )
+            > 0
+            or len(
+                self.listwidget_annotformat_symbolcontainer.findItems(
+                    new_symbol, Qt.MatchFlag.MatchCaseSensitive
+                )
+            )
+            > 0
+        ):
             self.label_symbolalreadyadded.setText("Symbol already added!")
             self.label_symbolalreadyadded.show()
         else:
@@ -2212,7 +2536,10 @@ class AddSymbolDialog(QDialog, Ui_AddSymbolsDialog):
         """
         for symbol in current_symbol_list:
             self.add_symbol_to_list_old_symbols(symbol)
-        self.listwidget_annotformat_oldsymbols.sortItems(order= Qt.SortOrder.DescendingOrder)
+        self.listwidget_annotformat_oldsymbols.sortItems(
+            order=Qt.SortOrder.DescendingOrder
+        )
+
 
 class OpenProjectDialog(QDialog, Ui_OpenProjectDialog):
     """
@@ -2220,12 +2547,12 @@ class OpenProjectDialog(QDialog, Ui_OpenProjectDialog):
     The window contains a list of all available projects, of
     which one can be selected.
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
         self.setWindowTitle("Open Project")
-
 
     def on_change_path_clicked(self):
         """
@@ -2250,22 +2577,23 @@ class GenericWarningDialog(QDialog, Ui_GenericWarningDialog):
     can be changed as required. Serves no purpose to the
     model, but is just feedback for the user.
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
         self.setWindowTitle("Warning")
 
 
-
 class AnalysisSuccessDialog(QDialog, Ui_AnalysisSuccessDialog):
     """
-    Class for the success-dialog that opens upon analysing 
+    Class for the success-dialog that opens upon analysing
     a corpus. Also provides possibilites to select a save
     location for the results and directly open the selected
     save location
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
@@ -2303,13 +2631,17 @@ class AnalysisSuccessDialog(QDialog, Ui_AnalysisSuccessDialog):
 
         # send a signal to the model so that the analysis is saved to the selected location
 
-class AnalysisSettingsConfirmationDialog(QDialog, Ui_AnalysisSettingsConfirmationDialog):
+
+class AnalysisSettingsConfirmationDialog(
+    QDialog, Ui_AnalysisSettingsConfirmationDialog
+):
     """
     Class for a the confirmation dialog after changing the analysis settings.
     Enables the user to either confirm changes or discard changes to the default
     parameters (default = complete analysis with all variables).
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
@@ -2375,19 +2707,21 @@ class AnalysisSettingsConfirmationDialog(QDialog, Ui_AnalysisSettingsConfirmatio
         Clears the speaker list widget in the dialog.
         """
         self.listWidget_speakerlist.clear()
-    
+
     def clear_dv_list(self):
         """
         Clears the dependent variable list widget in the dialog.
         """
         self.listWidget_dvlist.clear()
 
+
 class AnnotationHelpDialog(QDialog, Ui_AnnotationHelpDialog):
     """
     Class for a the help-dialog that explains the idea and process
     of specifying an annotation format.
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
@@ -2399,7 +2733,8 @@ class ImportMetadataDialog(QDialog, Ui_ImportMetadataDialog):
     Class for a the help-dialog that explains the idea and process
     of specifying an annotation format.
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
@@ -2411,7 +2746,8 @@ class ExportMetadataDialog(QDialog, Ui_ExportMetadataDialog):
     Class for the help-dialog that explains the idea and process
     of specifying an annotation format.
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("Export Metadata")
@@ -2419,10 +2755,11 @@ class ExportMetadataDialog(QDialog, Ui_ExportMetadataDialog):
 
 class IVEditorDialog(QDialog, Ui_IVEditorDialog):
     """
-    Class for the dialog that enables editing 
+    Class for the dialog that enables editing
     IVs and their values, as well as deleting IVs.
-    """    
-    def __init__(self, parent: QWidget=None) -> None:
+    """
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
@@ -2438,7 +2775,7 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
         # list for ivs that will be added during the add-iv-dialog use
         # --> different from the edit-workflow as the ivs are not added to the complete "temporary model" directly, but only after the user confirms the dialog, as there wont be an entry in the "temporary model" with the not yet confirmed iv name
         # --> edit workflow: ivs are added to the temporary model directly, as the ivs are already in the temporary model (dictioanry) and can be edited directly
-        self.values_to_add = [] 
+        self.values_to_add = []
 
     def accept(self) -> None:
         """
@@ -2453,10 +2790,10 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
             self.current_ivs_temp[new_iv_name] = self.values_to_add.copy()
 
         super().accept()
-    
+
     def on_combobox_activated(self):
         """
-        View-Changes if an element in the combobox is selected. 
+        View-Changes if an element in the combobox is selected.
         En-/Disables elements and controls text in the dialog.
         """
         if self.comboBox_selectiv.currentIndex() != -1:
@@ -2468,12 +2805,14 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
             self.lineEdit_nameinput.setText(self.comboBox_selectiv.currentText())
 
             # set the stored values for the selected IV
-            self.tableWidget_storedvalues.setRowCount(0) # clear the table widget
+            self.tableWidget_storedvalues.setRowCount(0)  # clear the table widget
             for var, variables in self.current_ivs_temp.items():
                 if var == self.comboBox_selectiv.currentText():
                     for value in reversed(variables):
-                        self.add_item_to_stored_values(item_text=value, item_column=1, checkbox_column=0)
-                
+                        self.add_item_to_stored_values(
+                            item_text=value, item_column=1, checkbox_column=0
+                        )
+
             # lastly, manually call the name input change function, to avoid a bug where the user types in a duplicate name, does not confirm it and switches to the iv with the duplicate name, for which no name change is detected and the save button is falsly disabled
             self.check_varname_changed()
 
@@ -2485,9 +2824,8 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
             self.btn_addvalue.setEnabled(False)
             self.lineEdit_nameinput.setText("")
             # if combobox empty (all variables deleted), always enable save-button
-            self.tableWidget_storedvalues.setRowCount(0) # clear the table widget
+            self.tableWidget_storedvalues.setRowCount(0)  # clear the table widget
             self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
-
 
     def on_input_change_confirmed(self):
         """
@@ -2503,16 +2841,18 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
         # --> Bug exists as the user can change the name to the same name, which would and should not trigger the invalid name errors (save button disabled, ...).
         if new_name == old_name:
             return
-        
-        self.comboBox_selectiv.setItemText(self.comboBox_selectiv.currentIndex(), new_name)
+
+        self.comboBox_selectiv.setItemText(
+            self.comboBox_selectiv.currentIndex(), new_name
+        )
         # update the temporary model with the new name
-        # 1. copy the values of the old iv 
+        # 1. copy the values of the old iv
         variables_copy = self.current_ivs_temp[old_name].copy()
         # 2. add a new entry with the new name and the copied values
         self.current_ivs_temp[new_name] = variables_copy
         # 3. remove the old entry
         del self.current_ivs_temp[old_name]
-        
+
         # the result is that the old iv is removed and a new iv with the new name is added to the temporary model. Also the combobox is updated with the new name.
         # --> Any newly added values or removed values are now stored in the temporary model under the new name, as the temporary model is in sync with the combobox again
         return
@@ -2529,13 +2869,19 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
 
         # check if input is given, if not inform user about the error and return
         if new_value == "":
-            self.lineEdit_valueinput.setStyleSheet("QLineEdit { border: 1px solid red; }")
+            self.lineEdit_valueinput.setStyleSheet(
+                "QLineEdit { border: 1px solid red; }"
+            )
             self.label_valueinputwarning.setText("Please input a name!")
             return
-        
+
         if new_value.isspace() or new_value.startswith(" ") or new_value.endswith(" "):
-            self.lineEdit_valueinput.setStyleSheet("QLineEdit { border: 1px solid red; }")
-            self.label_valueinputwarning.setText("Name not valid! (No space at start/end)")
+            self.lineEdit_valueinput.setStyleSheet(
+                "QLineEdit { border: 1px solid red; }"
+            )
+            self.label_valueinputwarning.setText(
+                "Name not valid! (No space at start/end)"
+            )
             self.lineEdit_valueinput.setText("")
             return
 
@@ -2547,34 +2893,44 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
             if new_value == self.tableWidget_storedvalues.item(row, 1).text():
                 is_duplicate = True
                 break
-        
+
         if is_duplicate:
-            self.lineEdit_valueinput.setStyleSheet("QLineEdit { border: 1px solid red; }")
+            self.lineEdit_valueinput.setStyleSheet(
+                "QLineEdit { border: 1px solid red; }"
+            )
             self.label_valueinputwarning.setText("Duplicate values not allowed!")
         else:
             self.lineEdit_valueinput.setText("")
-            self.add_item_to_stored_values(item_text=new_value, item_column=1, checkbox_column=0)
+            self.add_item_to_stored_values(
+                item_text=new_value, item_column=1, checkbox_column=0
+            )
 
             # NOTE: Idea of the combobox is that it is always in sync with the/a direct representation of the temporary model, which means the combobox entries should always be the same as the keys in the temporary model
             # add the new value either to the temporary model (if the iv is already in the temporary model) or to the list of values to add (if the iv is not yet in the temporary model)
-            if self.comboBox_selectiv.currentIndex() != -1: # --> Current index == -1 means that either no IV is selected or the editor is called for the add-IV-dialog, where the hidden combobox is empty and therefore the index is -1
+            if (
+                self.comboBox_selectiv.currentIndex() != -1
+            ):  # --> Current index == -1 means that either no IV is selected or the editor is called for the add-IV-dialog, where the hidden combobox is empty and therefore the index is -1
                 for var, variables in self.current_ivs_temp.items():
                     if var == self.comboBox_selectiv.currentText():
                         variables.append(new_value)
                         # sort the values in the temporary model alphabetically
                         variables.sort()
-            else: # if the IV is not yet in the temporary model (add-iv-workflow), add the value to the list of values to add
+            else:  # if the IV is not yet in the temporary model (add-iv-workflow), add the value to the list of values to add
                 self.values_to_add.append(new_value)
                 # sort the values alphabetically
                 self.values_to_add.sort()
 
-            self.lineEdit_valueinput.setStyleSheet("QLineEdit { border: 1px solid black; }")
+            self.lineEdit_valueinput.setStyleSheet(
+                "QLineEdit { border: 1px solid black; }"
+            )
             self.label_valueinputwarning.setText("")
 
         self.lineEdit_valueinput.setFocus()
-            
+
     # TODO: Testfunction for adding checkboxes and new items in general to table widgets --> Make it global maybe later
-    def add_item_to_stored_values(self, item_text: str, item_column: int, checkbox_column: int):
+    def add_item_to_stored_values(
+        self, item_text: str, item_column: int, checkbox_column: int
+    ):
         """
         Adds a checkbox with the correct style at the correct position and a new item at the correct position to the table widget.
 
@@ -2586,31 +2942,37 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
 
         new_item = QTableWidgetItem(item_text)
         self.tableWidget_storedvalues.setItem(0, item_column, new_item)
-        
 
         checkbox_item = QTableWidgetItem()
-        checkbox_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+        checkbox_item.setFlags(
+            Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled
+        )
         checkbox_item.setCheckState(Qt.CheckState.Unchecked)
         self.tableWidget_storedvalues.setItem(0, checkbox_column, checkbox_item)
 
     def remove_selected_values(self):
         """
-        Removes the selected values from the table widget that 
+        Removes the selected values from the table widget that
         contains all variants for the IV.
-        """    
-        for row in range(self.tableWidget_storedvalues.rowCount()- 1, -1, -1):
-            if self.tableWidget_storedvalues.item(row, 0).checkState() == Qt.CheckState.Checked:
+        """
+        for row in range(self.tableWidget_storedvalues.rowCount() - 1, -1, -1):
+            if (
+                self.tableWidget_storedvalues.item(row, 0).checkState()
+                == Qt.CheckState.Checked
+            ):
                 value_name = self.tableWidget_storedvalues.item(row, 1).text()
                 self.tableWidget_storedvalues.removeRow(row)
                 # remove the value from the temporary model or the list of values to add
-                if self.comboBox_selectiv.currentIndex() != -1: # --> Current index == -1 means that either no IV is selected or the editor is called for the add-IV-dialog, where the hidden combobox is empty and therefore the index is -1
+                if (
+                    self.comboBox_selectiv.currentIndex() != -1
+                ):  # --> Current index == -1 means that either no IV is selected or the editor is called for the add-IV-dialog, where the hidden combobox is empty and therefore the index is -1
                     for var, variables in self.current_ivs_temp.items():
                         if var == self.comboBox_selectiv.currentText():
                             # remove the value from the temporary model
                             for value in variables:
                                 if value == value_name:
                                     variables.remove(value)
-                else: # if the IV is not yet in the temporary model (add-iv-workflow), remove the value from the list of values to add
+                else:  # if the IV is not yet in the temporary model (add-iv-workflow), remove the value from the list of values to add
                     for elem in self.values_to_add:
                         if elem == value_name:
                             self.values_to_add.remove(elem)
@@ -2628,32 +2990,51 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
         Otherwise, if the variable name is valid, the method updates the UI elements to indicate a valid input
         and enables the confirmation and save buttons.
         """
-        
+
         # return if combobox is empty (all variables deleted) and visible ("add"-dialog always has count == 0 so would always return, but there the combobox is hidden), as name-change is initiated by the system (not the user) as no variable to display is left
         # --> is handled in on_combobox_activated(), which is the source of the "exception"
-        if self.comboBox_selectiv.count() == 0 and self.comboBox_selectiv.isVisible() == True:
+        if (
+            self.comboBox_selectiv.count() == 0
+            and self.comboBox_selectiv.isVisible() == True
+        ):
             return
-        
+
         variable_name = self.lineEdit_nameinput.text()
         # TODO: Also check if name is duplciate
-        if (not variable_name.strip() or variable_name.startswith(" ") or variable_name.endswith(" ")): # or variable_name_is_duplicate == False
-            self.lineEdit_nameinput.setStyleSheet("QLineEdit { border: 1px solid red; }")
+        if (
+            not variable_name.strip()
+            or variable_name.startswith(" ")
+            or variable_name.endswith(" ")
+        ):  # or variable_name_is_duplicate == False
+            self.lineEdit_nameinput.setStyleSheet(
+                "QLineEdit { border: 1px solid red; }"
+            )
             self.label_variableinputwarning.setText("No (valid) name input!")
             self.btn_editconfirm.setEnabled(False)
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
-        elif variable_name in self.current_ivs_temp.keys() and variable_name != self.comboBox_selectiv.currentText(): # duplicate name check, which is only relevant if the name is not the same as the name of the currently selected IV (as the name of the currently selected IV is always in the temporary model before the user changes it, so it is always a duplicate)
-            self.lineEdit_nameinput.setStyleSheet("QLineEdit { border: 1px solid red; }")
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(
+                False
+            )
+        elif (
+            variable_name in self.current_ivs_temp.keys()
+            and variable_name != self.comboBox_selectiv.currentText()
+        ):  # duplicate name check, which is only relevant if the name is not the same as the name of the currently selected IV (as the name of the currently selected IV is always in the temporary model before the user changes it, so it is always a duplicate)
+            self.lineEdit_nameinput.setStyleSheet(
+                "QLineEdit { border: 1px solid red; }"
+            )
             self.label_variableinputwarning.setText("Duplicate name!")
             self.btn_editconfirm.setEnabled(False)
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(
+                False
+            )
         else:
-            self.lineEdit_nameinput.setStyleSheet("QLineEdit { border: 1px solid black; }")
+            self.lineEdit_nameinput.setStyleSheet(
+                "QLineEdit { border: 1px solid black; }"
+            )
             self.label_variableinputwarning.setText("")
             self.btn_editconfirm.setEnabled(True)
             self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
 
-
-# Override Keypress-Event -> Dont close Dialog while pressing enter/escape
+    # Override Keypress-Event -> Dont close Dialog while pressing enter/escape
     def keyPressEvent(self, arg__1: QKeyEvent) -> None:
         pass
         # if(arg__1.key() == Qt.Key.Key_Enter):
@@ -2663,7 +3044,7 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
         """
         Remove the currently selected item from the combo box and add it to the list of removed formats.
 
-        This method removes the currently selected item from the combo box `comboBox_selectiv` and deletes it from the temporary model. 
+        This method removes the currently selected item from the combo box `comboBox_selectiv` and deletes it from the temporary model.
         The selected item is determined by the current index of the combo box.
 
         Note:
@@ -2672,7 +3053,9 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
 
         """
         selected_index = self.comboBox_selectiv.currentIndex()
-        if selected_index != -1:  # Check if an item is selected (should always be as delete-button only enabled if format is selected)
+        if (
+            selected_index != -1
+        ):  # Check if an item is selected (should always be as delete-button only enabled if format is selected)
             # self.list_of_removed_ivs.append(self.comboBox_selectiv.itemText(selected_index))
             remove_iv_name = self.comboBox_selectiv.itemText(selected_index)
             self.comboBox_selectiv.removeItem(selected_index)
@@ -2688,13 +3071,14 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
         """
         return self.current_ivs_temp
 
+
 class DVEditorDialog(QDialog, Ui_DVEditorDialog):
     """
     Class for the dialog that enables adding, editing and deleting DVs, as
     well as grouping the found variants inside them.
-    """    
+    """
 
-    def __init__(self, parent: QWidget=None) -> None:
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("Editor: Dependent Variables")
@@ -2715,10 +3099,14 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
         self.variant_checkboxes: Dict[str, QTableWidgetItem] = {}
 
         # connect the cell changed signal to update the grouped dvs after a variant is checked/unchecked (only reacts to changes in the checkbox column)
-        self.tableWidget_dialog_dvaddvariants.cellChanged.connect(self.update_dv_grouping)
+        self.tableWidget_dialog_dvaddvariants.cellChanged.connect(
+            self.update_dv_grouping
+        )
 
         for column in range(self.tableWidget_dialog_dvaddvariants.columnCount()):
-            self.tableWidget_dialog_dvaddvariants.horizontalHeader().setSectionResizeMode(column, QHeaderView.ResizeMode.Fixed)
+            self.tableWidget_dialog_dvaddvariants.horizontalHeader().setSectionResizeMode(
+                column, QHeaderView.ResizeMode.Fixed
+            )
 
         # list for dvs variants that will be grouped during the add-iv-dialog use
         # --> just store the name of the variants, as the re-grouping is done after the user confirms the dialog
@@ -2726,15 +3114,15 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
 
         # list for ivs that were deleted during dialog/editor use
         # self.list_of_removed_dvs = []
-        
+
         # list for variants that will be grouped to a dv during the add-dv-dialog use
         # --> different from the edit-workflow as the variants are not added to the complete "temporary model" directly, but only after the user confirms the dialog, as there wont be an entry in the "temporary model" with the not yet confirmed dv name
-        # stores the variant name and the color of the variant (hexadecimal code) 
+        # stores the variant name and the color of the variant (hexadecimal code)
         # self.variants_to_add: Tuple[List[str], List[str]] = [] # TODO: PROBLEM -> Tuple is not mutable so maybe use something else as the elements in the tuple may need to change
 
     def accept(self) -> None:
         """
-        Is called whenuser is accepting the dialog for adding or editing a 
+        Is called whenuser is accepting the dialog for adding or editing a
         DV and its variants. The method updates the final temporary model that will
         be returned to the controller later and closes the dialog.
         """
@@ -2743,12 +3131,16 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
         if self.comboBox_selectdv.isHidden():
             new_dv_name = self.lineEdit_nameinput.text()
             self.current_dvs_temp[new_dv_name] = ([], [])
-            # add the variants to the temporary detected variants model 
+            # add the variants to the temporary detected variants model
             # => this dictionary references to the DVs and can only contain DVs that are in the temporary model, so DV can be filled with the according variants
             for variant in self.variants_to_add:
                 old_variant_data = self.detected_variants_temp[variant]
-                self.detected_variants_temp[variant] = (old_variant_data[0], new_dv_name, old_variant_data[2])
-        
+                self.detected_variants_temp[variant] = (
+                    old_variant_data[0],
+                    new_dv_name,
+                    old_variant_data[2],
+                )
+
         # clear the old data in the temporary model
         for dv in self.current_dvs_temp.keys():
             self.current_dvs_temp[dv] = ([], [])
@@ -2764,16 +3156,18 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
         # for other cases, the ivs are already in the temporary model and can be used directly
         # Close the Window
         super().accept()
-    
+
     def on_combobox_activated(self):
         """
-        View-Changes if an element in the combobox is selected. 
+        View-Changes if an element in the combobox is selected.
         En-/Disables elements and controls text in the dialog.
         """
 
-        # disconnect the cell changed signal as the combobox switch will trigger checkbox changes (to display the correct check states for the new DV) 
+        # disconnect the cell changed signal as the combobox switch will trigger checkbox changes (to display the correct check states for the new DV)
         # and the cell changed signal will then regroup the variants, which should not be done as the user doesnt actively change the check states
-        self.tableWidget_dialog_dvaddvariants.cellChanged.disconnect(self.update_dv_grouping)
+        self.tableWidget_dialog_dvaddvariants.cellChanged.disconnect(
+            self.update_dv_grouping
+        )
 
         if self.comboBox_selectdv.currentIndex() != -1:
             self.btn_delete_dv.setEnabled(True)
@@ -2783,7 +3177,9 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
             self.lineEdit_nameinput.setText(self.comboBox_selectdv.currentText())
 
             # set the stored values for the selected IV
-            self.tableWidget_dialog_dvaddvariants.setRowCount(0) # clear the table widget to load all variants of the selected DV again
+            self.tableWidget_dialog_dvaddvariants.setRowCount(
+                0
+            )  # clear the table widget to load all variants of the selected DV again
 
             checked_variants = []
             unchecked_variants = []
@@ -2800,13 +3196,17 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
 
             # Add unchecked variants first (will be pushed down to the bottom)
             for variant, color in unchecked_variants:
-                self.add_item_to_variant_list(item_text=variant, is_grouped_to_dv=False, variant_color=color)
+                self.add_item_to_variant_list(
+                    item_text=variant, is_grouped_to_dv=False, variant_color=color
+                )
 
             # Add checked variants after
             for variant, color in checked_variants:
-                self.add_item_to_variant_list(item_text=variant, is_grouped_to_dv=True, variant_color=color)
+                self.add_item_to_variant_list(
+                    item_text=variant, is_grouped_to_dv=True, variant_color=color
+                )
 
-        else: 
+        else:
             self.btn_delete_dv.setEnabled(False)
             self.lineEdit_nameinput.setEnabled(False)
             self.btn_editconfirm.setEnabled(False)
@@ -2817,10 +3217,12 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
             self.tableWidget_dialog_dvaddvariants.setEnabled(False)
             self.lineEdit_nameinput.setText("")
             # if combobox empty (all variables deleted), always enable save-button
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)        
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
 
         # reconnect the cell changed signal
-        self.tableWidget_dialog_dvaddvariants.cellChanged.connect(self.update_dv_grouping)
+        self.tableWidget_dialog_dvaddvariants.cellChanged.connect(
+            self.update_dv_grouping
+        )
 
     def on_input_change_confirmed(self):
         """
@@ -2832,12 +3234,20 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
         new_name = self.lineEdit_nameinput.text()
         for detected_var, var_data in self.detected_variants_temp.items():
             if var_data[1] == old_name:
-                self.detected_variants_temp[detected_var] = (var_data[0], new_name, var_data[2])
+                self.detected_variants_temp[detected_var] = (
+                    var_data[0],
+                    new_name,
+                    var_data[2],
+                )
         # also change other temporary data structures
-        if old_name in self.current_dvs_temp.keys(): # check if the DV is already in the temporary model (which it should, but this prevents key errors)
+        if (
+            old_name in self.current_dvs_temp.keys()
+        ):  # check if the DV is already in the temporary model (which it should, but this prevents key errors)
             old_data = self.current_dvs_temp.pop(old_name)
             self.current_dvs_temp[new_name] = old_data
-        self.comboBox_selectdv.setItemText(self.comboBox_selectdv.currentIndex(), new_name)
+        self.comboBox_selectdv.setItemText(
+            self.comboBox_selectdv.currentIndex(), new_name
+        )
 
     def on_change_color_double_click(self, row, column):
         """
@@ -2846,7 +3256,7 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
         in the model.
         """
 
-        # TODO: Check if another variable already has this color via the hexadecimal code 
+        # TODO: Check if another variable already has this color via the hexadecimal code
 
         # Only react on doubleClick on the last column (index == 2), as color should only be changed for this column
         if column == 2:
@@ -2867,14 +3277,18 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
                 item.setToolTip("Hexadecimal: " + color_hexcode)
 
                 # Set item
-                self.tableWidget_dialog_dvaddvariants.setItem(row,column,item)
+                self.tableWidget_dialog_dvaddvariants.setItem(row, column, item)
 
                 # get the name of the edited variant at position row, column 0
                 variant_name = self.tableWidget_dialog_dvaddvariants.item(row, 0).text()
 
                 for detected_var, var_data in self.detected_variants_temp.items():
                     if detected_var == variant_name:
-                        self.detected_variants_temp[detected_var] = (var_data[0], var_data[1], color_hexcode)
+                        self.detected_variants_temp[detected_var] = (
+                            var_data[0],
+                            var_data[1],
+                            color_hexcode,
+                        )
 
     def check_varname_changed(self):
         """
@@ -2891,27 +3305,46 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
         """
         # return if combobox is empty (all variables deleted), as name-change is initiated by the system (not the user) as no variable to display is left
         # --> is handled in on_combobox_activated(), which is the source of the "exception"
-        if self.comboBox_selectdv.count() == 0 and self.comboBox_selectdv.isVisible() == True:
+        if (
+            self.comboBox_selectdv.count() == 0
+            and self.comboBox_selectdv.isVisible() == True
+        ):
             return
 
         variable_name = self.lineEdit_nameinput.text()
         # TODO: Also check if name is duplciate
-        if (not variable_name.strip() or variable_name.startswith(" ") or variable_name.endswith(" ")): # or variable_name_is_duplicate == False
-            self.lineEdit_nameinput.setStyleSheet("QLineEdit { border: 1px solid red; }")
+        if (
+            not variable_name.strip()
+            or variable_name.startswith(" ")
+            or variable_name.endswith(" ")
+        ):  # or variable_name_is_duplicate == False
+            self.lineEdit_nameinput.setStyleSheet(
+                "QLineEdit { border: 1px solid red; }"
+            )
             self.label_variableinputwarning.setText("No name (valid) input!")
             self.btn_editconfirm.setEnabled(False)
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
-        elif variable_name in self.current_dvs_temp.keys() and variable_name != self.comboBox_selectdv.currentText(): # duplicate name check, which is only relevant if the name is not the same as the name of the currently selected IV (as the name of the currently selected IV is always in the temporary model before the user changes it, so it is always a duplicate)
-            self.lineEdit_nameinput.setStyleSheet("QLineEdit { border: 1px solid red; }")
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(
+                False
+            )
+        elif (
+            variable_name in self.current_dvs_temp.keys()
+            and variable_name != self.comboBox_selectdv.currentText()
+        ):  # duplicate name check, which is only relevant if the name is not the same as the name of the currently selected IV (as the name of the currently selected IV is always in the temporary model before the user changes it, so it is always a duplicate)
+            self.lineEdit_nameinput.setStyleSheet(
+                "QLineEdit { border: 1px solid red; }"
+            )
             self.label_variableinputwarning.setText("Duplicate name!")
             self.btn_editconfirm.setEnabled(False)
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(
+                False
+            )
         else:
-            self.lineEdit_nameinput.setStyleSheet("QLineEdit { border: 1px solid black; }")
+            self.lineEdit_nameinput.setStyleSheet(
+                "QLineEdit { border: 1px solid black; }"
+            )
             self.label_variableinputwarning.setText("")
             self.btn_editconfirm.setEnabled(True)
             self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
-
 
     def filter_dv_names(self):
         """
@@ -2927,7 +3360,9 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
             item = self.tableWidget_dialog_dvaddvariants.item(row, 0)
             if item is not None:
                 name = item.text().lower()
-                self.tableWidget_dialog_dvaddvariants.setRowHidden(row, text not in name)
+                self.tableWidget_dialog_dvaddvariants.setRowHidden(
+                    row, text not in name
+                )
 
     def remove_current_dv(self):
         """
@@ -2942,17 +3377,24 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
 
         """
         selected_index = self.comboBox_selectdv.currentIndex()
-        if selected_index != -1:  # Check if an item is selected (should always be as delete-button only enabled if format is selected)
+        if (
+            selected_index != -1
+        ):  # Check if an item is selected (should always be as delete-button only enabled if format is selected)
             # delete the dv from the temporary model dictionary
             del self.current_dvs_temp[self.comboBox_selectdv.itemText(selected_index)]
             # also remove the dv from all variants that are grouped to it
             for variant, variant_data in self.detected_variants_temp.items():
                 if variant_data[1] == self.comboBox_selectdv.currentText():
-                    self.detected_variants_temp[variant] = (variant_data[0], None, variant_data[2])
+                    self.detected_variants_temp[variant] = (
+                        variant_data[0],
+                        None,
+                        variant_data[2],
+                    )
             self.comboBox_selectdv.removeItem(selected_index)
 
-
-    def add_item_to_variant_list(self, item_text: str, is_grouped_to_dv: bool, variant_color: str = None):
+    def add_item_to_variant_list(
+        self, item_text: str, is_grouped_to_dv: bool, variant_color: str = None
+    ):
         """
         Adds a checkbox with the correct style at the correct position and a new item at the correct position to the table widget.
         """
@@ -2960,25 +3402,33 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
 
         variant_name = QTableWidgetItem(item_text)
         variant_data = self.detected_variants_temp[item_text]
-        if variant_data[1] != self.comboBox_selectdv.currentText() and variant_data[1] is not None:
+        if (
+            variant_data[1] != self.comboBox_selectdv.currentText()
+            and variant_data[1] is not None
+        ):
             # if variant is already grouped to another DV, show this by changing the color of the text and adding a tooltip
             variant_name.setForeground(QColor("orange"))
-            variant_name.setToolTip("<b>Already grouped to: <u>" + variant_data[1] + "</u>. Checking the checkbox in this row will remove the variant from the other DV and add it to this DV.</b>")
+            variant_name.setToolTip(
+                "<b>Already grouped to: <u>"
+                + variant_data[1]
+                + "</u>. Checking the checkbox in this row will remove the variant from the other DV and add it to this DV.</b>"
+            )
         else:
             variant_name.setForeground(QColor("black"))
 
         variant_name.setFont(FontConfig.get_standardized_font(10, True))
 
         self.tableWidget_dialog_dvaddvariants.setItem(0, 0, variant_name)
-        
 
         checkbox_item = QTableWidgetItem()
-        checkbox_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+        checkbox_item.setFlags(
+            Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled
+        )
         if is_grouped_to_dv:
             checkbox_item.setCheckState(Qt.CheckState.Checked)
         else:
             checkbox_item.setCheckState(Qt.CheckState.Unchecked)
-    
+
         self.tableWidget_dialog_dvaddvariants.setItem(0, 1, checkbox_item)
 
         # add the variant to the checkbox data structure
@@ -2986,7 +3436,7 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
 
         color_item = QTableWidgetItem()
         color_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-        
+
         if variant_color is not None:
             # Set flags -> No Text-Changes and no Selection-Highlighting
             flags = color_item.flags()
@@ -3008,29 +3458,49 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
         Updates the grouping of a DV variant based on the updated checkbox state.
         """
         if column != 1:
-            return # return if the checkbox column was not changed
+            return  # return if the checkbox column was not changed
         else:
-            changed_variant_name = self.tableWidget_dialog_dvaddvariants.item(row, 0).text()
-            if self.tableWidget_dialog_dvaddvariants.item(row, column).checkState() == Qt.CheckState.Checked:
+            changed_variant_name = self.tableWidget_dialog_dvaddvariants.item(
+                row, 0
+            ).text()
+            if (
+                self.tableWidget_dialog_dvaddvariants.item(row, column).checkState()
+                == Qt.CheckState.Checked
+            ):
                 # add the variant to the DV (ALSO: if add-dv-dialog, the combobox index is -1 and the DV is not yet in the temporary model --> Follow different workflow)
                 if self.comboBox_selectdv.currentIndex() != -1:
                     # --> this also automatically removes the variant from the DV it was previously grouped to (if it was grouped to another DV)
-                    self.detected_variants_temp[changed_variant_name] = (self.detected_variants_temp[changed_variant_name][0], self.comboBox_selectdv.currentText(), self.detected_variants_temp[changed_variant_name][2])
+                    self.detected_variants_temp[changed_variant_name] = (
+                        self.detected_variants_temp[changed_variant_name][0],
+                        self.comboBox_selectdv.currentText(),
+                        self.detected_variants_temp[changed_variant_name][2],
+                    )
                 else:
                     # remove them from their old DV if they were grouped to one and group them in a supporting structure thats used just for the add dialog
                     if self.detected_variants_temp[changed_variant_name][1] is not None:
-                        self.detected_variants_temp[changed_variant_name] = (self.detected_variants_temp[changed_variant_name][0], None, self.detected_variants_temp[changed_variant_name][2])
+                        self.detected_variants_temp[changed_variant_name] = (
+                            self.detected_variants_temp[changed_variant_name][0],
+                            None,
+                            self.detected_variants_temp[changed_variant_name][2],
+                        )
                     self.variants_to_add.append(changed_variant_name)
             else:
                 # remove the variant from the DV, but only if the variant is actually grouped to currently selected DV (also differ between add- and edit-dialog)
                 if self.comboBox_selectdv.currentIndex() != -1:
-                    if self.detected_variants_temp[changed_variant_name][1] == self.comboBox_selectdv.currentText():
-                        self.detected_variants_temp[changed_variant_name] = (self.detected_variants_temp[changed_variant_name][0], None, self.detected_variants_temp[changed_variant_name][2])
+                    if (
+                        self.detected_variants_temp[changed_variant_name][1]
+                        == self.comboBox_selectdv.currentText()
+                    ):
+                        self.detected_variants_temp[changed_variant_name] = (
+                            self.detected_variants_temp[changed_variant_name][0],
+                            None,
+                            self.detected_variants_temp[changed_variant_name][2],
+                        )
                 else:
                     # remove the variant from the list of variants to add (if the variant was added to the list before)
                     if changed_variant_name in self.variants_to_add:
                         self.variants_to_add.remove(changed_variant_name)
-    
+
     def return_temporary_dv_data(self):
         """
         Returns the temporary DVs as well as the updated variants to the controller. The controller can then propagate the changes to the model, if the user saves the changes.
@@ -3042,17 +3512,19 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
         """
         return self.current_dvs_temp, self.detected_variants_temp
 
+
 class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
     """
     Class for the speaker-editor-dialog. Opens a dialog that
     allows adding, editing and deleting speakers.
-    """    
-    def __init__(self, parent: QWidget=None) -> None:
+    """
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("Editor: Speakers")
-        
-        # self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)      
+
+        # self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
 
         self.comboBox_selectspeaker.setCurrentIndex(-1)
         # list for ivs that were deleted during dialog/editor use
@@ -3060,7 +3532,7 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
 
         # self.current_speakers_temp: Dict[str, Tuple[List[str], str]] = {}
         self.current_speakers_temp: Dict[str, Tuple[Dict[str, str], str]] = {}
-        
+
         self.current_ivs_temp: Dict[str, List[str]] = {}
 
         # list that contains all comboboxes so that they are accessible in the correct order in case they need to be updated
@@ -3076,7 +3548,7 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
 
     def accept(self) -> None:
         """
-        Accepts the changes made in the Speaker editor dialog. Differs between the add-speaker-dialog and the edit-speaker-dialog, as for the add-speaker-dialog, 
+        Accepts the changes made in the Speaker editor dialog. Differs between the add-speaker-dialog and the edit-speaker-dialog, as for the add-speaker-dialog,
         the speakers are not yet in the temporary model and have to be added after the user confirms the dialog.
         """
         # check if add or edit menu was used
@@ -3089,11 +3561,13 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
                 if combobox.currentIndex() != -1:
                     self.values_to_add[iv_name] = combobox.currentText()
             # add the result to the temporary model
-            self.current_speakers_temp[new_speaker_name] = (self.values_to_add.copy(), self.color_to_add)
+            self.current_speakers_temp[new_speaker_name] = (
+                self.values_to_add.copy(),
+                self.color_to_add,
+            )
 
         # close the dialog and send signals via super method
         super().accept()
-
 
     def on_change_color_clicked(self):
         """
@@ -3110,34 +3584,43 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
             # --> if the color is the same as the color of another speaker, the color is not valid and the user should be informed about this
             for speaker, speaker_data in self.current_speakers_temp.items():
                 # duplicate color --> color is already used by another speaker
-                if speaker_data[1] == color.name() and speaker != self.comboBox_selectspeaker.currentText():
+                if (
+                    speaker_data[1] == color.name()
+                    and speaker != self.comboBox_selectspeaker.currentText()
+                ):
                     # Inform the user that the color is already used by another speaker by showing a tooltip
                     self.label_duplicate_color.show()
                     return
 
-            self.label_colorsquare.setStyleSheet(f"background-color: {color.name()}; border: 3px solid black;	max-height: 20px; max-width: 20px; min-height: 20px; min-width: 20px;")
+            self.label_colorsquare.setStyleSheet(
+                f"background-color: {color.name()}; border: 3px solid black;	max-height: 20px; max-width: 20px; min-height: 20px; min-width: 20px;"
+            )
 
             # Update the color of the selected speaker in the temporary model
             if self.comboBox_selectspeaker.currentIndex() != -1:
                 selected_speaker = self.comboBox_selectspeaker.currentText()
                 # change the whole tuple in the temporary model, as the color is stored in the second element of the tuple and tuples are immutable
                 # this means copying the dictionary with the IVs and values and then updating the color for the new tuple
-                self.current_speakers_temp[selected_speaker] = (self.current_speakers_temp[selected_speaker][0], color.name())
+                self.current_speakers_temp[selected_speaker] = (
+                    self.current_speakers_temp[selected_speaker][0],
+                    color.name(),
+                )
                 self.label_duplicate_color.hide()
             else:
                 self.color_to_add = color.name()
 
-            
     def on_combobox_activated(self):
         """
-        View-Changes if an element in the combobox is selected. 
+        View-Changes if an element in the combobox is selected.
         En-/Disables elements and controls text in the dialog.
         """
 
-        # disconnect the comboboxes from the save function, as otherwise the comboboxes are updated with the values of the selected speaker and then the temporary model is updated with the values of the comboboxes. This 
+        # disconnect the comboboxes from the save function, as otherwise the comboboxes are updated with the values of the selected speaker and then the temporary model is updated with the values of the comboboxes. This
         # however should only happen if different IV values are selected manually by the user, not if the IV values changed programmatically due to the selection of a speaker
         for iv_name, combobox in self.combobox_order.items():
-            combobox.currentIndexChanged.disconnect(self.save_combobox_values_in_temporary_model)
+            combobox.currentIndexChanged.disconnect(
+                self.save_combobox_values_in_temporary_model
+            )
 
         if self.comboBox_selectspeaker.currentIndex() != -1:
             self.btn_delete_speaker.setEnabled(True)
@@ -3148,7 +3631,9 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
             # update the comboboxes with the values of the selected speaker
             self.update_combobox_values()
             # update the color of the selected speaker
-            self.label_colorsquare.setStyleSheet(f"background-color: {self.current_speakers_temp[self.comboBox_selectspeaker.currentText()][1]}; border: 3px solid black;	max-height: 20px; max-width: 20px; min-height: 20px; min-width: 20px;")
+            self.label_colorsquare.setStyleSheet(
+                f"background-color: {self.current_speakers_temp[self.comboBox_selectspeaker.currentText()][1]}; border: 3px solid black;	max-height: 20px; max-width: 20px; min-height: 20px; min-width: 20px;"
+            )
 
         else:
             self.btn_delete_speaker.setEnabled(False)
@@ -3161,18 +3646,22 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
             for cb_label, combobox in self.combobox_order.items():
                 combobox.setCurrentIndex(-1)
             # reset the color of the color label
-            self.label_colorsquare.setStyleSheet("background-color: white; border: 3px solid black;	max-height: 20px; max-width: 20px; min-height: 20px; min-width: 20px;")
+            self.label_colorsquare.setStyleSheet(
+                "background-color: white; border: 3px solid black;	max-height: 20px; max-width: 20px; min-height: 20px; min-width: 20px;"
+            )
             # if combobox empty (all variables deleted), always enable save-button
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)        
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
 
         # reconnect the comboboxes to the save function
         for iv_name, combobox in self.combobox_order.items():
-            combobox.currentIndexChanged.connect(self.save_combobox_values_in_temporary_model)
+            combobox.currentIndexChanged.connect(
+                self.save_combobox_values_in_temporary_model
+            )
 
-        
-
-    def add_iv_item_row(self, iv_name: str, iv_values: List[str], selected_value: str = None):
-        """"
+    def add_iv_item_row(
+        self, iv_name: str, iv_values: List[str], selected_value: str = None
+    ):
+        """ "
         Adds a new row to the scroll area that contains the IVs and their values for the selected speaker. Is called when the editor dialog is opened to display the IVs of the selected speaker (or default values if no speaker is selected/new speaker is added).
 
         Parameters:
@@ -3194,13 +3683,14 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
             iv_combobox.setCurrentText(selected_value)
         else:
             iv_combobox.setCurrentIndex(-1)
-        
 
         # Add the combobox to the list of comboboxes
         self.combobox_order[iv_name] = iv_combobox
 
         # connect the combobox to the save function, so that changes are saved in the temporary model after every change
-        iv_combobox.currentIndexChanged.connect(self.save_combobox_values_in_temporary_model)
+        iv_combobox.currentIndexChanged.connect(
+            self.save_combobox_values_in_temporary_model
+        )
 
         # Create a grid layout
         layout = self.scrollArea_ivscontents.layout()
@@ -3216,40 +3706,56 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
         # Set the layout to the widget
         self.scrollArea_ivscontents.setLayout(layout)
 
-
     def update_combobox_values(self):
         """
         Updates the values of the IVs for the selected speaker in the scroll area.
         """
-        
+
         for iv_name, combobox in self.combobox_order.items():
-            if iv_name in self.current_speakers_temp[self.comboBox_selectspeaker.currentText()][0].keys():
-                selected_value = self.current_speakers_temp[self.comboBox_selectspeaker.currentText()][0][iv_name]
-                self.combobox_order[iv_name].setCurrentIndex(self.combobox_order[iv_name].findText(selected_value))
-            else: # if the IV is not in the temporary model, set the selected value to the default value (index -1)
+            if (
+                iv_name
+                in self.current_speakers_temp[
+                    self.comboBox_selectspeaker.currentText()
+                ][0].keys()
+            ):
+                selected_value = self.current_speakers_temp[
+                    self.comboBox_selectspeaker.currentText()
+                ][0][iv_name]
+                self.combobox_order[iv_name].setCurrentIndex(
+                    self.combobox_order[iv_name].findText(selected_value)
+                )
+            else:  # if the IV is not in the temporary model, set the selected value to the default value (index -1)
                 self.combobox_order[iv_name].setCurrentIndex(-1)
-        
+
         return
 
     def save_combobox_values_in_temporary_model(self):
         """
-        Saves the selected values of the IVs for the selected speaker in the temporary model. Function is called whenever the users changes any value in the comboboxes. This means that 
+        Saves the selected values of the IVs for the selected speaker in the temporary model. Function is called whenever the users changes any value in the comboboxes. This means that
         there are more updates than necessary, but it is the easiest way to ensure that the temporary model is always in sync with the comboboxes.
         """
         # check if a speaker is selected, if not return without saving any values as there is no speaker in the temporary model yet to save the values for (add-speaker-dialog)
         if self.comboBox_selectspeaker.currentIndex() == -1:
             return
-        
+
         for iv_name, combobox in self.combobox_order.items():
             selected_value = combobox.currentText()
             if self.combobox_order[iv_name].currentIndex() != -1:
-                self.current_speakers_temp[self.comboBox_selectspeaker.currentText()][0][iv_name] = selected_value
+                self.current_speakers_temp[self.comboBox_selectspeaker.currentText()][
+                    0
+                ][iv_name] = selected_value
 
-
-            else: # if the combobox is set to the default value (index -1), remove the IV from the temporary model
+            else:  # if the combobox is set to the default value (index -1), remove the IV from the temporary model
                 # check if the IV is in the temporary model, if so, remove it
-                if iv_name in self.current_speakers_temp[self.comboBox_selectspeaker.currentText()][0].keys():
-                    del self.current_speakers_temp[self.comboBox_selectspeaker.currentText()][0][iv_name]
+                if (
+                    iv_name
+                    in self.current_speakers_temp[
+                        self.comboBox_selectspeaker.currentText()
+                    ][0].keys()
+                ):
+                    del self.current_speakers_temp[
+                        self.comboBox_selectspeaker.currentText()
+                    ][0][iv_name]
 
     def check_varname_changed(self):
         """
@@ -3267,22 +3773,42 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
 
         # return if combobox is empty (all speakers deleted), as name-change is initiated by the system (not the user) as no speaker to display is left
         # --> is handled in on_combobox_activated(), which is the source of the "exception"
-        if self.comboBox_selectspeaker.count() == 0 and self.comboBox_selectspeaker.isVisible() == True:
+        if (
+            self.comboBox_selectspeaker.count() == 0
+            and self.comboBox_selectspeaker.isVisible() == True
+        ):
             return
 
         variable_name = self.lineEdit_nameinput.text()
         # TODO: Also check if name is duplciate
         # for count == 0, saving needs to be enabled not disabled, even though the textinput changes to an empty string
-        if (not variable_name.strip() or variable_name.startswith(" ") or variable_name.endswith(" ")): # TODO: or variable_name_is_duplicate == False 
-            self.lineEdit_nameinput.setStyleSheet("QLineEdit { border: 1px solid red; }")
+        if (
+            not variable_name.strip()
+            or variable_name.startswith(" ")
+            or variable_name.endswith(" ")
+        ):  # TODO: or variable_name_is_duplicate == False
+            self.lineEdit_nameinput.setStyleSheet(
+                "QLineEdit { border: 1px solid red; }"
+            )
             self.label_variableinputwarning.setText("No (valid) name input!")
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
-        elif variable_name in self.current_speakers_temp.keys() and variable_name != self.comboBox_selectspeaker.currentText(): # duplicate name check, which is only relevant if the name is not the same as the name of the currently selected IV (as the name of the currently selected IV is always in the temporary model before the user changes it, so it is always a duplicate)
-            self.lineEdit_nameinput.setStyleSheet("QLineEdit { border: 1px solid red; }")
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(
+                False
+            )
+        elif (
+            variable_name in self.current_speakers_temp.keys()
+            and variable_name != self.comboBox_selectspeaker.currentText()
+        ):  # duplicate name check, which is only relevant if the name is not the same as the name of the currently selected IV (as the name of the currently selected IV is always in the temporary model before the user changes it, so it is always a duplicate)
+            self.lineEdit_nameinput.setStyleSheet(
+                "QLineEdit { border: 1px solid red; }"
+            )
             self.label_variableinputwarning.setText("Duplicate name!")
-            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
+            self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(
+                False
+            )
         else:
-            self.lineEdit_nameinput.setStyleSheet("QLineEdit { border: 1px solid black; }")
+            self.lineEdit_nameinput.setStyleSheet(
+                "QLineEdit { border: 1px solid black; }"
+            )
             self.label_variableinputwarning.setText("")
             self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
 
@@ -3295,7 +3821,9 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
         selected, nothing happens.
         """
         selected_index = self.comboBox_selectspeaker.currentIndex()
-        if selected_index != -1:  # Check if an item is selected (should always be as delete-button only enabled if format is selected)
+        if (
+            selected_index != -1
+        ):  # Check if an item is selected (should always be as delete-button only enabled if format is selected)
             # remove the speaker from the temporary model
             del self.current_speakers_temp[self.comboBox_selectspeaker.currentText()]
             self.comboBox_selectspeaker.removeItem(selected_index)
@@ -3309,6 +3837,7 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
         """
         return self.current_speakers_temp
 
+
 class MetadataDeletionWarningDialog(QDialog, Ui_MetadataDeletionWarningDialog):
     """
     Dialog for displaying a warning message when deleting metadata.
@@ -3317,7 +3846,7 @@ class MetadataDeletionWarningDialog(QDialog, Ui_MetadataDeletionWarningDialog):
     It inherits from QDialog and Ui_MetadataDeletionWarningDialog.
     """
 
-    def __init__(self, parent: QWidget=None) -> None:
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
 
@@ -3328,7 +3857,8 @@ class VariableDetectionHelpDialog(QDialog, Ui_VariableDetectionHelpDialog):
     """
     Dialog that holds information about how the detection of variable variants works.
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("Help: Detected DV-Variants")
@@ -3338,14 +3868,14 @@ class InvalidInputWarningDialog(QDialog, Ui_InvalidInputWarningDialog):
     """
     Dialog that displays a warning message when the user tries to confirm an invalid input.
     """
-    def __init__(self, parent: QWidget=None) -> None:
+
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowTitle("Warning: Invalid Input")
 
 
 class LoadFilesTab(QWidget, Ui_LoadFilesTab):
-
     def __init__(self, parent: CorpusCompassView) -> None:
         super().__init__(parent)
         self.setupUi(self)
@@ -3353,7 +3883,7 @@ class LoadFilesTab(QWidget, Ui_LoadFilesTab):
 
         # Connect Signals
         self.tab_file_preview.tabCloseRequested.connect(self.closeTab)
-    
+
     def add_file(self, file_name: str):
         self.add_item_to_stored_values(file_name, item_column=1, checkbox_column=0)
         # self.list_loaded_filenames.addItem(file_name)
@@ -3376,19 +3906,22 @@ class LoadFilesTab(QWidget, Ui_LoadFilesTab):
             self.tab_file_preview.setCurrentIndex(old_tab_count)
         else:
             self.tab_file_preview.setCurrentIndex(tab_index)
-    
+
     def closeTab(self, id: int):
         self.tab_file_preview.removeTab(id)
 
     def remove_selected_values(self):
         """
-        Removes selected files from the table-widget ("list") that 
-        contains all files. Also closes all opened tabs that 
+        Removes selected files from the table-widget ("list") that
+        contains all files. Also closes all opened tabs that
         showed files that are now removed.
-        """    
+        """
         removed_files = []
-        for row in range(self.list_loaded_filenames.rowCount()- 1, -1, -1):
-            if self.list_loaded_filenames.item(row, 0).checkState() == Qt.CheckState.Checked:
+        for row in range(self.list_loaded_filenames.rowCount() - 1, -1, -1):
+            if (
+                self.list_loaded_filenames.item(row, 0).checkState()
+                == Qt.CheckState.Checked
+            ):
                 removed_files.append(self.list_loaded_filenames.item(row, 1).text())
                 self.list_loaded_filenames.removeRow(row)
 
@@ -3397,7 +3930,9 @@ class LoadFilesTab(QWidget, Ui_LoadFilesTab):
             if tab_text in removed_files:
                 self.tab_file_preview.removeTab(index)
 
-    def add_item_to_stored_values(self, item_text: str, item_column: int, checkbox_column: int):
+    def add_item_to_stored_values(
+        self, item_text: str, item_column: int, checkbox_column: int
+    ):
         """
         Adds a checkbox with the correct style at the correct position and a new item at the correct position to the table widget.
         """
@@ -3405,16 +3940,16 @@ class LoadFilesTab(QWidget, Ui_LoadFilesTab):
 
         new_item = QTableWidgetItem(item_text)
         self.list_loaded_filenames.setItem(0, item_column, new_item)
-        
 
         checkbox_item = QTableWidgetItem()
-        checkbox_item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+        checkbox_item.setFlags(
+            Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled
+        )
         checkbox_item.setCheckState(Qt.CheckState.Unchecked)
         self.list_loaded_filenames.setItem(0, checkbox_column, checkbox_item)
 
 
 class VariableManagementTab(QWidget, Ui_VariableManagementTab):
-
     def __init__(self, parent: CorpusCompassView) -> None:
         super().__init__(parent)
         self.setupUi(self)
@@ -3436,16 +3971,24 @@ class VariableManagementTab(QWidget, Ui_VariableManagementTab):
 
         # Fix column size
         for column in range(self.tableWidget_detectedinformation.columnCount()):
-            self.tableWidget_detectedinformation.horizontalHeader().setSectionResizeMode(column, QHeaderView.ResizeMode.Fixed)
+            self.tableWidget_detectedinformation.horizontalHeader().setSectionResizeMode(
+                column, QHeaderView.ResizeMode.Fixed
+            )
 
         for column in range(self.treeWidget_dvs.columnCount()):
-            self.treeWidget_dvs.header().setSectionResizeMode(column, QHeaderView.ResizeMode.Fixed)
+            self.treeWidget_dvs.header().setSectionResizeMode(
+                column, QHeaderView.ResizeMode.Fixed
+            )
 
         for column in range(self.treeWidget_ivs.columnCount()):
-            self.treeWidget_ivs.header().setSectionResizeMode(column, QHeaderView.ResizeMode.Fixed)
+            self.treeWidget_ivs.header().setSectionResizeMode(
+                column, QHeaderView.ResizeMode.Fixed
+            )
 
         for column in range(self.treeWidget_speakers.columnCount()):
-            self.treeWidget_speakers.header().setSectionResizeMode(column, QHeaderView.ResizeMode.Fixed)
+            self.treeWidget_speakers.header().setSectionResizeMode(
+                column, QHeaderView.ResizeMode.Fixed
+            )
 
     def switch_tab(self, tab_id):
         """
@@ -3468,7 +4011,9 @@ class VariableManagementTab(QWidget, Ui_VariableManagementTab):
         #   self.add_detected_variant_row(variant.info)
         pass
 
-    def fill_detected_variants_fully(self, detected_variants, dv_values: Dict[str, Tuple[int, str, str]]):
+    def fill_detected_variants_fully(
+        self, detected_variants, dv_values: Dict[str, Tuple[int, str, str]]
+    ):
         """
         Fills the detected variants table with the detected variants.
 
@@ -3479,9 +4024,17 @@ class VariableManagementTab(QWidget, Ui_VariableManagementTab):
         for index, row in detected_variants.iterrows():
             variant_name = row["identifier"][0]
             variant_data = dv_values[variant_name]
-            self.add_detected_variant_row(variant_name, variant_data[0], variant_data[2], variant_data[1])
+            self.add_detected_variant_row(
+                variant_name, variant_data[0], variant_data[2], variant_data[1]
+            )
 
-    def add_detected_variant_row(self, variant_name: str, occurences: int, color_hex: str, corresponding_dv: str = '-'):
+    def add_detected_variant_row(
+        self,
+        variant_name: str,
+        occurences: int,
+        color_hex: str,
+        corresponding_dv: str = "-",
+    ):
         """
         Adds a new row to the detected variants table with the given variant name, occurences, color, and corresponding DV.
 
@@ -3492,25 +4045,34 @@ class VariableManagementTab(QWidget, Ui_VariableManagementTab):
         - corresponding_dv (str): The name of the corresponding DV. Defaults to '-'.
         """
         variant_item = QTableWidgetItem(variant_name)
-        variant_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        variant_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
         occurences_item = QTableWidgetItem(str(occurences))
-        occurences_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        occurences_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
         dv_item = QTableWidgetItem(corresponding_dv)
-        dv_item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)       
+        dv_item.setTextAlignment(
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter
+        )
         color_item = QTableWidgetItem()
         if color_hex is not None:
             color_item.setBackground(QColor(color_hex))
-
 
         current_row_count = self.tableWidget_detectedinformation.rowCount()
         self.tableWidget_detectedinformation.insertRow(current_row_count)
 
         self.tableWidget_detectedinformation.setItem(current_row_count, 0, variant_item)
-        self.tableWidget_detectedinformation.setItem(current_row_count, 1, occurences_item)     
+        self.tableWidget_detectedinformation.setItem(
+            current_row_count, 1, occurences_item
+        )
         self.tableWidget_detectedinformation.setItem(current_row_count, 2, dv_item)
-        self.tableWidget_detectedinformation.setItem(current_row_count, 3, color_item)     
+        self.tableWidget_detectedinformation.setItem(current_row_count, 3, color_item)
 
-    def update_detected_variants_table(self, updated_variants: Dict[str, Tuple[int, str, str]]):
+    def update_detected_variants_table(
+        self, updated_variants: Dict[str, Tuple[int, str, str]]
+    ):
         """
         Updates the detected variants table with the changes made to the model after the dv editor was used to either add new DVs, remove DVs, change the grouping of DVs or changing the colors of certain variants.
         """
@@ -3522,19 +4084,29 @@ class VariableManagementTab(QWidget, Ui_VariableManagementTab):
             # get the corresponding DV
             corresponding_dv = self.tableWidget_detectedinformation.item(row, 2).text()
             # get the color
-            color = self.tableWidget_detectedinformation.item(row, 3).background().color().name()
+            color = (
+                self.tableWidget_detectedinformation.item(row, 3)
+                .background()
+                .color()
+                .name()
+            )
             # get the updated data for the variant and check if any of the data has changed --> if so update the table
-            if variant_name in updated_variants.keys(): # also check if the variant is in the updated table (has to be, as the table is the source of the updated data and variants cannot be deleted in the DV editor, only grouped to another DV)
+            if (
+                variant_name in updated_variants.keys()
+            ):  # also check if the variant is in the updated table (has to be, as the table is the source of the updated data and variants cannot be deleted in the DV editor, only grouped to another DV)
                 updated_variants_data = updated_variants[variant_name]
                 new_grouped_var = updated_variants_data[1]
                 # check if the group (DV) of the variant is None, which means that it is/was ungrouped from a DV --> in this case, the DV in the table has to be updated to "-"
                 if new_grouped_var is None:
-                    new_grouped_var = '-'
+                    new_grouped_var = "-"
                 if new_grouped_var != corresponding_dv:
-                    self.tableWidget_detectedinformation.item(row, 2).setText(new_grouped_var)
+                    self.tableWidget_detectedinformation.item(row, 2).setText(
+                        new_grouped_var
+                    )
                 if updated_variants_data[2] != color:
-                    self.tableWidget_detectedinformation.item(row, 3).setBackground(QColor(updated_variants_data[2]))
-
+                    self.tableWidget_detectedinformation.item(row, 3).setBackground(
+                        QColor(updated_variants_data[2])
+                    )
 
     def add_all_ivs(self, ivs: Dict[str, List[str]]):
         """
@@ -3631,13 +4203,13 @@ class VariableManagementTab(QWidget, Ui_VariableManagementTab):
         Clears all detected variants from the table. Useful for refreshing the table after changes to the detected variants.
         """
         self.tableWidget_detectedinformation.setRowCount(0)
-    
+
     def clear_ivs_tree(self):
         """
         Clears all IVs from the tree widget. Useful for refreshing the tree widget after changes to the IVs.
         """
         self.treeWidget_ivs.clear()
-    
+
     def clear_dvs_tree(self):
         """
         Clears all DVs from the tree widget. Useful for refreshing the tree widget after changes to the DVs.
@@ -3650,22 +4222,37 @@ class VariableManagementTab(QWidget, Ui_VariableManagementTab):
         """
         self.treeWidget_speakers.clear()
 
-from src.model.variables_speaker_detection import SpeakerFormats, SpeakerDetector, AnnotationDetector
-from src.model.files import File # TODO: Files and Table with detected annotations should be handed over from controller
-class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
 
+from src.model.variables_speaker_detection import (
+    SpeakerFormats,
+    SpeakerDetector,
+    AnnotationDetector,
+)
+from src.model.files import (
+    File,
+)  # TODO: Files and Table with detected annotations should be handed over from controller
+
+
+class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
     def __init__(self, parent: CorpusCompassView) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.view = parent
 
         self.file_name_text_edit_mapping: Dict[str, QPlainTextEdit] = {}
-        self.dv_checkbox_mapping : Dict[str, QCheckBox] = {}
-        self.speaker_checkbox_mapping : Dict[str, QCheckBox] = {}
+        self.dv_checkbox_mapping: Dict[str, QCheckBox] = {}
+        self.speaker_checkbox_mapping: Dict[str, QCheckBox] = {}
 
-        self.checkBox_selectall_dvs.toggled.connect(lambda: self.check_all(self.scrollArea_dvcontents, self.checkBox_selectall_dvs))
-        self.checkBox_selectall_speakers.toggled.connect(lambda: self.check_all(self.scrollArea_speakercontents, self.checkBox_selectall_speakers))
-
+        self.checkBox_selectall_dvs.toggled.connect(
+            lambda: self.check_all(
+                self.scrollArea_dvcontents, self.checkBox_selectall_dvs
+            )
+        )
+        self.checkBox_selectall_speakers.toggled.connect(
+            lambda: self.check_all(
+                self.scrollArea_speakercontents, self.checkBox_selectall_speakers
+            )
+        )
 
         # ALL BELOW IN INIT IS JUST FOR TESTING (REMOVE LATER)
         # self.add_file_text_edit("Testfile1", "A: This is a file!", 5)
@@ -3673,27 +4260,23 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         # self.add_file_text_edit("Testfile3", "C: This is a third one!", 7)
         # self.add_file_text_edit("Testfile4", "A: Last File!", 8)
 
-
         annotation_detector = AnnotationDetector()
         speaker_detector = SpeakerDetector()
 
         # Check if the detector generates a correct re from the following string:
         annotation_format_str = "[$TOKEN.IDENTIFIER]"
-        annotation_detector.add_annotation_format_token_identifier(annotation_str=annotation_format_str,
-                                                                   token=(2, 6),
-                                                                   identifier=(8, 17))
-        
-        
+        annotation_detector.add_annotation_format_token_identifier(
+            annotation_str=annotation_format_str, token=(2, 6), identifier=(8, 17)
+        )
+
         # filetext = self.corpusPlainTextEdit.toPlainText()
         # f1 = File("File1", "utf8", "./file1.txt", 1.0, filetext)
 
         # self.detected_speakers = None #speaker_detector.detect_speakers([f1])
         # self.detected_annotations = None #annotation_detector.detect_annotations([f1])
 
-
         # self.add_dv_container("DV1", ["var1", "var2", "var3"], ["#123123", "#777888", "#341231"], 0)
         # self.add_dv_container("DV2", ["var1", "var1.5", "var2", "var3"], ["#123123", "#777888", "#341231", "#987654"], 1)
-
 
         # self.add_single_metadata_row_to_container(self.scrollArea_speakercontents, 0, "A", "#023132")
         # self.add_single_metadata_row_to_container(self.scrollArea_speakercontents, 1, "B", "#033332")
@@ -3718,7 +4301,12 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         self.clear_scroll_area_speakers()
         speaker_id = 0
         for speaker_name, speaker_data in model_speakers.items():
-            self.add_single_metadata_row_to_container(self.scrollArea_speakercontents, speaker_id, speaker_name, speaker_data[1])
+            self.add_single_metadata_row_to_container(
+                self.scrollArea_speakercontents,
+                speaker_id,
+                speaker_name,
+                speaker_data[1],
+            )
             speaker_id += 1
 
     def add_all_files(self, model_files: List[File]):
@@ -3735,7 +4323,7 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
 
     def clear_all_contents(self):
         """
-        Clears all scroll areas that display content (DV variants, Speakers, etc.). This function is called whenever there are changes to the content 
+        Clears all scroll areas that display content (DV variants, Speakers, etc.). This function is called whenever there are changes to the content
         or to the underlyign data that require a complete refresh of the content.
         """
         self.clear_scroll_area_dvs()
@@ -3766,7 +4354,7 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
             item = layout.takeAt(0)
             widget = item.widget()
             if widget is not None:
-                widget.deleteLater() # Delete the widget safely
+                widget.deleteLater()  # Delete the widget safely
         # clear the speaker checkbox mapping
         self.speaker_checkbox_mapping.clear()
 
@@ -3784,7 +4372,12 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         # Clear the file name to text edit mapping
         self.file_name_text_edit_mapping.clear()
 
-    def highlight_dvs(self, toggle, dv_values: Dict[str, Tuple[int, str, str]] = None, detected_annotations = None):
+    def highlight_dvs(
+        self,
+        toggle,
+        dv_values: Dict[str, Tuple[int, str, str]] = None,
+        detected_annotations=None,
+    ):
         """
         This function is called, when the user wants to highlight the detected DVs in the text. Calls the function that executes the highlighting
         for all files/text-edits.
@@ -3792,18 +4385,34 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         # for each textedit
         for file in self.file_name_text_edit_mapping.keys():
             text_edit = self.get_text_edit_by_file_name(file)
-            self.highlight_dvs_in_text_edit(toggle, file, text_edit, dv_values, detected_annotations)
+            self.highlight_dvs_in_text_edit(
+                toggle, file, text_edit, dv_values, detected_annotations
+            )
 
-    def underline_speakers(self, toggle, speakers: Dict[str, Tuple[Dict[str, str], str]] = None, detected_speakers = None):
+    def underline_speakers(
+        self,
+        toggle,
+        speakers: Dict[str, Tuple[Dict[str, str], str]] = None,
+        detected_speakers=None,
+    ):
         """
         This function is called, when the user wants to underline the speakers in the text. Calls the function that executes the underlining
         for all files/text-edits.
         """
         for file in self.file_name_text_edit_mapping.keys():
             text_edit = self.get_text_edit_by_file_name(file)
-            self.underline_speakers_in_text_edit(toggle, file, text_edit, speakers, detected_speakers)
+            self.underline_speakers_in_text_edit(
+                toggle, file, text_edit, speakers, detected_speakers
+            )
 
-    def highlight_dvs_in_text_edit(self, toggle, file_name, file_textEdit: QPlainTextEdit, dv_values: Dict[str, Tuple[int, str, str]] = None, detected_annotations = None): 
+    def highlight_dvs_in_text_edit(
+        self,
+        toggle,
+        file_name,
+        file_textEdit: QPlainTextEdit,
+        dv_values: Dict[str, Tuple[int, str, str]] = None,
+        detected_annotations=None,
+    ):
         """
         Highlight the correct words with the correct colors for all text-edits.
 
@@ -3814,34 +4423,46 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         # get the annotations for the file
 
         if detected_annotations is not None:
-            detected_annotations_for_file = detected_annotations[detected_annotations['file_name'] == file_name]
-        else: 
+            detected_annotations_for_file = detected_annotations[
+                detected_annotations["file_name"] == file_name
+            ]
+        else:
             return
-        
+
         cursor = file_textEdit.textCursor()
         format = QTextCharFormat()
         default_color = QColor("yellow") if toggle else QColor("white")
-        format.setBackground(default_color) # "default color"/gets changed for each interrow entry
+        format.setBackground(
+            default_color
+        )  # "default color"/gets changed for each interrow entry
 
         for index, row in detected_annotations_for_file.iterrows():
-            start = row['annotation_start']
-            end = row['annotation_end']
+            start = row["annotation_start"]
+            end = row["annotation_end"]
 
-            identifiers = row['identifier']
+            identifiers = row["identifier"]
             first_identifier = identifiers[0]
             color = dv_values[first_identifier][2]
-            if color is None: # default color if user didnt choose a color
+            if color is None:  # default color if user didnt choose a color
                 color = "yellow"
 
-            format.setBackground(QColor(color)) if toggle else format.setBackground(QColor("white"))
-            
+            format.setBackground(QColor(color)) if toggle else format.setBackground(
+                QColor("white")
+            )
+
             cursor.clearSelection()
             cursor.setPosition(start)
             cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
             cursor.mergeCharFormat(format)
 
-        
-    def underline_speakers_in_text_edit(self, toggle, file_name, file_textEdit: QPlainTextEdit, speakers: Dict[str, Tuple[Dict[str, str], str]] = None, detected_speakers = None):
+    def underline_speakers_in_text_edit(
+        self,
+        toggle,
+        file_name,
+        file_textEdit: QPlainTextEdit,
+        speakers: Dict[str, Tuple[Dict[str, str], str]] = None,
+        detected_speakers=None,
+    ):
         """
         Underlining the speakers with the correct colors for all text-edits.
 
@@ -3851,25 +4472,27 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         """
         # get the speakers for the file
         if detected_speakers is not None:
-            detected_speakers_for_file = detected_speakers[detected_speakers['file_name'] == file_name]
+            detected_speakers_for_file = detected_speakers[
+                detected_speakers["file_name"] == file_name
+            ]
         else:
             return
-        
-        cursor = file_textEdit.textCursor() 
+
+        cursor = file_textEdit.textCursor()
         format = QTextCharFormat()
         cursor.setPosition(0)
 
         for index, row in detected_speakers_for_file.iterrows():
-            start = row['speaker_start']
-            end = row['spoken_text_end']
-            speaker_name = row['speaker_name']
+            start = row["speaker_start"]
+            end = row["spoken_text_end"]
+            speaker_name = row["speaker_name"]
             color = speakers[speaker_name][1]
-            if color is None: # default color if user didnt choose a color
+            if color is None:  # default color if user didnt choose a color
                 color = "blue"
-                
+
             cursor.setPosition(start)
             cursor.setPosition(end, QTextCursor.MoveMode.KeepAnchor)
-            if toggle: 
+            if toggle:
                 format.setFontUnderline(True)
                 format.setUnderlineColor(QColor(color))
                 format.setUnderlineStyle(QTextCharFormat.UnderlineStyle.SingleUnderline)
@@ -3891,7 +4514,7 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
             return self.file_name_text_edit_mapping[file_name]
         else:
             return None
-    
+
     def get_list_of_selected_dvs(self) -> List[str]:
         """
         Get the list of selected DVs.
@@ -3904,7 +4527,7 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
             if checkbox.isChecked():
                 selected_dvs.append(dv_name)
         return selected_dvs
-    
+
     def get_list_of_selected_speakers(self) -> List[str]:
         """
         Get the list of selected speakers.
@@ -3932,7 +4555,9 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
 
         new_text_edit = QPlainTextEdit()
         new_text_edit.setPlainText(file_text)
-        new_text_edit.setStyleSheet("QPlainTextEdit {font-size: 16px; min-height: 200px; max-height: 200px}")
+        new_text_edit.setStyleSheet(
+            "QPlainTextEdit {font-size: 16px; min-height: 200px; max-height: 200px}"
+        )
         new_text_edit.setReadOnly(True)
         new_text_edit.setBackgroundVisible(False)
         new_text_edit.setCenterOnScroll(False)
@@ -3949,7 +4574,9 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         layout.addWidget(file_label, row, 0)
         layout.addWidget(new_text_edit, row, 2)
 
-    def add_dv_container(self, dv_name: str, variants_names, variants_colors, dv_id: int):
+    def add_dv_container(
+        self, dv_name: str, variants_names, variants_colors, dv_id: int
+    ):
         """
         Add a container for a dependent variable to the view. This container includes the dependent variable name and the information about its variants.
         It calls another function to add all these variants to the container, which includes the variant name, color, and a checkbox.
@@ -3963,7 +4590,7 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         Returns:
             None
         """
-    # Create the inner scroll-area
+        # Create the inner scroll-area
         scroll_area = QScrollArea()
         scroll_widget = QWidget()
         scroll_layout = QGridLayout()
@@ -3973,14 +4600,19 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         # scroll_widget.setMinimumWidth(262)
         # Rows will have same ordering as the variants in the data structure
         for variant_id in range(len(variants_names)):
-            self.add_single_metadata_row_to_container(scroll_widget, variant_id, variants_names[variant_id], variants_colors[variant_id], False)
+            self.add_single_metadata_row_to_container(
+                scroll_widget,
+                variant_id,
+                variants_names[variant_id],
+                variants_colors[variant_id],
+                False,
+            )
         scroll_area.setWidget(scroll_widget)
         scroll_area.setStyleSheet("QScrollArea { border: none; }")
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-
-    # Create the outer items (expand-button, label and check-all-box)
+        # Create the outer items (expand-button, label and check-all-box)
         data_name_label = QLabel("")
         set_abbreviate_label(data_name_label, dv_name, 30, True)
         data_name_label.setStyleSheet("font-weight: bold; font-size: 11pt;")
@@ -3990,23 +4622,31 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         set_checkbox_stylesheet(checkbox)
         checkbox.setChecked(True)
         checkbox.toggled.connect(lambda: self.check_all(scroll_widget, checkbox))
-        
 
         expand_button = QPushButton("▼")
         set_expand_button_stylesheet(expand_button=expand_button, init_expanded=True)
-        expand_button.toggled.connect(lambda: expand_button_clicked(scroll_area, expand_button))
+        expand_button.toggled.connect(
+            lambda: expand_button_clicked(scroll_area, expand_button)
+        )
 
-    # Add items/widgets to main dv-container
+        # Add items/widgets to main dv-container
         container_layout = self.scrollArea_dvcontents.layout()
         # Add the outer items to the main dv-layout
-        container_layout.addWidget(expand_button, dv_id*2, 0)
-        container_layout.addWidget(data_name_label, dv_id*2, 1)
-        container_layout.addWidget(checkbox, dv_id*2, 2)
+        container_layout.addWidget(expand_button, dv_id * 2, 0)
+        container_layout.addWidget(data_name_label, dv_id * 2, 1)
+        container_layout.addWidget(checkbox, dv_id * 2, 2)
 
         # Add the scroll area to the main dv-layout
-        container_layout.addWidget(scroll_area, dv_id*2 + 1, 0, 1, 3)
+        container_layout.addWidget(scroll_area, dv_id * 2 + 1, 0, 1, 3)
 
-    def add_single_metadata_row_to_container(self, scroll_area_container: QWidget, row: int, metadata_name: str, color_code: str, for_speaker: bool = True):
+    def add_single_metadata_row_to_container(
+        self,
+        scroll_area_container: QWidget,
+        row: int,
+        metadata_name: str,
+        color_code: str,
+        for_speaker: bool = True,
+    ):
         """
         Adds a single metadata row (dependent variable variant or speaker) to the given scroll area container.
 
@@ -4026,11 +4666,17 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         colorbox_label = QLabel("")
         if color_code == None:
             color_code = "#FFFFFF"
-        colorbox_label.setStyleSheet("QLabel { background-color:" + color_code + "; border: 3px solid black; max-height: 20px; max-width: 20px; min-height: 20px; min-width: 20px; }")
+        colorbox_label.setStyleSheet(
+            "QLabel { background-color:"
+            + color_code
+            + "; border: 3px solid black; max-height: 20px; max-width: 20px; min-height: 20px; min-width: 20px; }"
+        )
         colorbox_label.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         checkbox = QCheckBox()
-        checkbox.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)  # Set size policy to fixed
+        checkbox.setSizePolicy(
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
+        )  # Set size policy to fixed
         checkbox.setMaximumWidth(32)  # Set maximum width to 32
         checkbox.setChecked(True)
 
@@ -4041,7 +4687,7 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
             self.dv_checkbox_mapping[metadata_name] = checkbox
 
         set_checkbox_stylesheet(checkbox)
-        
+
         # Create a grid layout
         layout = scroll_area_container.layout()
 
@@ -4059,7 +4705,7 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
     def check_all(self, target_widget: QWidget, checkbox_checkall: QCheckBox):
         """
         Iterates over all elements in a widget and (un-)checks all checkboxes
-        that are direct children of the widget (so not contained as part of 
+        that are direct children of the widget (so not contained as part of
         an inner widget), based on the selection of a "select-all" checkbox.
         """
         for checkbox in target_widget.findChildren(QWidget):
@@ -4071,21 +4717,28 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         """
         Toggles if the file name is shown next to each text edit.
         """
-        for label_widget in self.scrollAreaWidgetContents_contentdisplay.findChildren(QWidget):
-            if isinstance(label_widget, QLabel) and label_widget.parent() == self.scrollAreaWidgetContents_contentdisplay:
+        for label_widget in self.scrollAreaWidgetContents_contentdisplay.findChildren(
+            QWidget
+        ):
+            if (
+                isinstance(label_widget, QLabel)
+                and label_widget.parent()
+                == self.scrollAreaWidgetContents_contentdisplay
+            ):
                 label_widget.setVisible(toggle)
+
 
 class CreateProjectDialog(QDialog, Ui_CreateProjectDialog):
     """
     The dialog is opened, if a new project should be created.
     """
+
     create_proj_accepted = Signal(str)
 
-    def __init__(self, parent: QWidget=None) -> None:
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
         self.view = parent
-
 
     def accept(self) -> None:
         """

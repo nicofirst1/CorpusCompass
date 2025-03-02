@@ -122,8 +122,9 @@ def generate_dataset(
     # get statistics about the number of variables
     corpus_statitstics["dependent_variables"] = len(dependent_variables)
     corpus_statitstics["independent_variables"] = len(independent_variables)
-    corpus_statitstics["variables"] =  len(dependent_variables) + len(independent_variables)
-
+    corpus_statitstics["variables"] = len(dependent_variables) + len(
+        independent_variables
+    )
 
     # get the number of values for each variable
     corpus_statitstics["variables_values"] = len(idv)
@@ -222,12 +223,11 @@ def generate_dataset(
         f"There is a total of {annotated} annotations in the corpus ({annotated / len(whole_corpus.split(' ')) * 100:.2f}% "
         f"of the corpus).\n"
         f"I found {not_annotated} not annotated words that were previously annotated.\n"
-        f"Of those {not_annotated_interest} ({not_annotated_interest / (not_annotated+1e-10) * 100:.2f}%) "
+        f"Of those {not_annotated_interest} ({not_annotated_interest / (not_annotated + 1e-10) * 100:.2f}%) "
         f"are produced by a speakers of interest"
     )
 
     corpus_statitstics["annotated_tokens"] = annotated
-
 
     # While the previous cell, counts all the tokens in the whole corpus, we probably want to differentiate between speakers.
     # For this reason, here we need to specify where we want to look for the missed tokens.
@@ -380,8 +380,6 @@ def generate_dataset(
                         not_found_vars.append(var)
                         continue
 
-
-
                 # get the features
                 feats = t.rsplit(".", 1)
                 text = feats[1]
@@ -431,9 +429,11 @@ def generate_dataset(
                 csv_line[-1] = csv_line[-1].strip(",")
                 csv_file.append(csv_line)
 
-    not_found_vars=list(set(not_found_vars))
+    not_found_vars = list(set(not_found_vars))
     if len(not_found_vars) > 0:
-        logger.warning(f"\n\nThe following variables were not found in the independent variables file: {not_found_vars}")
+        logger.warning(
+            f"\n\nThe following variables were not found in the independent variables file: {not_found_vars}"
+        )
     # Saving the output
     corpus_statitstics["speaker_n_words"] = speaker_n_words
 
@@ -446,7 +446,7 @@ def generate_dataset(
         annotation_info.append([token] + list(v.values()))
 
     # save the not annotated log
-    if any([len(x)>0 for x in not_annotated_log.values()]):
+    if any([len(x) > 0 for x in not_annotated_log.values()]):
         header = ["file", "token"]
 
         # count the maximum length for all the values of the values of the dict

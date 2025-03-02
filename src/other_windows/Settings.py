@@ -13,13 +13,13 @@ class Settings(GeneralWindow):
         form_layout = QtWidgets.QFormLayout()
         form_layout.setAlignment(QtCore.Qt.AlignCenter)
 
-        text_size=self.mem.settings['text_size']
-        text_font=self.mem.settings['text_font']
+        text_size = self.mem.settings["text_size"]
+        text_font = self.mem.settings["text_font"]
 
         for group, members in self.mem.setting_groups.items():
-            group=to_pretty_name(group)
+            group = to_pretty_name(group)
             group_label = QtWidgets.QLabel(group)
-            group_label.setFont(QtGui.QFont(text_font, text_size+5, QtGui.QFont.Bold))
+            group_label.setFont(QtGui.QFont(text_font, text_size + 5, QtGui.QFont.Bold))
             form_layout.addRow(group_label)
             for name in members:
                 input_, lay = create_input(self, name, self.mem)

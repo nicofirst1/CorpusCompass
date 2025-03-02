@@ -10,7 +10,7 @@ from src.common.Memory import Memory
 
 
 def multi_corpus_upload(
-        corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16"
+    corpus_list: Dict[str, bytes], encoding: Optional[str] = "utf-16"
 ) -> Tuple[Dict[str, str], List[str]]:
     """
     Upload multiple corpus
@@ -79,7 +79,7 @@ def multi_corpus_upload(
 
 
 def load_postprocess(
-        paths: List[str], encoding: str, separator: str
+    paths: List[str], encoding: str, separator: str
 ) -> Tuple[List[Any], Optional[str]]:
     """
     Open the file and return the content
@@ -162,7 +162,7 @@ def save_postprocess(results: Dict, mem: Memory):
 
 
 def open_variables(
-        paths: List[str], encoding: str
+    paths: List[str], encoding: str
 ) -> Union[Tuple[Dict[str, Any], str], Tuple[Dict[str, Any], None]]:
     """
     Open the file and return the content
@@ -196,13 +196,13 @@ def open_variables(
 
 
 def create_input(
-        parent,
-        name: str,
-        mem: Memory,
-        arrange: Literal["vert", "horz"] = "horz",
-        delay: int = 2,
-        custom_class: Optional[QtWidgets.QWidget] = None,
-        predefined_value: Optional[Any] = None,
+    parent,
+    name: str,
+    mem: Memory,
+    arrange: Literal["vert", "horz"] = "horz",
+    delay: int = 2,
+    custom_class: Optional[QtWidgets.QWidget] = None,
+    predefined_value: Optional[Any] = None,
 ) -> Tuple[QtWidgets.QWidget, QtWidgets.QHBoxLayout]:
     """
     Create a widget for a setting

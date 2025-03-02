@@ -52,7 +52,6 @@ class Main(GeneralWindow):
         self.dataset_updater_button.clicked.connect(self.open_window)
         self.dataset_updater_button.setEnabled(False)
 
-
         # create a button for the data_analyzer
         self.data_analyzer_button = QtWidgets.QPushButton("Data Analyzer")
         self.data_analyzer_button.clicked.connect(self.open_window)
@@ -146,7 +145,9 @@ class Main(GeneralWindow):
             )
             self.window_annotation_fixer.show()
         elif sender == self.data_analyzer_button and has_postprocess and has_preloaded:
-            self.window_data_analyzer = DataAnalyzer(self.mem,self.preloaded_data , self.postprocess_data)
+            self.window_data_analyzer = DataAnalyzer(
+                self.mem, self.preloaded_data, self.postprocess_data
+            )
             self.window_data_analyzer.show()
 
         elif sender == self.load_files_button:
@@ -156,4 +157,3 @@ class Main(GeneralWindow):
         elif sender == self.setting_button:
             self.window_settings = Settings(self.mem)
             self.window_settings.show()
-

@@ -140,7 +140,7 @@ def logistic_regression(df, dependent_variables, independent_variables, custom_p
 
 @catch_exception
 def point_biserial_correlation(
-        df, dependent_variables, independent_variables, custom_path
+    df, dependent_variables, independent_variables, custom_path
 ):
     if not os.path.exists(custom_path):
         os.makedirs(custom_path)
@@ -164,11 +164,11 @@ def point_biserial_correlation(
 
 @catch_exception
 def kmeans_analysis(
-        df: pd.DataFrame,
-        tokens: pd.Series,
-        custom_path: str,
-        num_clusters: int,
-        max_clusters: int,
+    df: pd.DataFrame,
+    tokens: pd.Series,
+    custom_path: str,
+    num_clusters: int,
+    max_clusters: int,
 ):
     """
     Perform a k-means analysis on the data
@@ -278,13 +278,13 @@ def kmeans_analysis(
 
 @catch_exception
 def pair_wise_frequency(
-        df: pd.DataFrame,
-        dependent_variables: List[str],
-        independent_variables: List[str],
-        speakers: List[str],
-        custom_path: str,
-        speakers_properties: Optional[Dict[str, List[str]]] = None,
-        normalization_dict: Optional[Dict[str, int]] = None,
+    df: pd.DataFrame,
+    dependent_variables: List[str],
+    independent_variables: List[str],
+    speakers: List[str],
+    custom_path: str,
+    speakers_properties: Optional[Dict[str, List[str]]] = None,
+    normalization_dict: Optional[Dict[str, int]] = None,
 ) -> Dict[str, Dict[str, int]]:
     # make directory for the variables
     if not os.path.exists(custom_path):
@@ -328,14 +328,14 @@ def pair_wise_frequency(
     df = pd.DataFrame(csv_lines[1:], columns=csv_lines[0])
 
     # drop all rows that do not contain "speaker" in the first column
-    df = df[df['speaker/independent variable'].str.contains("speaker")]
+    df = df[df["speaker/independent variable"].str.contains("speaker")]
 
     indep_vars = [v for v in other_columns if "speaker" not in v]
 
     for prp in indep_vars:
         bool_l = []
         v = prp.split(":")[1]
-        for sp in df['speaker/independent variable']:
+        for sp in df["speaker/independent variable"]:
             sp = sp.split(":")[1]
             props = speakers_properties[sp]
             bool_l.append(v in props)
@@ -356,7 +356,7 @@ def pair_wise_frequency(
 
 @catch_exception
 def poisson_regression(
-        df: pd.DataFrame, independent_vars: List[str], speakers: List[str], custom_path: str
+    df: pd.DataFrame, independent_vars: List[str], speakers: List[str], custom_path: str
 ):
     """
     This function performs a poisson regression on the dataframe.

@@ -120,8 +120,9 @@ def generate_dataset(
     # get statistics about the number of variables
     corpus_statitstics["dependent_variables"] = len(dependent_variables)
     corpus_statitstics["independent_variables"] = len(independent_variables)
-    corpus_statitstics["variables"] =  len(dependent_variables) + len(independent_variables)
-
+    corpus_statitstics["variables"] = len(dependent_variables) + len(
+        independent_variables
+    )
 
     # get the number of values for each variable
     corpus_statitstics["variables_values"] = len(idv)
@@ -167,9 +168,11 @@ def generate_dataset(
         feat_regex, _ = content
         for pt, crp in corpus_dict.items():
             crp = "\n".join(crp)
-            anns = re.finditer(feat_regex, crp)  
+            anns = re.finditer(feat_regex, crp)
             # check correctness of all annotations
-            anns, _, msg = check_correct_annotations(anns, crp, pt, verbose=True) # TODO: Problem: Diese Methode ist speziell für die alte Version der Annotation zugeschnitten
+            anns, _, msg = check_correct_annotations(
+                anns, crp, pt, verbose=True
+            )  # TODO: Problem: Diese Methode ist speziell für die alte Version der Annotation zugeschnitten
             err_msg += msg + "\n\n"
 
             annotations.extend(anns)
@@ -218,7 +221,7 @@ def generate_dataset(
         f"There is a total of {annotated} annotations in the corpus ({annotated / len(whole_corpus.split(' ')) * 100:.2f}% "
         f"of the corpus).\n"
         f"I found {not_annotated} not annotated words that were previously annotated.\n"
-        f"Of those {not_annotated_interest} ({not_annotated_interest / (not_annotated+1e-10) * 100:.2f}%) "
+        f"Of those {not_annotated_interest} ({not_annotated_interest / (not_annotated + 1e-10) * 100:.2f}%) "
         f"are produced by a speakers of interest"
     )
 
@@ -340,7 +343,7 @@ def generate_dataset(
                 sp = corpus[idx - 1]
             else:
                 continue
-            
+
             for _, content in feat_regex_dict.items():
                 feat_regex, multiple_identifier_seperator = content
                 # get the features
@@ -360,7 +363,9 @@ def generate_dataset(
 
                     # skip any tags that are wrongly formatted
                     if any([token in wt for wt in wrong_tags]):
-                        logger.warning(f"\nSkipping '{token}' because it is wrongly formatted")
+                        logger.warning(
+                            f"\nSkipping '{token}' because it is wrongly formatted"
+                        )
                         continue
 
                     # initialize empty row
@@ -376,8 +381,6 @@ def generate_dataset(
                         except KeyError:
                             not_found_vars.append(var)
                             continue
-
-
 
                     # get the features
                     feats = t.group("identifier").split(multiple_identifier_seperator)
@@ -426,9 +429,11 @@ def generate_dataset(
                     csv_line[-1] = csv_line[-1].strip(",")
                     csv_file.append(csv_line)
 
-    not_found_vars=list(set(not_found_vars))
+    not_found_vars = list(set(not_found_vars))
     if len(not_found_vars) > 0:
-        logger.warning(f"\n\nThe following variables were not found in the independent variables file: {not_found_vars}")
+        logger.warning(
+            f"\n\nThe following variables were not found in the independent variables file: {not_found_vars}"
+        )
     # Saving the output
     corpus_statitstics["speaker_n_words"] = speaker_n_words
 
@@ -441,7 +446,7 @@ def generate_dataset(
         annotation_info.append([token] + list(v.values()))
 
     # save the not annotated log
-    if any([len(x)>0 for x in not_annotated_log.values()]):
+    if any([len(x) > 0 for x in not_annotated_log.values()]):
         header = ["file", "token"]
 
         # count the maximum length for all the values of the values of the dict
@@ -474,7 +479,7 @@ def generate_dataset(
     df = df.drop(to_drop, axis=1)
     sep = ":"
     df_encoded = pd.get_dummies(df, columns=df.columns, prefix_sep=sep)
-    
+
     if df_encoded.size != 0:
         # drop all columns that have nothing after : in name
         df_encoded = df_encoded.loc[:, ~df_encoded.columns.str.contains(f"{sep}$")]
@@ -578,9 +583,11 @@ class DCThread(QtCore.QThread):
 
 
 class CustomThread(QtCore.QThread):
-    """Runs a method in a separate thread and emits a signal with the result when done.
-    """
-    def __init__(self, method2run: callable, signal: QtCore.Signal = None, *args, **kwargs):
+    """Runs a method in a separate thread and emits a signal with the result when done."""
+
+    def __init__(
+        self, method2run: callable, signal: QtCore.Signal = None, *args, **kwargs
+    ):
         """Initializes the thread with the method to run and the signal to emit the result.
 
         Args:
@@ -592,10 +599,9 @@ class CustomThread(QtCore.QThread):
         self.args = args
         self.kwargs = kwargs
         self.signal = signal
-    
+
     def run(self):
-        """Runs the method and emits the signal with the result when done.
-        """
+        """Runs the method and emits the signal with the result when done."""
         result = self.method2run(*self.args, **self.kwargs)
         if self.signal:
             self.signal.emit(result)
