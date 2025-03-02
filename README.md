@@ -32,6 +32,9 @@ By defining variables (e.g., age, gender, dialect features) and specifying how t
   - [Issues \& Support](#issues--support)
     - [Opening Issues](#opening-issues)
     - [Troubleshooting](#troubleshooting)
+  - [Build Standalone Executables](#build-standalone-executables)
+    - [Using `build.sh`](#using-buildsh)
+    - [Notes \& Tips](#notes--tips)
   - [Associated Publications \& Acknowledgments](#associated-publications--acknowledgments)
 
 ---
@@ -156,6 +159,66 @@ UnicodeDecodeError: 'utf-16-le' codec can't decode byte 0x0a ...
 ```
 This might mean you have a text file with an odd number of bytes. A quick workaround is to add a space at the end of the file and retry.
 
+Below is an **updated README** snippet illustrating how users can build standalone binaries (for Windows or macOS) using the **`build.sh`** script you created. It fits naturally under a “Build Standalone App” or “Compile Executables” section. Adjust paths, filenames, or formatting as needed:
+
+
+## Build Standalone Executables
+
+To generate a **single-file `.exe`** for Windows or a **`.app` bundle** for macOS, we provide a convenient **Bash script** called `build.sh`. This script automates the following steps:
+
+1. **Poetry Installation**: Installs all dependencies (including PyInstaller).
+2. **Qt Resource Compilation**: Compiles any `.qrc` files into Python modules (for icons, etc.).
+3. **(Optional) UI Compilation**: If desired, compiles `.ui` files into Python code.
+4. **PyInstaller Build**: Detects your operating system (macOS vs. Windows) and bundles the app accordingly.
+5. **Copy to Desktop** (Optional): Prompts you to copy the generated app/executable to your Desktop for quick access.
+
+### Using `build.sh`
+
+1. **Make it executable**:
+   ```bash
+   chmod +x build.sh
+   ```
+2. **Run the script**:
+   ```bash
+   ./build.sh
+   ```
+3. **On macOS**:  
+   A `.app` is created in `release/mac/`. For example:
+   ```
+   release/mac/CorpusCompass.app
+   ```
+   You can run it directly or move it elsewhere.
+
+4. **On Windows** (running Git Bash or a similar Bash shell):  
+   A **single-file** `.exe` appears in `release/win/`. For instance:
+   ```
+   release/win/CorpusCompass.exe
+   ```
+   You can double-click it or copy it to another folder—no separate Python installation needed.
+
+5. **Optional Desktop Copy**:  
+   The script asks if you’d like to copy the final `.app` or `.exe` to your Desktop. Enter `y` (yes) or `n` (no).
+
+### Notes & Tips
+
+- **No Cross-Compilation**: The script does not build Windows `.exe` on macOS or vice versa. You must run it **on** each OS to produce the relevant build artifact.
+- **Icons**:  
+  - By default, `build.sh` uses `includes/icon.icns` for macOS and `includes/icon.ico` for Windows.  
+  - Convert images (e.g., `.png`, `.jpg`) to `.icns` or `.ico` if needed.
+- **Customizing**: If you change file paths or names, update `build.sh` accordingly. You can also add extra PyInstaller flags (e.g., `--onefile`, `--add-data`) in the script.
+- **Reproducibility**: If you modify `.ui` files or icons, remember to recompile them before building, or enable the optional UI compilation section in `build.sh`.
+
+With this setup, non-technical collaborators—particularly **linguists unfamiliar with Python**—can run CorpusCompass easily, just by double-clicking the resulting `.exe` or `.app` file. Check out our [Issues](#issues--support) section if you have any trouble! 
+
+```
+(Example directory structure after building)
+release/
+├── mac/
+│   └── CorpusCompass.app
+└── win/
+    └── CorpusCompass.exe
+```
+
 ---
 
 ## Associated Publications & Acknowledgments
@@ -167,12 +230,11 @@ This project was created in collaboration with researchers in Linguistics and Co
 1. **CorpusCompass: A Tool for Data Extraction and Dataset Generation in Corpus Linguistics**  
    *Muhadj Adnan, Nicolo’ Brandizzi (2023)*  
    In *Proceedings of the 9th Italian Conference on Computational Linguistics (CLiC-it 2023)*, CEUR Workshop Proceedings, Venice, Italy.  
-   [CEUR Link](http://ceur-ws.org/Vol-3596/)  
+   [CEUR Link](https://ceur-ws.org/Vol-3596/paper2.pdf)  
 
 2. **User-Centered Design of Digital Tools for Sociolinguistic Studies in Under-Resourced Languages**  
    *Jonas Adler, Carsten Scholle, Daniel Buschek, Nicolo’ Brandizzi, Muhadj Adnan (2024)*  
    In *Proceedings of the 3rd Workshop on NLP Applications to Field Linguistics (Field Matters 2024)*, ACL, Bangkok, Thailand.  
+   [ACL Link](https://aclanthology.org/2024.fieldmatters-1.3/)
 
 We appreciate citations of these works if CorpusCompass assists your academic research.
-
-**Enjoy exploring your corpora with CorpusCompass!** If you have questions or feedback, please contact us via GitHub issues or email. We look forward to your contributions and research outcomes.
