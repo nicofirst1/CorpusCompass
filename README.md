@@ -1,100 +1,178 @@
+
 # CorpusCompass
 
-CorpusCompass is a tool for researchers in the field of Corpus Linguistics that helps them efficiently extract and analyze data from annotated corpora. 
-By defining variables and annotation rules using JSON files and specifying how to find them in the corpus using regular expressions (REGEX), 
-researchers can tailor the tool to their specific research questions and needs. 
-CorpusCompass also includes features for debugging missing annotations and identifying unexpected correlations in the data.
+<p align="center">
+  <img src="./includes/icon.png" alt="CorpusCompass Icon" width="180" />
+</p>
 
-It is designed to be used with [ELAN](https://tla.mpi.nl/tools/tla-tools/elan/) and [Praat](https://www.fon.hum.uva.nl/praat/) annotation tools,
-but can be used with any other tool that uses a similar format.
+**CorpusCompass** is a user-friendly tool designed for researchers in **Corpus Linguistics** who want a simpler way to extract, manage, and analyze data from annotated corpora. Whether you’re studying under-resourced languages or more commonly researched varieties, CorpusCompass provides:
 
+- Automatic detection of linguistic variables via **regex** patterns  
+- Intuitive **graphical interface** built with PySide6 (Qt)  
+- Tools for **speaker identification**, **annotation management**, and **CSV/JSON** output  
+- Compatibility with widely used annotation tools such as **[ELAN](https://tla.mpi.nl/tools/tla-tools/elan/)** and **[Praat](https://www.fon.hum.uva.nl/praat/)**  
 
-![example image](./includes/example.png)
+By defining variables (e.g., age, gender, dialect features) and specifying how to detect them in your transcripts, **CorpusCompass** aims to streamline workflows often performed manually in spreadsheets or code scripts—making advanced data analysis more approachable for linguists, even without deep programming skills.
 
-### Error reporting and feature requests
-If you find a bug or have a feature request, please open an issue on the [issue tracker](https://github.com/nicofirst1/CorpusCompass/issues/new/choose)
+![example image](./includes/cc_workflow.jpg)
 
-## Getting started
+---
 
-#### Troubleshooting**
+## Table of Contents
+- [CorpusCompass](#corpuscompass)
+  - [Table of Contents](#table-of-contents)
+  - [Key Features](#key-features)
+  - [Installation from Release](#installation-from-release)
+  - [Getting Started (Download \& Modify)](#getting-started-download--modify)
+    - [1. Clone or Download the Repository](#1-clone-or-download-the-repository)
+    - [2. Install Dependencies with Poetry](#2-install-dependencies-with-poetry)
+    - [3. Activate Poetry (Optional)](#3-activate-poetry-optional)
+    - [4. Run the Application](#4-run-the-application)
+    - [Making Changes / Rebuilding UI](#making-changes--rebuilding-ui)
+  - [Issues \& Support](#issues--support)
+    - [Opening Issues](#opening-issues)
+    - [Troubleshooting](#troubleshooting)
+  - [Associated Publications \& Acknowledgments](#associated-publications--acknowledgments)
 
-If you get an error like this:
+---
+
+## Key Features
+
+- **Comprehensive GUI**  
+  Easily manage projects, import annotated files, detect speakers and annotation markers, and view results interactively.  
+- **Customizable Variables**  
+  Define independent and dependent variables (e.g., speaker demographics vs. linguistic features) to fit a wide range of studies.  
+- **Annotation Previews**  
+  Quickly test or preview how the tool detects annotation markers before final dataset creation.  
+- **Flexible Exports**  
+  Output your processed corpus data as CSV or JSON for statistical analysis in R, Python, Excel, or other platforms.  
+- **Cross-Platform**  
+  Built with PySide6 (Qt), running on Windows, macOS, and Linux.
+
+---
+
+## Installation from Release
+
+We plan to provide **pre-built executables** for Windows and macOS. Once available, you can download them from the [Releases page](https://github.com/YourOrg/CorpusCompass/releases), then:
+
+1. **Download** the `.exe` (Windows) or `.app/.dmg` (macOS).  
+2. **Run/Install**: Just open or run the file—no separate Python environment needed.  
+3. **Launch** CorpusCompass: Start analyzing your corpora immediately via the GUI.
+
+*(Stay tuned for these release binaries!)*
+
+---
+
+## Getting Started (Download & Modify)
+
+If you’re comfortable with GitHub or Python, follow these steps to customize or contribute to CorpusCompass.
+
+### 1. Clone or Download the Repository
+
+- **GitHub-savvy approach**:
+  ```bash
+  git clone https://github.com/nicofirst1/CorpusCompass
+  cd CorpusCompass
+  ```
+- **No Git experience?**  
+  Click the green “Code” button on GitHub and select “Download ZIP.” Then unzip on your computer.
+
+### 2. Install Dependencies with Poetry
+
+1. [Install Poetry](https://python-poetry.org/docs/#installation) (if you haven’t).  
+2. In the repository folder, run:
+   ```bash
+   poetry install
+   ```
+   This downloads and installs all required packages (including PySide6) into a virtual environment.
+
+### 3. Activate Poetry (Optional)
+
+To work inside the environment:
+
+```bash
+poetry shell
 ```
-UnicodeDecodeError: 'utf-16-le' codec can't decode byte 0x0a in position 21530: truncated data
-```
-It may be because the file you are trying to open has an odd number of bytes. 
-Add one space at the end of the file and try again.
 
-### Using CorpusCompass
+Then launch:
 
-To use CorpusCompass, you will need to define your own variables and annotation rules using JSON files. 
-Detailed instructions for customizing the tool to your specific needs are provided in the Jupyter notebook.
-
-Once you have defined your variables and annotation rules, you can use CorpusCompass to extract and analyze data from your annotated corpus. 
-The tool provides various functions for debugging missing annotations and identifying unexpected correlations in the data, 
-which can be helpful for refining your research questions and hypotheses.
-
-
-### Additional Resources
-
-CorpusCompass can be used in conjunction with statistical analysis or visualization tools (such as Excel or R) to gain 
-further insights into the factors that are affecting language use. More information on using these tools with CorpusCompass 
-is provided in the Jupyter notebook.
-
-
-
-## Local installation 
-
-If you wish to install the tool locally, you can do so by cloning the repository and 
-installing the requirements:
-- Python (should be already installed on your system)
-- Jupyter Notebook
-
-You can install these dependencies by running the following command:
-
-`pip install jupyter`
-
-Next, clone the CorpusCompass repository and install the package:
-
-```
-git clone https://github.com/nicofirst1/CorpusCompass
-pip install -e CorpusCompass/
+```bash
+python main.py
 ```
 
-Now that you have all the necessary dependencies installed, you can open the Jupyter notebook and start using CorpusCompass.
+Alternatively, run:
 
-### Data analysis
-We provide a python file for automatic data analysis ([data_analysis.py](data_analysis.py)). This analysis is based on the dataset we created previously (`binary_dataset.csv`).
-The analysis provided are the following:
-- Correlation between the variables
-- Covariance between the variables
-- Pearson's correlation coefficient
-- Spearman's correlation coefficient
-- K-means clustering of the data
-
-### Annotation fixing
-We also provide a python file for fixing annotations ([annotation_fixer.py](annotation_fixer.py)). 
-This script is based on the annotation info we created previously (`annotation_info.csv`). 
-It allows the user to delete or keep annotation based on the number of times they appear in the dataset.
-
-#### Running the analysis
-To run the analysis you need to specify the path to the dataset you want to analyze, with:
+```bash
+poetry run python main.py
 ```
-python data_analysis.py /path/to/binary_dataset.csv
+
+*(No manual environment activation needed.)*
+
+### 4. Run the Application
+
+Launching the GUI:
+
+```bash
+python main.py
 ```
-A new folder will be created in the same directory as the dataset, with the name `analysis`, and the analysis will be saved there.
 
-### Python code
-If you don't like notebooks for some reason, you can also convert the notebook to a python file.
-To do this, install nbconvert with `pip install nbconvert` and run `jupyter nbconvert --to python notebook.ipynb` in the directory of the notebook.
+- **Create a new project**: Provide a project name, description, and target directory.  
+- **Open existing data**: Import or load pre-annotated text/corpus files.  
+- Use the **Load Files** tab to add them into your project, tweak detection settings, define variables, or run the annotation preview.
 
-On the other hand, if you want to convert python code to a notebook, you need to install `p2j` with `pip install p2j` 
-and run `p2j notebook.py` in the directory of the python file.
+### Making Changes / Rebuilding UI
 
+If you modify `.ui` or `.qrc` files (e.g., adjusting the layout in Qt Designer or adding new icons):
 
-### Compiling the app
-To compile the app you can use pyinstaller. 
-To do this, install pyinstaller with `pip install pyinstaller` and run 
-```bashpyinstaller main.py -n CorpusCompass  --windowed --icon=includes/icon.jpg 
+1. **Compile `.ui`**:  
+   ```bash
+   pyside6-uic src/view/res/some_file.ui -o src/view/generated/ui_some_file.py
+   ```
+   or run:
+   ```bash
+   chmod +x compile_ui.sh
+   ./compile_ui.sh
+   ```
+   to compile all UI files at once.
+2. **Compile `.qrc`**:  
+   ```bash
+   pyside6-rcc resources.qrc -o resources_rc.py
+   ```
+3. **Re-run** `python main.py`.
 
+---
+
+## Issues & Support
+
+### Opening Issues
+- **Found a bug or glitch?** [Open an issue here](https://github.com/nicofirst1/CorpusCompass/issues/new/choose) and share the details.  
+- **Feature requests** or suggestions? We welcome improvements from the community.  
+
+### Troubleshooting
+
+**UnicodeDecodeError**  
 ```
+UnicodeDecodeError: 'utf-16-le' codec can't decode byte 0x0a ...
+```
+This might mean you have a text file with an odd number of bytes. A quick workaround is to add a space at the end of the file and retry.
+
+---
+
+## Associated Publications & Acknowledgments
+
+This project was created in collaboration with researchers in Linguistics and Computer Science. We especially thank the students whose contributions and user‐centered design insights helped shape CorpusCompass’s current architecture.
+
+**Associated Publications**:
+
+1. **CorpusCompass: A Tool for Data Extraction and Dataset Generation in Corpus Linguistics**  
+   *Muhadj Adnan, Nicolo’ Brandizzi (2023)*  
+   In *Proceedings of the 9th Italian Conference on Computational Linguistics (CLiC-it 2023)*, CEUR Workshop Proceedings, Venice, Italy.  
+   [CEUR Link](http://ceur-ws.org/Vol-3596/)  
+
+2. **User-Centered Design of Digital Tools for Sociolinguistic Studies in Under-Resourced Languages**  
+   *Jonas Adler, Carsten Scholle, Daniel Buschek, Nicolo’ Brandizzi, Muhadj Adnan (2024)*  
+   In *Proceedings of the 3rd Workshop on NLP Applications to Field Linguistics (Field Matters 2024)*, ACL, Bangkok, Thailand.  
+
+We appreciate citations of these works if CorpusCompass assists your academic research.
+
+**Enjoy exploring your corpora with CorpusCompass!** If you have questions or feedback, please contact us via GitHub issues or email. We look forward to your contributions and research outcomes.
