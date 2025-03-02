@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LoadFilesTab</class>
+ <widget class="QWidget" name="LoadFilesTab">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{
+	background-color: white;
+}
+
+QPushButton {
+    background-color:rgb(154, 217, 234) ;
+	color: white;
+    min-width: 80px;
+	min-height: 40px;
+	border-style: solid;
+	border-color: rgb(154, 217, 234);
+	border-width: 5px;
+	border-radius: 10px;
+}
+
+QPushButton:pressed {
+	background-color:rgb(134, 189, 203) ;
+	border-color: rgb(134, 189, 203);
+	color: rgb(245, 245, 245);
+}
+
+QPushButton:flat {
+    border: none; /* no border for a flat push button */
+}
+
+QPushButton:default {
+    border-color: navy; /* make the default button prominent */
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="opaqueResize">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="verticalWidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item alignment="Qt::AlignHCenter">
+        <widget class="QLabel" name="label">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Loaded Files</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QScrollArea" name="scrollArea">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>274</width>
+            <height>599</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QTableWidget" name="list_loaded_filenames">
+             <property name="styleSheet">
+              <string notr="true">QAbstractItemView::indicator{
+	width: 20px;
+	height: 20px;
+}
+
+QAbstractItemView::indicator:checked {
+    /* Adjust the appearance of the checked indicator */
+    image: url(:/images/images/checked_icon.png) /* Specify a custom image if desired */
+}
+
+QAbstractItemView::indicator:unchecked {
+    /* Adjust the appearance of the unchecked indicator */
+    image: url(:/images/images/unchecked_icon.png); /* Specify a custom image if desired */
+}
+
+
+QTableWidget {
+    font-size: 12pt; /* Set the font size */
+    font-weight: bold; /* Set the font weight */
+}
+
+QTableWidget::item:selected {
+    background-color: rgba(50, 50, 225, 0.1); /* Change the background color and opacity */
+	color:black;
+}
+
+QTableWidget::item:focus {
+    selection-color: blue; /* Hide the dotted selection border */
+    border: 1px solid white;
+}
+
+QAbstractItemView::indicator:hover {
+    /* Adjust the appearance of the hover indicator */
+    background-color: lightgray; /* Example: change background color when hovering */
+}
+
+QAbstractItemView::indicator:checked:hover {
+    /* Adjust the appearance of the checked checkbox when hovering */
+    background-color: rgb(255, 166, 167); /* Example: change background color of checked checkbox when hovering */
+
+}
+
+
+QAbstractItemView::indicator:unchecked:hover {
+    /* Adjust the appearance of the unchecked checkbox when hovering */
+    background-color: lightgreen; /* Example: change background color of unchecked checkbox when hovering */
+}
+
+</string>
+             </property>
+             <property name="horizontalScrollBarPolicy">
+              <enum>Qt::ScrollBarAlwaysOff</enum>
+             </property>
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::NoSelection</enum>
+             </property>
+             <property name="showGrid">
+              <bool>false</bool>
+             </property>
+             <attribute name="horizontalHeaderVisible">
+              <bool>false</bool>
+             </attribute>
+             <attribute name="horizontalHeaderMinimumSectionSize">
+              <number>28</number>
+             </attribute>
+             <attribute name="horizontalHeaderDefaultSectionSize">
+              <number>28</number>
+             </attribute>
+             <attribute name="horizontalHeaderStretchLastSection">
+              <bool>true</bool>
+             </attribute>
+             <attribute name="verticalHeaderVisible">
+              <bool>false</bool>
+             </attribute>
+             <column>
+              <property name="text">
+               <string>Neue Spalte</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>File-Name</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="btn_add_file">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Add File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_remove_file">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Remove selected
+Files</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="verticalWidget_2" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QTabWidget" name="tab_file_preview">
+         <property name="currentIndex">
+          <number>-1</number>
+         </property>
+         <property name="tabsClosable">
+          <bool>true</bool>
+         </property>
+         <property name="movable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_finished">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>84</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	color: white;
+	background-color: rgb(0, 170, 0);
+	border-style: solid;
+	border-color: rgb(0, 125, 0);
+	border-width: 2px;
+	border-radius: 10px;
+}
+
+QPushButton:pressed {
+	background-color: rgb(0, 134, 0);
+}
+
+QPushButton:disabled{
+  background-color: rgb(121, 121, 121);
+}</string>
+         </property>
+         <property name="text">
+          <string>Save</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
