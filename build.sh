@@ -36,7 +36,7 @@ function compile_resources() {
 #######################################
 function compile_ui_files() {
   echo "Compiling UI files..."
-  for ui_file in "$RES_DIR*.ui"; do
+  for ui_file in $RES_DIR/*.ui; do
     base="$(basename "$ui_file" .ui)"
     poetry run pyside6-uic "$ui_file" -o "$GEN_DIR/ui_${base}.py"
     echo "  Compiled $ui_file → ui_${base}.py"
