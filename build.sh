@@ -51,6 +51,7 @@ function build_mac() {
   echo "Building for macOS..."
   poetry run pyinstaller \
     --name "CorpusCompass" \
+    --onedir \
     --windowed \
     --icon="includes/icon.icns" \
     --distpath "release/mac" \
@@ -67,7 +68,7 @@ function build_mac() {
 function build_windows() {
   echo "Building for Windows (one-file exe)..."
   poetry run pyinstaller \
-    --onefile \
+    --onedir \
     --windowed \
     --name "CorpusCompass" \
     --icon="includes/icon.ico" \
