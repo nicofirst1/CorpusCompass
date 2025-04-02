@@ -5,9 +5,9 @@ from typing import Dict, Any
 
 from PySide6 import QtWidgets
 
-from src.annotation_fixer.af_utils import corpus_dict2text
-from src.common import GeneralWindow, Memory, AppLogger, create_input, QTextEditLog
-from src.data_analyzer.DAProcess import DAProcess
+from corpuscompass.annotation_fixer.af_utils import corpus_dict2text
+from corpuscompass.common import GeneralWindow, Memory, AppLogger, create_input, QTextEditLog
+from corpuscompass.data_analyzer.DAProcess import DAProcess
 
 
 class DataAnalyzer(GeneralWindow):

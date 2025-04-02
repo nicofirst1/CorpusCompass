@@ -1,5 +1,5 @@
 import unittest
-from src.model.corpus_compass_model import Project
+from model.corpus_compass_model import Project
 
 
 class ProjectTestCase(unittest.TestCase):

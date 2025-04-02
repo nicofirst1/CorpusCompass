@@ -6,8 +6,8 @@ from typing import Dict, Any
 
 from PySide6 import QtWidgets
 
-from src.annotation_fixer.af_utils import corpus_dict2text
-from src.common import (
+from corpuscompass.annotation_fixer.af_utils import corpus_dict2text
+from corpuscompass.common import (
     GeneralWindow,
     Memory,
     AppLogger,
@@ -15,7 +15,7 @@ from src.common import (
     QTextEditLog,
     create_input,
 )
-from src.dataset_creator.DCThread import DCThread
+from dataset_creator.DCThread import DCThread
 
 
 class DatasetCreator(GeneralWindow):

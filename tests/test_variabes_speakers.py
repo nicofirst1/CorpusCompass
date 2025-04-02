@@ -1,6 +1,6 @@
 import unittest
 
-from src.model.variables_speakers import Speaker, Variable, VariableValue
+from model.variables_speakers import Speaker, Variable, VariableValue
 
 
 class VariableTestCase(unittest.TestCase):

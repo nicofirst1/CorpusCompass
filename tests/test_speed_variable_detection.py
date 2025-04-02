@@ -1,11 +1,11 @@
 import unittest
 
-from src.model.variables_speaker_detection import (
+from model.variables_speaker_detection import (
     SpeakerFormats,
     SpeakerDetector,
     AnnotationDetector,
 )
-from src.model.files import File
+from model.files import File
 
 
 class SpeedTestCase(unittest.TestCase):

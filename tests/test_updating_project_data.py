@@ -1,7 +1,7 @@
 import unittest
-from src.model.corpus_compass_model import Project
-from src.model.variables_speakers import Variable, VariableValue, Speaker
-from src.model.files import File
+from model.corpus_compass_model import Project
+from model.variables_speakers import Variable, VariableValue, Speaker
+from model.files import File
 
 
 class UpdateProjectDataTestCase(unittest.TestCase):

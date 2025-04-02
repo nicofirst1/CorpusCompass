@@ -1,6 +1,6 @@
 import os
 
-from src.data_analyzer.da_analysis_functions import (
+from corpuscompass.data_analyzer.da_analysis_functions import (
     kmeans_analysis,
     poisson_regression,
     pair_wise_frequency,
@@ -11,7 +11,7 @@ from src.data_analyzer.da_analysis_functions import (
     point_biserial_correlation,
     t_test,
 )
-from src.data_analyzer.da_utils import load_all, to_df_names
+from corpuscompass.data_analyzer.da_utils import load_all, to_df_names
 
 if __name__ == "__main__":
     setting, custom_paths, variables, data, nomalization_num = load_all()

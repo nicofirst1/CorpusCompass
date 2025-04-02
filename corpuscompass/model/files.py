@@ -1,5 +1,5 @@
 from PySide6.QtCore import Signal, QThread
-from src.utils.file_utils import decode_txt_file
+from corpuscompass.utils.file_utils import decode_txt_file
 from typing import List
 import os
 

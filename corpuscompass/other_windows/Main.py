@@ -1,11 +1,11 @@
 from PySide6 import QtWidgets
 
-from src.annotation_fixer import AnnotationFixer
-from src.common import GeneralWindow, Memory, load_postprocess
-from src.data_analyzer import DataAnalyzer
-from src.dataset_creator import DatasetCreator
-from src.other_windows import LoadFiles, Settings
-from src.other_windows.AskLoaded import AskLoading
+from corpuscompass.annotation_fixer import AnnotationFixer
+from corpuscompass.common import GeneralWindow, Memory, load_postprocess
+from corpuscompass.data_analyzer import DataAnalyzer
+from corpuscompass.dataset_creator import DatasetCreator
+from corpuscompass.other_windows import LoadFiles, Settings
+from other_windows.AskLoaded import AskLoading
 
 
 class Main(GeneralWindow):

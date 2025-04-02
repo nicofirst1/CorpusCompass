@@ -19,6 +19,8 @@ def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
         exc_value (class): Tells you what the occurred exception is.
         exc_traceback (traceback): What other methods were called beforehand.
     """
+
+
     if issubclass(exc_type, KeyboardInterrupt):
         # Will call default excepthook
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
@@ -28,3 +30,4 @@ def handle_unhandled_exception(exc_type, exc_value, exc_traceback):
     logging.critical(
         "Unhandled exception", exc_info=(exc_type, exc_value, exc_traceback)
     )
+

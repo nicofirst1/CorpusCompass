@@ -1,4 +1,4 @@
-from src.model.files import File, FileLoader
+from model.files import File, FileLoader
 import time
 import os
 import unittest

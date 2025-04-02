@@ -15,7 +15,7 @@ from sklearn.metrics import silhouette_score
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
-from src.data_analyzer.da_utils import catch_exception
+from data_analyzer.da_utils import catch_exception
 
 
 @catch_exception

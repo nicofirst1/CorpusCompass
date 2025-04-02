@@ -1,5 +1,5 @@
 from enum import Enum
-from src.model.files import File
+from corpuscompass.model.files import File
 from PySide6.QtCore import Signal, QThread, QObject, SIGNAL
 from typing import List, Dict, Tuple
 import pandas as pd

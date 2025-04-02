@@ -50,9 +50,12 @@ function compile_ui_files() {
 function build_mac() {
   echo "Building for macOS..."
   poetry run pyinstaller \
+    --clean \
     --name "CorpusCompass" \
     --onedir \
     --windowed \
+    --noconfirm \
+    --log-level DEBUG \
     --icon="includes/icon.icns" \
     --distpath "release/mac" \
     --workpath "build/mac" \

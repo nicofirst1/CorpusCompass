@@ -1,7 +1,7 @@
 import unittest
 import os
-from src.model.files import File
-from src.model.corpus_compass_model import Project
+from model.files import File
+from model.corpus_compass_model import Project
 
 
 class SavingLoadingTestCase(unittest.TestCase):

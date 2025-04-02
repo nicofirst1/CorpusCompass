@@ -4,10 +4,10 @@ run CorpussCompass
 """
 
 from PySide6.QtWidgets import QApplication
-from src.view.corpus_compass_view import CorpusCompassView
-from src.model.corpus_compass_model import CorpusCompassModel
-from src.controller import Controller
-from src.utils.exception_handling import setup_exception_handling
+from corpuscompass.view.corpus_compass_view import CorpusCompassView
+from corpuscompass.model.corpus_compass_model import CorpusCompassModel
+from corpuscompass.controller import Controller
+from corpuscompass.utils.exception_handling import setup_exception_handling
 import logging
 
 

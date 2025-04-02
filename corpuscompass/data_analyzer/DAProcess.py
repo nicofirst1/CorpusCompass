@@ -6,7 +6,7 @@ import pandas as pd
 from PySide6 import QtCore
 from PySide6.QtCore import QProcess
 
-from src.common import QTextLogger, Memory, AppLogger
+from corpuscompass.common import QTextLogger, Memory, AppLogger
 
 
 class DAProcess(QtCore.QProcess):
@@ -69,7 +69,7 @@ class DAProcess(QtCore.QProcess):
 
         cmd = [
             "-m",
-            "src.data_analyzer.da_main",
+            "data_analyzer.da_main",
             f"{self.mem.lfp['variables_dir']}",
             f"{self.mem.file_postprocess_paths}",
             f"{self.mem.file_settings}",

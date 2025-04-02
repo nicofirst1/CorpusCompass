@@ -6,7 +6,7 @@ from typing import Dict, Optional, Tuple, List, Any, Union, Literal
 import pandas as pd
 from PySide6 import QtWidgets, QtGui, QtCore
 
-from src.common.Memory import Memory
+from corpuscompass.common.Memory import Memory
 
 
 def multi_corpus_upload(

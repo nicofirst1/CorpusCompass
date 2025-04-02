@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets, QtCore, QtGui
 
-from src.common import GeneralWindow, Memory, create_input, to_pretty_name
+from corpuscompass.common import GeneralWindow, Memory, create_input, to_pretty_name
 
 
 class Settings(GeneralWindow):

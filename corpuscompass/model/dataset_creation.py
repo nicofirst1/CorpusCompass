@@ -1,11 +1,11 @@
 # TODO: CURRENTLY NOT USED! Maybe delete this file, if DCThread class is used instead
 import pandas as pd
-from src.model.files import File
-from src.model.variables_speakers import Variable, VariableValue, Speaker
+from corpuscompass.model.files import File
+from corpuscompass.model.variables_speakers import Variable, VariableValue, Speaker
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.model.corpus_compass_model import Project
+    from model.corpus_compass_model import Project
 
 
 class DatasetCreator:

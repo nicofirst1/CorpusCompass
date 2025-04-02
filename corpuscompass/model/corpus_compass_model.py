@@ -5,16 +5,16 @@ The module contains classes used for the CorpusCompass model
 from PySide6.QtCore import QObject, Signal
 from typing import List, Dict, Tuple
 import pandas as pd
-from src.model.variables_speakers import Variable, VariableValue, Speaker
-from src.model.files import File, FileLoader
-from src.model.variables_speaker_detection import (
+from corpuscompass.model.variables_speakers import Variable, VariableValue, Speaker
+from corpuscompass.model.files import File, FileLoader
+from corpuscompass.model.variables_speaker_detection import (
     SpeakerDetector,
     AnnotationDetector,
     SpeakerFormats,
 )
-from src.model.dataset_creation import DatasetCreator
-from src.utils.DCThread import DCThread, CustomThread, generate_dataset
-import src.utils.file_utils as file_utils
+from corpuscompass.model.dataset_creation import DatasetCreator
+from corpuscompass.utils.DCThread import DCThread, CustomThread, generate_dataset
+import corpuscompass.utils.file_utils as file_utils
 import json
 import os
 import ast

@@ -10,8 +10,8 @@ import pandas as pd
 from PySide6 import QtCore
 from tqdm import tqdm
 
-from src.common import QTextLogger
-from src.dataset_creator.dc_utils import (
+from common import QTextLogger
+from dataset_creator.dc_utils import (
     preprocess_corpus,
     get_name,
     check_correct_annotations,
