@@ -1,13 +1,16 @@
 [tool.poetry]
 name = "corpuscompass"
-version = "2.0.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+version = "2.0.1"
+description = "A desktop application for managing and analyzing annotated corpora."
+authors = ["Nicolo' Brandizzi <nicolo.brandizzi@iais.fraunhofer.de>"]
 license = "MIT"
 readme = "README.md"
+homepage = "https://www.corpuscompass.com/"
+repository = "https://github.com/nicofirst1/CorpusCompass"
+keywords = ["corpus", "annotation", "linguistics", "NLP", "PySide6"]
 
 [tool.poetry.dependencies]
-python = "<3.12,>=3.9"
+python = ">=3.9,<3.12"
 pandas = "^2.2.3"
 pyside6 = "^6.8.2.1"
 tqdm = "^4.67.1"
@@ -15,16 +18,12 @@ nltk = "^3.9.1"
 pyinstaller = "^6.12.0"
 pillow = "^11.1.0"
 
+[tool.poetry.group.dev.dependencies]
+# Add linters, testing, and dev tools here
+ruff = "^0.3.5"
+pytest = "^8.1.1"
+black = "^24.3.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry-pyinstaller-plugin]
-version = "6.12.0"
-# Disable UPX compression
-disable-upx = true
-
-
-[tool.poetry-pyinstaller-plugin.scripts]
-corpuscompass = { source = "corpuscompass/main.py", type = "onedir", bundle = false }
