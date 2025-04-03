@@ -10,7 +10,6 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 
 
-
 class LoadFilesTab(QWidget, Ui_LoadFilesTab):
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)

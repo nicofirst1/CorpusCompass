@@ -1,6 +1,6 @@
 from corpuscompass.view.utils import set_abbreviate_label
 from corpuscompass.view.generated.ui_home_menu_tab import Ui_HomeMenuTab
-from corpuscompass.view.tabs.tabs import Tab
+from corpuscompass.view.tabs.tab import Tab
 from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 
 

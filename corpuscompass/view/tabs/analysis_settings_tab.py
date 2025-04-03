@@ -61,7 +61,7 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         # self.add_file_text_edit("Testfile4", "A: Last File!", 8)
 
         annotation_detector = AnnotationDetector()
-        speaker_detector = SpeakerDetector()
+        #speaker_detector = SpeakerDetector()
 
         # Check if the detector generates a correct re from the following string:
         annotation_format_str = "[$TOKEN.IDENTIFIER]"
@@ -464,7 +464,7 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
         set_abbreviate_label(data_name_label, metadata_name, 27, True)
 
         colorbox_label = QLabel("")
-        if color_code == None:
+        if color_code is None:
             color_code = "#FFFFFF"
         colorbox_label.setStyleSheet(
             "QLabel { background-color:"

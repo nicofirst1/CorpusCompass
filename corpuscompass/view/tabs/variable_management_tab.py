@@ -3,7 +3,6 @@ from PySide6.QtWidgets import (
     QWidget,
     QHeaderView,
     QTableWidgetItem,
-    QTableWidgetItem,
     QTreeWidgetItem,
 )
 from PySide6.QtCore import Qt
@@ -148,7 +147,7 @@ class VariableManagementTab(QWidget, Ui_VariableManagementTab):
             # get the variant name
             variant_name = self.tableWidget_detectedinformation.item(row, 0).text()
             # get the occurences
-            occurences = self.tableWidget_detectedinformation.item(row, 1).text()
+            #occurences = self.tableWidget_detectedinformation.item(row, 1).text()
             # get the corresponding DV
             corresponding_dv = self.tableWidget_detectedinformation.item(row, 2).text()
             # get the color

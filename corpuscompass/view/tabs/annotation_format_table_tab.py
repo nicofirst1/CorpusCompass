@@ -9,7 +9,6 @@ from PySide6.QtWidgets import (
     QWidget,
     QHeaderView,
     QTableWidgetItem,
-    QTableWidgetItem,
 )
 from corpuscompass.view.generated.ui_annotation_format_table_tab import (
     Ui_AnnotationFormatTableTab,
