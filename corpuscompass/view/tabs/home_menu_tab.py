@@ -1,5 +1,4 @@
-
-from corpuscompass.view.utils import   set_abbreviate_label
+from corpuscompass.view.utils import set_abbreviate_label
 from corpuscompass.view.generated.ui_home_menu_tab import Ui_HomeMenuTab
 from corpuscompass.view.tabs.tabs import Tab
 from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
@@ -11,7 +10,6 @@ class HomeMenuTab(LazySignalTab, Ui_HomeMenuTab):
     current project and shows diffent options for the analysis of a corpus.
     """
 
-    
     def connect_signals(self, controller: "Controller"):
         print("📍 HomeMenuTab now visible, connecting signals.")
         self.btn_home_managecorpus_sect.clicked.connect(
@@ -33,10 +31,12 @@ class HomeMenuTab(LazySignalTab, Ui_HomeMenuTab):
             lambda: controller.on_home_section_button_clicked(Tab.GENERAL_SETTINGS_TAB)
         )
         self.btn_closeproject.clicked.connect(controller.on_project_closed_clicked)
-        self.btn_projectinformation.clicked.connect(controller.on_projectinformation_clicked)
-        self.btn_home_analysecorpus.clicked.connect(controller.on_analyse_corpus_button_clicked)
-
-   
+        self.btn_projectinformation.clicked.connect(
+            controller.on_projectinformation_clicked
+        )
+        self.btn_home_analysecorpus.clicked.connect(
+            controller.on_analyse_corpus_button_clicked
+        )
 
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
@@ -151,4 +151,3 @@ class HomeMenuTab(LazySignalTab, Ui_HomeMenuTab):
         else:
             self.label_warning_annotationformats.hide()
             self.label_annotationformat.setStyleSheet("color: green;")
-

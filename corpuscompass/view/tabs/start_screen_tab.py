@@ -1,11 +1,9 @@
-
 from PySide6.QtWidgets import (
-
     QWidget,
-
 )
 
 from corpuscompass.view.generated.ui_start_screen_tab import Ui_StartScreenTab
+
 
 class StartScreenTab(QWidget, Ui_StartScreenTab):
     """

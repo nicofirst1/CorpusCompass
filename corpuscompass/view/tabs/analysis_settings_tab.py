@@ -1,5 +1,8 @@
 from corpuscompass.model.files import File
-from corpuscompass.model.variables_speaker_detection import AnnotationDetector, SpeakerDetector
+from corpuscompass.model.variables_speaker_detection import (
+    AnnotationDetector,
+    SpeakerDetector,
+)
 from corpuscompass.view.generated.ui_analysis_settings_tab import Ui_AnalysisSettingsTab
 
 from typing import Dict, List, Tuple
@@ -8,45 +11,26 @@ from PySide6.QtWidgets import (
     QPushButton,
     QGridLayout,
     QSizePolicy,
-    QMainWindow,
     QWidget,
-    QDialog,
-    QFileDialog,
-    QTextEdit,
-    QComboBox,
-    QMessageBox,
-    QHeaderView,
-    QTableWidgetItem,
-    QColorDialog,
-    QTableWidgetItem,
-    QListWidget,
-    QListWidgetItem,
-    QTreeWidgetItem,
-    QTableWidget,
-    QDialogButtonBox,
     QCheckBox,
     QPlainTextEdit,
     QLabel,
-    QToolTip,
     QScrollArea,
-    QLayoutItem,
 )
 from PySide6.QtGui import (
-    QFont,
-    QKeyEvent,
     QTextCharFormat,
     QColor,
     QTextCursor,
-    QStandardItemModel,
-    QDragEnterEvent,
-    QDropEvent,
 )
 
-from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QSize, QRect, QTimer, QEvent
+from PySide6.QtCore import Qt, QRect
 
-from corpuscompass.view.font_configs import FontConfig
-from corpuscompass.view.generated.ui_speaker_format_tab import Ui_SpeakerIdTab
-from corpuscompass.view.utils import expand_button_clicked, set_abbreviate_label, set_checkbox_stylesheet, set_expand_button_stylesheet
+from corpuscompass.view.utils import (
+    expand_button_clicked,
+    set_abbreviate_label,
+    set_checkbox_stylesheet,
+    set_expand_button_stylesheet,
+)
 
 
 class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
@@ -542,4 +526,3 @@ class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
                 == self.scrollAreaWidgetContents_contentdisplay
             ):
                 label_widget.setVisible(toggle)
-

@@ -1,6 +1,6 @@
-
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import QTimer
+
 
 class LazySignalTab(QWidget):
     def __init__(self, parent=None):

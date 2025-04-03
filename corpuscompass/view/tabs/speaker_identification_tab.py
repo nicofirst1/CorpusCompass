@@ -1,23 +1,14 @@
-
 from typing import Dict
 from PySide6.QtWidgets import (
-QHeaderView,
+    QHeaderView,
     QWidget,
     QTableWidgetItem,
-
 )
 from PySide6.QtGui import (
-    QFont,
-    QKeyEvent,
-    QTextCharFormat,
     QColor,
-    QTextCursor,
-    QStandardItemModel,
-    QDragEnterEvent,
-    QDropEvent,
 )
 
-from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QSize, QRect, QTimer, QEvent
+from PySide6.QtCore import Qt
 
 from corpuscompass.view.font_configs import FontConfig
 from corpuscompass.view.generated.ui_speaker_format_tab import Ui_SpeakerIdTab

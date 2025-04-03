@@ -1,40 +1,21 @@
 from typing import Dict
 from PySide6.QtWidgets import (
-
     QWidget,
-
 )
 
-from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QSize, QRect, QTimer, QEvent
+from PySide6.QtCore import Qt
 
 from PySide6.QtWidgets import (
-    QPushButton,
-    QGridLayout,
-    QSizePolicy,
-    QMainWindow,
     QWidget,
-    QDialog,
-    QFileDialog,
-    QTextEdit,
-    QComboBox,
-    QMessageBox,
     QHeaderView,
     QTableWidgetItem,
-    QColorDialog,
     QTableWidgetItem,
-    QListWidget,
-    QListWidgetItem,
-    QTreeWidgetItem,
-    QTableWidget,
-    QDialogButtonBox,
-    QCheckBox,
-    QPlainTextEdit,
-    QLabel,
-    QToolTip,
-    QScrollArea,
-    QLayoutItem,
 )
-from corpuscompass.view.generated.ui_annotation_format_table_tab import Ui_AnnotationFormatTableTab
+from corpuscompass.view.generated.ui_annotation_format_table_tab import (
+    Ui_AnnotationFormatTableTab,
+)
+
+
 class AnnotationFormatTableTab(QWidget, Ui_AnnotationFormatTableTab):
     """
     Class for the annotation-format-tab. This window serves for
@@ -110,4 +91,3 @@ class AnnotationFormatTableTab(QWidget, Ui_AnnotationFormatTableTab):
         self.clear_table()
         for format, regex in formats.items():
             self.add_format_to_table(format, regex)
-

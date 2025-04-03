@@ -1,12 +1,9 @@
-
-
 from corpuscompass.view.generated.ui_settings_tab import Ui_SettingsTab
 
 from PySide6.QtWidgets import (
-
     QWidget,
-
 )
+
 
 class GeneralSettingsTab(QWidget, Ui_SettingsTab):
     """

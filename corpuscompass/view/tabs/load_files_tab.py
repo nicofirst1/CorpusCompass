@@ -1,32 +1,14 @@
-
 from corpuscompass.view.generated.ui_load_files_tab import Ui_LoadFilesTab
 
 
-from typing import Dict
 from PySide6.QtWidgets import (
-QHeaderView,
     QWidget,
     QTableWidgetItem,
     QTextEdit,
-
-)
-from PySide6.QtGui import (
-    QFont,
-    QKeyEvent,
-    QTextCharFormat,
-    QColor,
-    QTextCursor,
-    QStandardItemModel,
-    QDragEnterEvent,
-    QDropEvent,
-    
 )
 
-from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QSize, QRect, QTimer, QEvent
+from PySide6.QtCore import Qt
 
-from corpuscompass.view.font_configs import FontConfig
-from corpuscompass.view.generated.ui_speaker_format_tab import Ui_SpeakerIdTab
-from corpuscompass.view.utils import expand_button_clicked
 
 
 class LoadFilesTab(QWidget, Ui_LoadFilesTab):
@@ -101,4 +83,3 @@ class LoadFilesTab(QWidget, Ui_LoadFilesTab):
         )
         checkbox_item.setCheckState(Qt.CheckState.Unchecked)
         self.list_loaded_filenames.setItem(0, checkbox_column, checkbox_item)
-

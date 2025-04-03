@@ -1,54 +1,23 @@
-
-
 from typing import Dict, List, Tuple
 from PySide6.QtWidgets import (
-    QPushButton,
-    QGridLayout,
-    QSizePolicy,
-    QMainWindow,
     QWidget,
-    QDialog,
-    QFileDialog,
-    QTextEdit,
-    QComboBox,
-    QMessageBox,
     QHeaderView,
     QTableWidgetItem,
-    QColorDialog,
     QTableWidgetItem,
-    QListWidget,
-    QListWidgetItem,
     QTreeWidgetItem,
-    QTableWidget,
-    QDialogButtonBox,
-    QCheckBox,
-    QPlainTextEdit,
-    QLabel,
-    QToolTip,
-    QScrollArea,
-    QLayoutItem,
 )
-from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QSize, QRect, QTimer, QEvent
+from PySide6.QtCore import Qt
 from PySide6.QtGui import (
-    QFont,
-    QKeyEvent,
-    QTextCharFormat,
     QColor,
-    QTextCursor,
-    QStandardItemModel,
-    QDragEnterEvent,
-    QDropEvent,
 )
 
-import re
-import random
-import logging
 
-from corpuscompass.view.generated.ui_variable_management_tab import Ui_VariableManagementTab
+from corpuscompass.view.generated.ui_variable_management_tab import (
+    Ui_VariableManagementTab,
+)
 
 
 class VariableManagementTab(QWidget, Ui_VariableManagementTab):
-
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
         self.setupUi(self)
@@ -320,4 +289,3 @@ class VariableManagementTab(QWidget, Ui_VariableManagementTab):
         Clears all speakers from the tree widget. Useful for refreshing the tree widget after changes to the speakers.
         """
         self.treeWidget_speakers.clear()
-
