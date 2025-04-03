@@ -1,7 +1,6 @@
 # TODO: CURRENTLY NOT USED! Maybe delete this file, if DCThread class is used instead
 import pandas as pd
-from corpuscompass.model.files import File
-from corpuscompass.model.variables_speakers import Variable, VariableValue, Speaker
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

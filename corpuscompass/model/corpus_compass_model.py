@@ -12,7 +12,7 @@ from corpuscompass.model.variables_speaker_detection import (
     AnnotationDetector,
     SpeakerFormats,
 )
-from corpuscompass.model.dataset_creation import DatasetCreator
+from corpuscompass.model.dataset_creator import DatasetCreator
 from corpuscompass.utils.DCThread import DCThread, CustomThread, generate_dataset
 import corpuscompass.utils.file_utils as file_utils
 import json

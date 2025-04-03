@@ -13,7 +13,7 @@
 #   ./build.sh
 #
 
-VIEW_DIR="src/view"
+VIEW_DIR="corpuscompass/view"
 RES_DIR="$VIEW_DIR/res"
 GEN_DIR="$VIEW_DIR/generated"
 
@@ -26,7 +26,7 @@ set -e  # Exit immediately on error
 #######################################
 function compile_resources() {
   echo "Compiling Qt resources..."
-  poetry run pyside6-rcc src/view/res/resources.qrc -o resources_rc.py
+  poetry run pyside6-rcc corpuscompass/view/res/resources.qrc -o resources_rc.py
   echo "Done compiling Qt resources."
 }
 
@@ -59,7 +59,7 @@ function build_mac() {
     --icon="includes/icon.icns" \
     --distpath "release/mac" \
     --workpath "build/mac" \
-    main.py
+    corpuscompass/main.py
 
   echo "macOS build finished."
   echo "You can find the app folder at: release/mac/CorpusCompass.app"
@@ -124,7 +124,7 @@ function main() {
   # Detect OS, build accordingly
   if [[ "$OSTYPE" == "darwin"* ]]; then
     build_mac
-    ask_move_to_desktop
+    #ask_move_to_desktop
   elif [[ "$OSTYPE" == "msys"* ]] || [[ "$OSTYPE" == "cygwin"* ]] || [[ "$OSTYPE" == "win32"* ]]; then
     build_windows
     ask_move_to_desktop

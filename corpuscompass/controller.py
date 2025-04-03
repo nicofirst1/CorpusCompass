@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QFileDialog,
 )
 from PySide6.QtGui import QTextCharFormat, QColor, QTextCursor, QTextDocument
-from corpuscompass.model.corpus_compass_model import CorpusCompassModel, FileLoader, File
+from corpuscompass.model import CorpusCompassModel, FileLoader, File
 from corpuscompass.view.corpus_compass_view import CorpusCompassView
 from corpuscompass.view.tabs.tab import Tab
 import pandas as pd

@@ -5,7 +5,7 @@ run CorpussCompass
 
 from PySide6.QtWidgets import QApplication
 from corpuscompass.view.corpus_compass_view import CorpusCompassView
-from corpuscompass.model.corpus_compass_model import CorpusCompassModel
+from corpuscompass.model import CorpusCompassModel
 from corpuscompass.controller import Controller
 from corpuscompass.utils.exception_handling import setup_exception_handling
 import logging

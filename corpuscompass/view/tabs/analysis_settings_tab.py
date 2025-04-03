@@ -1,6 +1,5 @@
-from corpuscompass.model.files import File
-from corpuscompass.model.variables_speaker_detection import (
-    AnnotationDetector,
+from corpuscompass.model import (
+    AnnotationDetector,File
 )
 from corpuscompass.view.generated.ui_analysis_settings_tab import Ui_AnalysisSettingsTab
 from typing import TYPE_CHECKING, Dict,List, Tuple
