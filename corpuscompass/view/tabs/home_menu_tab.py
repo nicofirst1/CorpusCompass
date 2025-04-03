@@ -1,9 +1,14 @@
+from typing import TYPE_CHECKING
 from corpuscompass.view.utils import set_abbreviate_label
 from corpuscompass.view.generated.ui_home_menu_tab import Ui_HomeMenuTab
 from corpuscompass.view.tabs.tab import Tab
 from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 
+if TYPE_CHECKING:
+    from corpuscompass.view.corpus_compass_view import CorpusCompassView
+    from corpuscompass.controllers import Controller
 
+    
 class HomeMenuTab(LazySignalTab, Ui_HomeMenuTab):
     """
     Class for the home-menu tab. This window contains information about the
@@ -11,7 +16,6 @@ class HomeMenuTab(LazySignalTab, Ui_HomeMenuTab):
     """
 
     def connect_signals(self, controller: "Controller"):
-        print("📍 HomeMenuTab now visible, connecting signals.")
         self.btn_home_managecorpus_sect.clicked.connect(
             lambda: controller.on_home_section_button_clicked(Tab.LOAD_FILES_TAB)
         )
@@ -41,7 +45,7 @@ class HomeMenuTab(LazySignalTab, Ui_HomeMenuTab):
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
         self.setupUi(self)
-        self.view = parent
+        self.view: "CorpusCompassView" = parent  
 
         # Connect Signals from the main view to Slots
         self.view.proj_name_changed.connect(self.on_proj_name_changed)

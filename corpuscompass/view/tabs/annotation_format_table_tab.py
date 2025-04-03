@@ -1,31 +1,60 @@
-from typing import Dict
-from PySide6.QtWidgets import (
-    QWidget,
-)
+from typing import TYPE_CHECKING, Dict
+
 
 from PySide6.QtCore import Qt
 
 from PySide6.QtWidgets import (
-    QWidget,
     QHeaderView,
     QTableWidgetItem,
 )
 from corpuscompass.view.generated.ui_annotation_format_table_tab import (
     Ui_AnnotationFormatTableTab,
 )
+from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 
+if TYPE_CHECKING:
+    from corpuscompass.view.corpus_compass_view import CorpusCompassView
 
-class AnnotationFormatTableTab(QWidget, Ui_AnnotationFormatTableTab):
+class AnnotationFormatTableTab(LazySignalTab, Ui_AnnotationFormatTableTab):
     """
     Class for the annotation-format-tab. This window serves for
     checking and managing the specified annotation formats for a
     project.
     """
 
+    def connect_signals(self, controller) -> None:
+        """
+        Connect signals from the annotation format tab to the corresponding controller methods.
+        Called lazily when the tab is first shown.
+        """
+
+        self.btn_annotformat_save.clicked.connect(controller.on_annotformat_section_saved_clicked)
+        # self.btn_annotformat_removerows.clicked.connect(controller.on_annotformat_section_removeformats_clicked)
+
+        self.btn_help.clicked.connect(controller.on_annotformat_help_button_clicked)
+        self.btn_annotformat_cancel.clicked.connect(controller.on_annotformat_cancel_button_clicked)
+
+        self.btn_annotformat_addnew.clicked.connect(
+            lambda: controller.on_open_annotation_format_editor(
+                row=-1, column=-1, called_for_add=True
+            )
+        )
+        self.btn_annotformat_edit.clicked.connect(
+            lambda: controller.on_open_annotation_format_editor(
+                row=-1, column=-1, called_for_add=False
+            )
+        )
+
+        # Automatically passes (row, column) when double-clicked
+        self.tableWidget_annotformats.cellDoubleClicked.connect(
+            controller.on_open_annotation_format_editor
+        )
+
+
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
         self.setupUi(self)
-        self.view = parent
+        self.view: "CorpusCompassView" = parent
 
         # show/hide
         self.btn_annotformat_cancel.hide()  # Hide Cancel button for now to make workflow more clear

@@ -1,6 +1,5 @@
-from typing import Dict, List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Tuple
 from PySide6.QtWidgets import (
-    QWidget,
     QHeaderView,
     QTableWidgetItem,
     QTreeWidgetItem,
@@ -14,13 +13,51 @@ from PySide6.QtGui import (
 from corpuscompass.view.generated.ui_variable_management_tab import (
     Ui_VariableManagementTab,
 )
+from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 
 
-class VariableManagementTab(QWidget, Ui_VariableManagementTab):
+if TYPE_CHECKING:
+    from corpuscompass.view.corpus_compass_view import CorpusCompassView
+class VariableManagementTab(LazySignalTab, Ui_VariableManagementTab):
+
+    def connect_signals(self, controller):
+        self.btn_save_changes.clicked.connect(controller.on_metadata_saved_clicked)
+        # self.btn_cancel.clicked.connect(controller.on_metadata_cancel_clicked)
+        self.btn_help.clicked.connect(controller.on_metadata_help_clicked)
+
+        self.btn_add_iv.clicked.connect(lambda: controller.on_open_metadata_iv_editor(
+            item=None, column=0, called_for_add=True
+        ))
+        self.btn_edit_ivs.clicked.connect(lambda: controller.on_open_metadata_iv_editor(
+            item=None, column=0, called_for_add=False
+        ))
+        self.treeWidget_ivs.itemDoubleClicked.connect(controller.on_open_metadata_iv_editor)
+
+        self.btn_add_dv.clicked.connect(lambda: controller.on_open_metadata_dv_editor(
+            item=None, column=0, called_for_add=True
+        ))
+        self.btn_edit_dvs.clicked.connect(lambda: controller.on_open_metadata_dv_editor(
+            item=None, column=0, called_for_add=False
+        ))
+        self.treeWidget_dvs.itemDoubleClicked.connect(controller.on_open_metadata_dv_editor)
+
+        self.btn_add_speaker.clicked.connect(lambda: controller.on_open_metadata_speaker_editor(
+            item=None, column=0, called_for_add=True
+        ))
+        self.btn_edit_speakers.clicked.connect(lambda: controller.on_open_metadata_speaker_editor(
+            item=None, column=0, called_for_add=False
+        ))
+        self.treeWidget_speakers.itemDoubleClicked.connect(controller.on_open_metadata_speaker_editor)
+
+        self.btn_import_metadata.clicked.connect(controller.on_import_metadata_button_clicked)
+        self.btn_export_metadata.clicked.connect(controller.on_export_metadata_button_clicked)
+        self.btn_detectvariants.clicked.connect(controller.on_detect_variants_clicked)
+
+
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
         self.setupUi(self)
-        self.view = parent
+        self.view: "CorpusCompassView" = parent
         self.switch_tab(0)
 
         # Connect signals

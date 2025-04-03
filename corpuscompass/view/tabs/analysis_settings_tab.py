@@ -1,11 +1,10 @@
 from corpuscompass.model.files import File
 from corpuscompass.model.variables_speaker_detection import (
     AnnotationDetector,
-    SpeakerDetector,
 )
 from corpuscompass.view.generated.ui_analysis_settings_tab import Ui_AnalysisSettingsTab
+from typing import TYPE_CHECKING, Dict,List, Tuple
 
-from typing import Dict, List, Tuple
 
 from PySide6.QtWidgets import (
     QPushButton,
@@ -23,8 +22,12 @@ from PySide6.QtGui import (
     QTextCursor,
 )
 
+if TYPE_CHECKING:
+    from corpuscompass.view.corpus_compass_view import CorpusCompassView
+
 from PySide6.QtCore import Qt, QRect
 
+from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 from corpuscompass.view.utils import (
     expand_button_clicked,
     set_abbreviate_label,
@@ -32,12 +35,20 @@ from corpuscompass.view.utils import (
     set_expand_button_stylesheet,
 )
 
+class AnalysisSettingsTab(LazySignalTab, Ui_AnalysisSettingsTab):
 
-class AnalysisSettingsTab(QWidget, Ui_AnalysisSettingsTab):
+    def connect_signals(self, controller):
+        self.btn_close_overview.clicked.connect(controller.on_close_analysis_overview_button_clicked)
+        self.btn_save_settings.clicked.connect(controller.on_analysis_settings_save_button_clicked)
+
+        self.checkBox_showannotations.toggled.connect(controller.on_highlight_dvs_clicked)
+        self.checkBox_showspeakers.toggled.connect(controller.on_underline_speakers_clicked)
+        self.checkBox_showfileindicators.toggled.connect(self.toggle_file_indicator)
+
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
         self.setupUi(self)
-        self.view = parent
+        self.view: "CorpusCompassView" = parent
 
         self.file_name_text_edit_mapping: Dict[str, QPlainTextEdit] = {}
         self.dv_checkbox_mapping: Dict[str, QCheckBox] = {}

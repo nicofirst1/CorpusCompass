@@ -1,20 +1,32 @@
+from typing import TYPE_CHECKING
 from corpuscompass.view.generated.ui_load_files_tab import Ui_LoadFilesTab
 
 
 from PySide6.QtWidgets import (
-    QWidget,
     QTableWidgetItem,
     QTextEdit,
 )
 
 from PySide6.QtCore import Qt
 
+from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 
-class LoadFilesTab(QWidget, Ui_LoadFilesTab):
+if TYPE_CHECKING:
+    from corpuscompass.view.corpus_compass_view import CorpusCompassView
+
+class LoadFilesTab(LazySignalTab, Ui_LoadFilesTab):
+
+    def connect_signals(self, controller):
+        self.btn_add_file.clicked.connect(controller.on_add_file_clicked)
+        self.btn_remove_file.clicked.connect(controller.on_remove_selected_files_clicked)
+        self.list_loaded_filenames.cellDoubleClicked.connect(controller.on_file_double_clicked)
+        self.btn_finished.clicked.connect(controller.on_load_files_finished_clicked)
+
+
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
         self.setupUi(self)
-        self.view = parent
+        self.view: "CorpusCompassView" = parent
 
         # Connect Signals
         self.tab_file_preview.tabCloseRequested.connect(self.closeTab)

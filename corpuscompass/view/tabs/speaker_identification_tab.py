@@ -1,7 +1,6 @@
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 from PySide6.QtWidgets import (
     QHeaderView,
-    QWidget,
     QTableWidgetItem,
 )
 from PySide6.QtGui import (
@@ -12,20 +11,47 @@ from PySide6.QtCore import Qt
 
 from corpuscompass.view.font_configs import FontConfig
 from corpuscompass.view.generated.ui_speaker_format_tab import Ui_SpeakerIdTab
+from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 from corpuscompass.view.utils import expand_button_clicked
+if TYPE_CHECKING:
+    from corpuscompass.view.corpus_compass_view import CorpusCompassView
 
-
-class SpeakerIdentificationTab(QWidget, Ui_SpeakerIdTab):
+class SpeakerIdentificationTab(LazySignalTab, Ui_SpeakerIdTab):
     """
     Class for the speaker-identification tab. This window allows the user to
     specify the transcription format in order to detect speakers and associate
     them with their spoken text.
     """
 
+    def connect_signals(self, controller) -> None:
+        """
+        Connect signals from the speaker tab to the corresponding controller methods.
+        Called lazily when the tab is first shown.
+        """
+
+        self.btn_sp_save.clicked.connect(controller.on_speaker_format_saved_clicked)
+        self.btn_sp_cancel.clicked.connect(controller.on_speaker_cancel_button_clicked)
+
+        self.btn_expand_speakerinfo.clicked.connect(self.on_speaker_expand_clicked)
+        self.btn_expand_wordinfo.clicked.connect(self.on_words_expand_clicked)
+
+        self.radbtn_sp_standard.toggled.connect(
+            lambda: controller.on_speaker_format_changed(self.radbtn_sp_standard)
+        )
+        self.radbtn_sp_praat.toggled.connect(
+            lambda: controller.on_speaker_format_changed(self.radbtn_sp_praat)
+        )
+        self.radbtn_sp_flex.toggled.connect(
+            lambda: controller.on_speaker_format_changed(self.radbtn_sp_flex)
+        )
+        self.radbtn_sp_elan.toggled.connect(
+            lambda: controller.on_speaker_format_changed(self.radbtn_sp_elan)
+        )
+    
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
         self.setupUi(self)
-        self.view = parent
+        self.view: "CorpusCompassView" = parent
 
         # show/hide elements
         self.tableWidget_distinctspeakers.hide()

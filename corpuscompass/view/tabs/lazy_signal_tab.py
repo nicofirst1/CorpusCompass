@@ -1,6 +1,9 @@
+from typing import TYPE_CHECKING
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import QTimer
 
+if TYPE_CHECKING:
+    from corpuscompass.controllers import Controller
 
 class LazySignalTab(QWidget):
     def __init__(self, parent=None):

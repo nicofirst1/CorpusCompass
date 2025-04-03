@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 from PySide6.QtWidgets import (
     QWidget,
     QDialog,
@@ -7,6 +8,8 @@ from PySide6.QtCore import Signal
 
 from corpuscompass.view.generated.ui_create_project_dialog import Ui_CreateProjectDialog
 
+if TYPE_CHECKING:
+    from corpuscompass.view.corpus_compass_view import CorpusCompassView
 
 class CreateProjectDialog(QDialog, Ui_CreateProjectDialog):
     """

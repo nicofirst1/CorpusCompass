@@ -4,126 +4,65 @@ The module contains classes for the gui of CorpussCompass. The main class is
 """
 
 import inspect
-from typing import Any, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
 import PySide6
 from corpuscompass.view.dialogs import (
     AddSymbolDialog,
     AnalysisSettingsConfirmationDialog,
-    AnalysisSuccessDialog,AnnotationFormatEditorDialog,AnnotationHelpDialog,AnnotationRemovalDialog,
-    CreateProjectDialog,DetectVariantsDialog,DVEditorDialog,ExportMetadataDialog,ImportMetadataDialog,
-    InvalidInputWarningDialog,IVEditorDialog,MetadataDeletionWarningDialog,OpenProjectDialog,
-    ProjectInformationDialog,SpeakerEditorDialog,VariableDetectionHelpDialog
+    AnalysisSuccessDialog,
+    AnnotationFormatEditorDialog,
+    AnnotationHelpDialog,
+    AnnotationRemovalDialog,
+    CreateProjectDialog,
+    DetectVariantsDialog,
+    DVEditorDialog,
+    ExportMetadataDialog,
+    ImportMetadataDialog,
+    InvalidInputWarningDialog,
+    IVEditorDialog,
+    MetadataDeletionWarningDialog,
+    OpenProjectDialog,
+    ProjectInformationDialog,
+    SpeakerEditorDialog,
+    VariableDetectionHelpDialog,
 )
 
+from corpuscompass.view.dialogs.generic_warining_dialog import GenericWarningDialog
 from corpuscompass.view.tabs import (
-    AnalysisSettingsTab,AnnotationFormatTableTab,GeneralSettingsTab,HomeMenuTab,
-    LazySignalTab,LoadFilesTab,SpeakerIdentificationTab,StartScreenTab,Tab,VariableManagementTab
+    AnalysisSettingsTab,
+    AnnotationFormatTableTab,
+    GeneralSettingsTab,
+    HomeMenuTab,
+    LoadFilesTab,
+    SpeakerIdentificationTab,
+    StartScreenTab,
+    Tab,
+    VariableManagementTab,
 )
 
-from corpuscompass.view.font_configs import FontColors, FontConfig
 from corpuscompass.view.tabs.annotation_format_table_tab import AnnotationFormatTableTab
 from corpuscompass.view.tabs.general_settings_tab import GeneralSettingsTab
 from corpuscompass.view.tabs.load_files_tab import LoadFilesTab
 from corpuscompass.view.tabs.speaker_identification_tab import SpeakerIdentificationTab
 from corpuscompass.view.tabs.start_screen_tab import StartScreenTab
 from corpuscompass.view.tabs.tab import Tab
-from corpuscompass.model.variables_speakers import Variable, Speaker, VariableValue
 from corpuscompass.view.tabs.home_menu_tab import HomeMenuTab
 from corpuscompass.view.tabs.variable_management_tab import VariableManagementTab
-from corpuscompass.view.utils import (
-    split_string_with_token_and_identifier,
-    set_checkbox_stylesheet,
-    set_expand_button_stylesheet,
-    expand_button_clicked,
-    set_abbreviate_label)
 
-from corpuscompass.view.generated.ui_start_screen_tab import Ui_StartScreenTab
-from corpuscompass.view.generated.ui_create_project_dialog import Ui_CreateProjectDialog
-from corpuscompass.view.generated.ui_home_menu_tab import Ui_HomeMenuTab
 from corpuscompass.view.generated.ui_main_window import Ui_MainWindow
-from corpuscompass.view.generated.ui_settings_tab import Ui_SettingsTab
-from corpuscompass.view.generated.ui_project_information_dialog import Ui_ProjectInformationDialog
-from corpuscompass.view.generated.ui_speaker_format_tab import Ui_SpeakerIdTab
-from corpuscompass.view.generated.ui_annotation_format_table_tab import (
-    Ui_AnnotationFormatTableTab,
-)
-from corpuscompass.view.generated.ui_load_files_tab import Ui_LoadFilesTab
-from corpuscompass.view.generated.ui_variable_management_tab import Ui_VariableManagementTab
-from corpuscompass.view.generated.ui_analysis_settings_tab import Ui_AnalysisSettingsTab
-from corpuscompass.view.generated.ui_annotationformat_editor_dialog import (
-    Ui_EditorAnnotationformatDialog,
-)
-from corpuscompass.view.generated.ui_annotformat_deletion_dialog import (
-    Ui_AnnotationFormatRemoveDialog,
-)
-from corpuscompass.view.generated.ui_iv_editor_dialog import Ui_IVEditorDialog
-from corpuscompass.view.generated.ui_dv_editor_dialog import Ui_DVEditorDialog
-from corpuscompass.view.generated.ui_speaker_editor_dialog import Ui_SpeakerEditorDialog
-from corpuscompass.view.generated.ui_add_symbol_dialog import Ui_AddSymbolsDialog
-from corpuscompass.view.generated.ui_detecting_dvvariants_dialog import Ui_DetectVariantsDialog
-from corpuscompass.view.generated.ui_open_project_dialog import Ui_OpenProjectDialog
-from corpuscompass.view.generated.ui_generic_warning_dialog import Ui_GenericWarningDialog
-from corpuscompass.view.generated.ui_analysis_success_dialog import Ui_AnalysisSuccessDialog
-from corpuscompass.view.generated.ui_analysis_settings_confirmation_dialog import (
-    Ui_AnalysisSettingsConfirmationDialog,
-)
-from corpuscompass.view.generated.ui_annotation_help_dialog import Ui_AnnotationHelpDialog
-from corpuscompass.view.generated.ui_import_metadata_dialog import Ui_ImportMetadataDialog
-from corpuscompass.view.generated.ui_export_metadata_dialog import Ui_ExportMetadataDialog
-from corpuscompass.view.generated.ui_metadata_deletion_warning_dialog import (
-    Ui_MetadataDeletionWarningDialog,
-)
-from corpuscompass.view.generated.ui_variable_detection_help_dialog import (
-    Ui_VariableDetectionHelpDialog,
-)
-from corpuscompass.view.generated.ui_invalid_input_warning_dialog import (
-    Ui_InvalidInputWarningDialog,
-)
 
 
 from PySide6.QtWidgets import (
-    QPushButton,
-    QGridLayout,
-    QSizePolicy,
     QMainWindow,
     QWidget,
-    QDialog,
     QFileDialog,
-    QTextEdit,
-    QComboBox,
     QMessageBox,
-    QHeaderView,
-    QTableWidgetItem,
-    QColorDialog,
-    QTableWidgetItem,
-    QListWidget,
-    QListWidgetItem,
     QTreeWidgetItem,
-    QTableWidget,
     QDialogButtonBox,
-    QCheckBox,
-    QPlainTextEdit,
-    QLabel,
-    QToolTip,
-    QScrollArea,
-    QLayoutItem,
 )
-from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QSize, QRect, QTimer, QEvent
-from PySide6.QtGui import (
-    QFont,
-    QKeyEvent,
-    QTextCharFormat,
-    QColor,
-    QTextCursor,
-    QStandardItemModel,
-    QDragEnterEvent,
-    QDropEvent,
-)
+from PySide6.QtCore import Signal
 
-import re
-import random
-import logging
 
 
 # TODO: SUPPORT FUNCTIONS -> In own class
@@ -138,20 +77,6 @@ import logging
 
 
 
-def print_function_decorator(cls):
-    for name, method in cls.__dict__.items():
-        if callable(method) and name != '__init__' and not isinstance(method, PySide6.QtCore.Signal):  # Exclude __init__
-            def create_wrapper(method):
-                def wrapper(*args, **kwargs):
-                    method_name=inspect.stack()[1][3]
-                    print(f"Calling {method_name} with args: {args}, kwargs: {kwargs}")
-                    return method(*args, **kwargs)
-                return wrapper
-            setattr(cls, name, create_wrapper(method))
-    return cls
-
-
-@print_function_decorator
 class CorpusCompassView(QMainWindow, Ui_MainWindow):
     """
     The Main Window of the Corpus Compass application. Initializes all Tabs and
@@ -910,15 +835,6 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         self.invalid_input_warning_dialog = None
 
 
-
-
-
-from corpuscompass.model.variables_speaker_detection import (
-    SpeakerFormats,
-    SpeakerDetector,
-    AnnotationDetector,
-)
 from corpuscompass.model.files import (
     File,
 )  # TODO: Files and Table with detected annotations should be handed over from controller
-
