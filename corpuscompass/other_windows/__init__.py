@@ -1,4 +1,3 @@
-
 from .Settings import Settings
 from .Main import Main
 

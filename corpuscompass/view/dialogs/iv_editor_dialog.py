@@ -254,10 +254,7 @@ class IVEditorDialog(QDialog, Ui_IVEditorDialog):
 
         # return if combobox is empty (all variables deleted) and visible ("add"-dialog always has count == 0 so would always return, but there the combobox is hidden), as name-change is initiated by the system (not the user) as no variable to display is left
         # --> is handled in on_combobox_activated(), which is the source of the "exception"
-        if (
-            self.comboBox_selectiv.count() == 0
-            and self.comboBox_selectiv.isVisible()
-        ):
+        if self.comboBox_selectiv.count() == 0 and self.comboBox_selectiv.isVisible():
             return
 
         variable_name = self.lineEdit_nameinput.text()

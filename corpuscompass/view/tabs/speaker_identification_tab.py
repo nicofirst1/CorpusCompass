@@ -13,8 +13,10 @@ from corpuscompass.view.font_configs import FontConfig
 from corpuscompass.view.generated.ui_speaker_format_tab import Ui_SpeakerIdTab
 from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 from corpuscompass.view.utils import expand_button_clicked
+
 if TYPE_CHECKING:
     from corpuscompass.view.corpus_compass_view import CorpusCompassView
+
 
 class SpeakerIdentificationTab(LazySignalTab, Ui_SpeakerIdTab):
     """
@@ -47,7 +49,7 @@ class SpeakerIdentificationTab(LazySignalTab, Ui_SpeakerIdTab):
         self.radbtn_sp_elan.toggled.connect(
             lambda: controller.on_speaker_format_changed(self.radbtn_sp_elan)
         )
-    
+
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
         self.setupUi(self)

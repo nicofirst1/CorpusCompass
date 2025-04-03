@@ -3,10 +3,8 @@ The module contains classes for the gui of CorpussCompass. The main class is
 "CorpusCompassView".
 """
 
-import inspect
 from typing import Dict, List, Tuple
 
-import PySide6
 from corpuscompass.view.dialogs import (
     AddSymbolDialog,
     AnalysisSettingsConfirmationDialog,
@@ -64,7 +62,6 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Signal
 
 
-
 # TODO: SUPPORT FUNCTIONS -> In own class
 # def split_string_with_token_and_identifier(input_string):
 #     # Define the regular expression pattern to capture arbitrary characters before and after "token" and "identifier"
@@ -74,7 +71,6 @@ from PySide6.QtCore import Signal
 #     parts = [part for part in parts if part]
 
 #     return parts
-
 
 
 class CorpusCompassView(QMainWindow, Ui_MainWindow):

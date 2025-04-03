@@ -204,7 +204,7 @@ class AnnotationFormatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
             source_item.dropMimeData(
                 data, Qt.DropAction.CopyAction, 0, 0, QModelIndex()
             )
-            #item_text = source_item.item(0, 0).text()
+            # item_text = source_item.item(0, 0).text()
 
             if event.source() != self.listwidget_annotdial_separatorsymbols:
                 event.accept()

@@ -6,7 +6,13 @@ from typing import Dict, Any
 from PySide6 import QtWidgets
 
 from corpuscompass.annotation_fixer.af_utils import corpus_dict2text
-from corpuscompass.common import GeneralWindow, Memory, AppLogger, create_input, QTextEditLog
+from corpuscompass.common import (
+    GeneralWindow,
+    Memory,
+    AppLogger,
+    create_input,
+    QTextEditLog,
+)
 from corpuscompass.data_analyzer.DAProcess import DAProcess
 
 

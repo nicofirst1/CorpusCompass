@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING
 from corpuscompass.view.generated.ui_settings_tab import Ui_SettingsTab
 
 
-
 from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 from corpuscompass.view.tabs.tab import Tab
 
@@ -23,10 +22,7 @@ class GeneralSettingsTab(LazySignalTab, Ui_SettingsTab):
         self.setupUi(self)
         self.view: "CorpusCompassView" = parent
 
-
-    
     def connect_signals(self, controller: "Controller"):
         self.btn_back.clicked.connect(
             lambda: controller.on_home_section_button_clicked(Tab.HOME_TAB)
         )
-       

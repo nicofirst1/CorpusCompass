@@ -5,17 +5,15 @@ with the model.
 
 import os
 from typing import Dict, List, Tuple
-from PySide6.QtCore import Slot, Signal, QObject, Qt, QModelIndex, QRegularExpression
+from PySide6.QtCore import Slot, QObject
 from PySide6.QtWidgets import (
     QListWidgetItem,
     QDialog,
-    QLabel,
     QTreeWidgetItem,
     QRadioButton,
     QFileDialog,
 )
-from PySide6.QtGui import QTextCharFormat, QColor, QTextCursor, QTextDocument
-from corpuscompass.model import CorpusCompassModel, FileLoader, File
+from corpuscompass.model import CorpusCompassModel, File
 from corpuscompass.view.corpus_compass_view import CorpusCompassView
 from corpuscompass.view.tabs.tab import Tab
 import pandas as pd
@@ -48,7 +46,6 @@ class Controller(QObject):
 
         # Home Menu Tab
         self.view.home_menu_tab.set_controller_callback(lambda: self)
-
 
         # General-Settings-Tab
         general_settings_tab = self.view.general_settings_tab
@@ -1213,7 +1210,6 @@ class Controller(QObject):
         self.view.home_menu_tab.update_annotation_formats(len(annotation_formats))
 
         # => UI-Updates: 1. Format Tabelle 2. DV Metadata Tree + Tabelle 3. Analysis Settings angezeigte DV Variants 4. Analysis Settings refreshen von annotation highlights
-        pass
 
     def on_metadata_iv_changed(self):
         """
@@ -1228,7 +1224,6 @@ class Controller(QObject):
         for iv in ivs:
             value_counter += len(ivs[iv])
         self.view.home_menu_tab.update_iv_values(value_counter)
-        pass
 
     def on_metadata_dv_changed(self):
         """
@@ -1250,7 +1245,6 @@ class Controller(QObject):
         # Home Tab Anpassung
         self.view.home_menu_tab.update_dvs(len(dvs))
         self.view.home_menu_tab.update_dv_variants(len(variants))
-        pass
 
     def on_metadata_dv_values_changed(self):
         """
@@ -1272,7 +1266,6 @@ class Controller(QObject):
         # Home Tab Anpassung
         self.view.home_menu_tab.update_dvs(len(dvs))
         self.view.home_menu_tab.update_dv_variants(len(variants))
-        pass
 
     def on_metadata_speaker_changed(self):
         """
@@ -1290,7 +1283,6 @@ class Controller(QObject):
             )
         # Home Tab Anpassung
         self.view.home_menu_tab.update_speakers(len(speakers))
-        pass
 
     # SUPPORT FUNCTIONS (TODO: LATER IN OWN FILE)
 

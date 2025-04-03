@@ -8,7 +8,6 @@ from PySide6.QtWidgets import (
 )
 
 
-
 class GenericWarningDialog(QDialog, Ui_GenericWarningDialog):
     """
     Class for a generic warning dialog. Text inside the dialog

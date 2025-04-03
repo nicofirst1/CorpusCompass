@@ -1,8 +1,6 @@
-from corpuscompass.model import (
-    AnnotationDetector,File
-)
+from corpuscompass.model import AnnotationDetector, File
 from corpuscompass.view.generated.ui_analysis_settings_tab import Ui_AnalysisSettingsTab
-from typing import TYPE_CHECKING, Dict,List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Tuple
 
 
 from PySide6.QtWidgets import (
@@ -34,14 +32,22 @@ from corpuscompass.view.utils import (
     set_expand_button_stylesheet,
 )
 
+
 class AnalysisSettingsTab(LazySignalTab, Ui_AnalysisSettingsTab):
-
     def connect_signals(self, controller):
-        self.btn_close_overview.clicked.connect(controller.on_close_analysis_overview_button_clicked)
-        self.btn_save_settings.clicked.connect(controller.on_analysis_settings_save_button_clicked)
+        self.btn_close_overview.clicked.connect(
+            controller.on_close_analysis_overview_button_clicked
+        )
+        self.btn_save_settings.clicked.connect(
+            controller.on_analysis_settings_save_button_clicked
+        )
 
-        self.checkBox_showannotations.toggled.connect(controller.on_highlight_dvs_clicked)
-        self.checkBox_showspeakers.toggled.connect(controller.on_underline_speakers_clicked)
+        self.checkBox_showannotations.toggled.connect(
+            controller.on_highlight_dvs_clicked
+        )
+        self.checkBox_showspeakers.toggled.connect(
+            controller.on_underline_speakers_clicked
+        )
         self.checkBox_showfileindicators.toggled.connect(self.toggle_file_indicator)
 
     def __init__(self, parent: "CorpusCompassView") -> None:
@@ -71,7 +77,7 @@ class AnalysisSettingsTab(LazySignalTab, Ui_AnalysisSettingsTab):
         # self.add_file_text_edit("Testfile4", "A: Last File!", 8)
 
         annotation_detector = AnnotationDetector()
-        #speaker_detector = SpeakerDetector()
+        # speaker_detector = SpeakerDetector()
 
         # Check if the detector generates a correct re from the following string:
         annotation_format_str = "[$TOKEN.IDENTIFIER]"

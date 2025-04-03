@@ -15,6 +15,7 @@ from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 if TYPE_CHECKING:
     from corpuscompass.view.corpus_compass_view import CorpusCompassView
 
+
 class AnnotationFormatTableTab(LazySignalTab, Ui_AnnotationFormatTableTab):
     """
     Class for the annotation-format-tab. This window serves for
@@ -28,11 +29,15 @@ class AnnotationFormatTableTab(LazySignalTab, Ui_AnnotationFormatTableTab):
         Called lazily when the tab is first shown.
         """
 
-        self.btn_annotformat_save.clicked.connect(controller.on_annotformat_section_saved_clicked)
+        self.btn_annotformat_save.clicked.connect(
+            controller.on_annotformat_section_saved_clicked
+        )
         # self.btn_annotformat_removerows.clicked.connect(controller.on_annotformat_section_removeformats_clicked)
 
         self.btn_help.clicked.connect(controller.on_annotformat_help_button_clicked)
-        self.btn_annotformat_cancel.clicked.connect(controller.on_annotformat_cancel_button_clicked)
+        self.btn_annotformat_cancel.clicked.connect(
+            controller.on_annotformat_cancel_button_clicked
+        )
 
         self.btn_annotformat_addnew.clicked.connect(
             lambda: controller.on_open_annotation_format_editor(
@@ -49,7 +54,6 @@ class AnnotationFormatTableTab(LazySignalTab, Ui_AnnotationFormatTableTab):
         self.tableWidget_annotformats.cellDoubleClicked.connect(
             controller.on_open_annotation_format_editor
         )
-
 
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)

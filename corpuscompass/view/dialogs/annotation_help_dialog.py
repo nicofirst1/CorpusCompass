@@ -9,8 +9,6 @@ from PySide6.QtWidgets import (
 )
 
 
-
-
 class AnnotationHelpDialog(QDialog, Ui_AnnotationHelpDialog):
     """
     Class for a the help-dialog that explains the idea and process

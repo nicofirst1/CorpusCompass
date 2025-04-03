@@ -1,13 +1,9 @@
 from PySide6.QtGui import (
     QFont,
-    QKeyEvent,
-    QTextCharFormat,
     QColor,
-    QTextCursor,
-    QStandardItemModel,
-    QDragEnterEvent,
-    QDropEvent,
 )
+
+
 # TODO: CONSTANT VALUE FUNCTIONS -> In own class
 class FontColors:
     """

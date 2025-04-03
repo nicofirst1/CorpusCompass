@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from corpuscompass.view.corpus_compass_view import CorpusCompassView
     from corpuscompass.controllers import Controller
 
-    
+
 class HomeMenuTab(LazySignalTab, Ui_HomeMenuTab):
     """
     Class for the home-menu tab. This window contains information about the
@@ -45,7 +45,7 @@ class HomeMenuTab(LazySignalTab, Ui_HomeMenuTab):
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
         self.setupUi(self)
-        self.view: "CorpusCompassView" = parent  
+        self.view: "CorpusCompassView" = parent
 
         # Connect Signals from the main view to Slots
         self.view.proj_name_changed.connect(self.on_proj_name_changed)

@@ -276,7 +276,7 @@ class SpeakerEditorDialog(QDialog, Ui_SpeakerEditorDialog):
         # --> is handled in on_combobox_activated(), which is the source of the "exception"
         if (
             self.comboBox_selectspeaker.count() == 0
-            and self.comboBox_selectspeaker.isVisible() 
+            and self.comboBox_selectspeaker.isVisible()
         ):
             return
 

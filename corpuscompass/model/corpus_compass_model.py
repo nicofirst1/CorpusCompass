@@ -13,7 +13,7 @@ from corpuscompass.model.variables_speaker_detection import (
     SpeakerFormats,
 )
 from corpuscompass.model.dataset_creator import DatasetCreator
-from corpuscompass.utils.DCThread import DCThread, CustomThread, generate_dataset
+from corpuscompass.utils.DCThread import DCThread, CustomThread
 import corpuscompass.utils.file_utils as file_utils
 import json
 import os
@@ -1650,7 +1650,6 @@ class Project(QObject):
         Returns:
             str: The context of the text position.
         """
-        pass
         # TODO: Implement this method
 
     def get_count_of_unassigned_words(self) -> dict:

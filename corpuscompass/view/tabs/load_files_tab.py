@@ -14,14 +14,17 @@ from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 if TYPE_CHECKING:
     from corpuscompass.view.corpus_compass_view import CorpusCompassView
 
-class LoadFilesTab(LazySignalTab, Ui_LoadFilesTab):
 
+class LoadFilesTab(LazySignalTab, Ui_LoadFilesTab):
     def connect_signals(self, controller):
         self.btn_add_file.clicked.connect(controller.on_add_file_clicked)
-        self.btn_remove_file.clicked.connect(controller.on_remove_selected_files_clicked)
-        self.list_loaded_filenames.cellDoubleClicked.connect(controller.on_file_double_clicked)
+        self.btn_remove_file.clicked.connect(
+            controller.on_remove_selected_files_clicked
+        )
+        self.list_loaded_filenames.cellDoubleClicked.connect(
+            controller.on_file_double_clicked
+        )
         self.btn_finished.clicked.connect(controller.on_load_files_finished_clicked)
-
 
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)

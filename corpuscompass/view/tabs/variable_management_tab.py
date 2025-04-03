@@ -18,41 +18,63 @@ from corpuscompass.view.tabs.lazy_signal_tab import LazySignalTab
 
 if TYPE_CHECKING:
     from corpuscompass.view.corpus_compass_view import CorpusCompassView
-class VariableManagementTab(LazySignalTab, Ui_VariableManagementTab):
 
+
+class VariableManagementTab(LazySignalTab, Ui_VariableManagementTab):
     def connect_signals(self, controller):
         self.btn_save_changes.clicked.connect(controller.on_metadata_saved_clicked)
         # self.btn_cancel.clicked.connect(controller.on_metadata_cancel_clicked)
         self.btn_help.clicked.connect(controller.on_metadata_help_clicked)
 
-        self.btn_add_iv.clicked.connect(lambda: controller.on_open_metadata_iv_editor(
-            item=None, column=0, called_for_add=True
-        ))
-        self.btn_edit_ivs.clicked.connect(lambda: controller.on_open_metadata_iv_editor(
-            item=None, column=0, called_for_add=False
-        ))
-        self.treeWidget_ivs.itemDoubleClicked.connect(controller.on_open_metadata_iv_editor)
+        self.btn_add_iv.clicked.connect(
+            lambda: controller.on_open_metadata_iv_editor(
+                item=None, column=0, called_for_add=True
+            )
+        )
+        self.btn_edit_ivs.clicked.connect(
+            lambda: controller.on_open_metadata_iv_editor(
+                item=None, column=0, called_for_add=False
+            )
+        )
+        self.treeWidget_ivs.itemDoubleClicked.connect(
+            controller.on_open_metadata_iv_editor
+        )
 
-        self.btn_add_dv.clicked.connect(lambda: controller.on_open_metadata_dv_editor(
-            item=None, column=0, called_for_add=True
-        ))
-        self.btn_edit_dvs.clicked.connect(lambda: controller.on_open_metadata_dv_editor(
-            item=None, column=0, called_for_add=False
-        ))
-        self.treeWidget_dvs.itemDoubleClicked.connect(controller.on_open_metadata_dv_editor)
+        self.btn_add_dv.clicked.connect(
+            lambda: controller.on_open_metadata_dv_editor(
+                item=None, column=0, called_for_add=True
+            )
+        )
+        self.btn_edit_dvs.clicked.connect(
+            lambda: controller.on_open_metadata_dv_editor(
+                item=None, column=0, called_for_add=False
+            )
+        )
+        self.treeWidget_dvs.itemDoubleClicked.connect(
+            controller.on_open_metadata_dv_editor
+        )
 
-        self.btn_add_speaker.clicked.connect(lambda: controller.on_open_metadata_speaker_editor(
-            item=None, column=0, called_for_add=True
-        ))
-        self.btn_edit_speakers.clicked.connect(lambda: controller.on_open_metadata_speaker_editor(
-            item=None, column=0, called_for_add=False
-        ))
-        self.treeWidget_speakers.itemDoubleClicked.connect(controller.on_open_metadata_speaker_editor)
+        self.btn_add_speaker.clicked.connect(
+            lambda: controller.on_open_metadata_speaker_editor(
+                item=None, column=0, called_for_add=True
+            )
+        )
+        self.btn_edit_speakers.clicked.connect(
+            lambda: controller.on_open_metadata_speaker_editor(
+                item=None, column=0, called_for_add=False
+            )
+        )
+        self.treeWidget_speakers.itemDoubleClicked.connect(
+            controller.on_open_metadata_speaker_editor
+        )
 
-        self.btn_import_metadata.clicked.connect(controller.on_import_metadata_button_clicked)
-        self.btn_export_metadata.clicked.connect(controller.on_export_metadata_button_clicked)
+        self.btn_import_metadata.clicked.connect(
+            controller.on_import_metadata_button_clicked
+        )
+        self.btn_export_metadata.clicked.connect(
+            controller.on_export_metadata_button_clicked
+        )
         self.btn_detectvariants.clicked.connect(controller.on_detect_variants_clicked)
-
 
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
@@ -184,7 +206,7 @@ class VariableManagementTab(LazySignalTab, Ui_VariableManagementTab):
             # get the variant name
             variant_name = self.tableWidget_detectedinformation.item(row, 0).text()
             # get the occurences
-            #occurences = self.tableWidget_detectedinformation.item(row, 1).text()
+            # occurences = self.tableWidget_detectedinformation.item(row, 1).text()
             # get the corresponding DV
             corresponding_dv = self.tableWidget_detectedinformation.item(row, 2).text()
             # get the color

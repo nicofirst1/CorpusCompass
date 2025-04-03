@@ -8,8 +8,6 @@ from PySide6.QtWidgets import (
 )
 
 
-
-
 class ImportMetadataDialog(QDialog, Ui_ImportMetadataDialog):
     """
     Class for a the help-dialog that explains the idea and process

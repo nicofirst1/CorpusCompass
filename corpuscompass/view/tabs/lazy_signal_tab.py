@@ -5,6 +5,7 @@ from PySide6.QtCore import QTimer
 if TYPE_CHECKING:
     from corpuscompass.controllers import Controller
 
+
 class LazySignalTab(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)

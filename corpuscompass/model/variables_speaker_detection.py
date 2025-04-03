@@ -1,6 +1,6 @@
 from enum import Enum
 from corpuscompass.model.files import File
-from PySide6.QtCore import QObject, SIGNAL
+from PySide6.QtCore import QObject
 from typing import List, Dict, Tuple
 import pandas as pd
 import re

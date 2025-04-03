@@ -1,14 +1,9 @@
-
-
-
 from PySide6.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QWidget,
-    
     QCheckBox,
     QLabel,
-   
 )
 
 

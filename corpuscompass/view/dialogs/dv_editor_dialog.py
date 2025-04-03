@@ -250,10 +250,7 @@ class DVEditorDialog(QDialog, Ui_DVEditorDialog):
         """
         # return if combobox is empty (all variables deleted), as name-change is initiated by the system (not the user) as no variable to display is left
         # --> is handled in on_combobox_activated(), which is the source of the "exception"
-        if (
-            self.comboBox_selectdv.count() == 0
-            and self.comboBox_selectdv.isVisible()
-        ):
+        if self.comboBox_selectdv.count() == 0 and self.comboBox_selectdv.isVisible():
             return
 
         variable_name = self.lineEdit_nameinput.text()
