@@ -17,7 +17,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QTextCharFormat, QColor, QTextCursor, QTextDocument
 from corpuscompass.model.corpus_compass_model import CorpusCompassModel, FileLoader, File
 from corpuscompass.view.corpus_compass_view import CorpusCompassView
-from corpuscompass.view.tabs import Tab
+from corpuscompass.view.tabs.tabs import Tab
 import pandas as pd
 import logging
 from pathlib import Path
@@ -47,33 +47,8 @@ class Controller(QObject):
         start_screen_tab.import_project.clicked.connect(self.on_import_project_clicked)
 
         # Home Menu Tab
-        home_menu_tab = self.view.home_menu_tab
-        home_menu_tab.btn_home_speaker_sect.clicked.connect(
-            lambda: self.on_home_section_button_clicked(Tab.SPEAKER_TAB)
-        )
-        home_menu_tab.btn_home_annotformat_sect.clicked.connect(
-            lambda: self.on_home_section_button_clicked(Tab.ANNOTATIONFORMAT_TAB)
-        )
-        home_menu_tab.btn_home_managecorpus_sect.clicked.connect(
-            lambda: self.on_home_section_button_clicked(Tab.LOAD_FILES_TAB)
-        )
-        home_menu_tab.btn_home_varmanag_sect.clicked.connect(
-            lambda: self.on_home_section_button_clicked(Tab.VARMANAGEMENT_TAB)
-        )
-        home_menu_tab.btn_home_analysissettings_sect.clicked.connect(
-            lambda: self.on_home_section_button_clicked(Tab.ANALYSIS_SETTINGS_TAB)
-        )
-        home_menu_tab.btn_settings.clicked.connect(
-            lambda: self.on_home_section_button_clicked(Tab.GENERAL_SETTINGS_TAB)
-        )
-        home_menu_tab.btn_closeproject.clicked.connect(self.on_project_closed_clicked)
+        self.view.home_menu_tab.set_controller_callback(lambda: self)
 
-        home_menu_tab.btn_projectinformation.clicked.connect(
-            self.on_projectinformation_clicked
-        )
-        home_menu_tab.btn_home_analysecorpus.clicked.connect(
-            self.on_analyse_corpus_button_clicked
-        )
 
         # General-Settings-Tab
         general_settings_tab = self.view.general_settings_tab
