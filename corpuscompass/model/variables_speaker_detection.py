@@ -413,56 +413,30 @@ class AnnotationDetector:
         Returns:
             (raw) str: The regular expression for the annotation
         """
-        # Check if the token and identifier are given as a string or as a position
-        token_pos = token
-        identifier_pos = identifier
+        # Escape any special regex characters in the format string, but leave the keywords 'token' and 'identifier' as they are.
+        escaped_format_str = self.add_backslash_to_re_characters(annotation_str)
+        escaped_format_str = escaped_format_str.replace("\\t\\o\\k\\e\\n", "token")
+        escaped_format_str = escaped_format_str.replace(
+            "\\i\\d\\e\\n\\t\\i\\f\\i\\e\\r", "identifier"
+        )
 
-        # If the token and identifier are given as a string, we have to find the position of the token and identifier in the annotation string
-        if type(token) == str:
-            token_start = annotation_str.find(token)
-            token_end = token_start + len(token) - 1
-            token_pos = (token_start, token_end)
-
-        if type(identifier) == str:
-            identifier_start = annotation_str.find(identifier)
-            identifier_end = identifier_start + len(identifier) - 1
-            identifier_pos = (identifier_start, identifier_end)
-
-        # Check if the token is before the identifier or the identifier is before the token
-        token_before_identifier = token_pos[0] < identifier_pos[0]
-
-        first_pos = token_pos if token_before_identifier else identifier_pos
-        second_pos = identifier_pos if token_before_identifier else token_pos
-
-        # Split the annotation string into prefix, infix and suffix, separated by the token and identifier
-        prefix = annotation_str[: first_pos[0]]
-        infix = annotation_str[first_pos[1] + 1 : second_pos[0]]
-        suffix = annotation_str[second_pos[1] + 1 :]
-
-        prefix = self.add_backslash_to_re_characters(prefix)
-        infix = self.add_backslash_to_re_characters(infix)
-        suffix = self.add_backslash_to_re_characters(suffix)
-
-        # Create the regular expression for the annotation
+        # Define robust regex patterns for the token and identifier.
+        # The key is to make the identifier reluctant (non-greedy) and define the token precisely.
+        # identifier: `.+?` matches any character, but as few as possible.
+        # token: `\w+` matches word characters.
+        # This combination forces the identifier to stop at the last delimiter before a valid word token.
+        identifier_re = r"(?P<identifier>.+?)"
         token_re = r"(?P<token>\w+)"
-        if multiple_identifier_separator:
-            multiple_identifier_separator_backslash = (
-                self.add_backslash_to_re_characters(multiple_identifier_separator)
-            )
-            identifier_re = (
-                r"(?P<identifier>\w+("
-                + multiple_identifier_separator_backslash
-                + r"\w+)*)"
-            )
-        else:
-            multiple_identifier_separator = ""
-            identifier_re = r"(?P<identifier>\w+)"
 
-        if token_before_identifier:
-            annotation_re = prefix + token_re + infix + identifier_re + suffix
+        # Replace the keywords in the escaped format string with our robust regex patterns.
+        if annotation_str.find("token") < annotation_str.find("identifier"):
+            final_re = escaped_format_str.replace("token", token_re)
+            final_re = final_re.replace("identifier", identifier_re)
         else:
-            annotation_re = prefix + identifier_re + infix + token_re + suffix
-        return annotation_re
+            final_re = escaped_format_str.replace("identifier", identifier_re)
+            final_re = final_re.replace("token", token_re)
+
+        return final_re
 
     def add_annotation_format_token_identifier(
         self,
@@ -498,6 +472,9 @@ class AnnotationDetector:
         annotation_re = self.get_regex_from_annotation_format(
             annotation_str, token, identifier, multiple_identifier_separator
         )
+
+        if not multiple_identifier_separator:
+            multiple_identifier_separator = ""
 
         self.annotation_formats[annotation_str] = (
             annotation_re,
