@@ -83,33 +83,11 @@ class Controller(QObject):
         speaker_section_tab.radbtn_sp_elan.toggled.connect(
             lambda: self.on_speaker_format_changed(speaker_section_tab.radbtn_sp_elan)
         )
-
-        # Annotation-Format-Section
-        annot_format_tab = self.view.annotation_format_tab
-        annot_format_tab.btn_annotformat_save.clicked.connect(
-            self.on_annotformat_section_saved_clicked
-        )
-        # annot_format_tab.btn_annotformat_removerows.clicked.connect(self.on_annotformat_section_removeformats_clicked)
-        annot_format_tab.btn_help.clicked.connect(
-            self.on_annotformat_help_button_clicked
-        )
-        annot_format_tab.btn_annotformat_cancel.clicked.connect(
-            self.on_annotformat_cancel_button_clicked
-        )
-        annot_format_tab.btn_annotformat_addnew.clicked.connect(
-            lambda: self.on_open_annotation_format_editor(
-                row=-1, column=-1, called_for_add=True
-            )
-        )
-        annot_format_tab.btn_annotformat_edit.clicked.connect(
-            lambda: self.on_open_annotation_format_editor(
-                row=-1, column=-1, called_for_add=False
-            )
-        )
-        annot_format_tab.tableWidget_annotformats.cellDoubleClicked.connect(
-            self.on_open_annotation_format_editor
-        )  # Call without lambda to send row and column automatically (thats why called_for_add is default False, which is what the function will be called with)
-
+        self.view.annotation_format_tab.set_controller_callback(lambda: self)
+ 
+        # Load File Tab
+        load_files_tab = self.view.load_files_tab
+        
         # Load File Tab
         load_files_tab = self.view.load_files_tab
         load_files_tab.btn_add_file.clicked.connect(self.on_add_file_clicked)
