@@ -2,6 +2,7 @@
 The module contains classes used for the CorpusCompass model
 """
 
+import logging
 from PySide6.QtCore import QObject, Signal
 from typing import List, Dict, Tuple
 import pandas as pd
@@ -464,6 +465,143 @@ class Project(QObject):
 
         with open(filepath, "w") as outfile:
             json.dump(iv_dict, outfile, indent=4)
+
+    def import_ivs(self, filepath: str, replace: bool) -> None:
+        """
+        Imports Independent Variables from a JSON file.
+
+        Args:
+            filepath (str): The path to the JSON file containing the IV data.
+            replace (bool): If True, all existing IVs will be deleted before importing.
+                            If False, new IVs will be added, and existing ones will be skipped.
+        """
+        try:
+            data = file_utils.load_json_file(filepath)
+        except Exception as e:
+            self.error_occurred_signal.emit(f"Failed to load IV file: {e}")
+            return
+
+        if replace:
+            # Clear all existing IVs by removing them one by one to ensure proper cleanup
+            for iv_name in list(self.independent_variables.keys()):
+                self.remove_iv(iv_name)
+
+        for variable_data in data.get("Variables", []):
+            iv_name = variable_data.get("Name")
+            if not iv_name:
+                continue
+
+            # In extend mode, skip if IV already exists
+            if not replace and self.exists_iv(iv_name):
+                logging.info(f"Skipping existing IV: {iv_name}")
+                continue
+
+            iv_values = [
+                val.get("Name") for val in variable_data.get("VariableValues", [])
+            ]
+            self.add_iv(iv_name, iv_values)
+
+        # Notify the view that IVs and speaker assignments might have changed
+        self.iv_changed_signal.emit(self.get_iv_printable())
+        self.speaker_changed_signal.emit(self.get_speakers_printable())
+
+    def import_dvs(self, filepath: str, replace: bool) -> None:
+        """
+        Imports Dependent Variables and their values from a JSON file.
+
+        Args:
+            filepath (str): The path to the JSON file containing the DV data.
+            replace (bool): If True, all existing DVs and their values will be deleted.
+                            If False, new DVs and values will be added.
+        """
+        try:
+            data = file_utils.load_json_file(filepath)
+        except Exception as e:
+            self.error_occurred_signal.emit(f"Failed to load DV file: {e}")
+            return
+
+        if replace:
+            # Clear all existing DVs and their values
+            for dv_name in list(self.dependent_variables.keys()):
+                self.remove_dv(dv_name)
+            for dv_value in self.dependent_variable_values[:]:
+                self.remove_dv_value(dv_value)
+
+        # First, process the flat list of all possible DV values
+        for dv_value_name in data.get("VariableValues", []):
+            if not self.exists_dv_value(dv_value_name):
+                self.add_dv_value(dv_value_name)
+
+        # Second, process the structured DV hierarchy
+        for variable_data in data.get("Variables", []):
+            dv_name = variable_data.get("Name")
+            if not dv_name:
+                continue
+
+            # In extend mode, check for existing DV
+            if not replace and self.exists_dv(dv_name):
+                dv = self.get_dv(dv_name)
+            else:
+                self.add_dv(dv_name)
+                dv = self.get_dv(dv_name)
+
+            # Assign values to the DV
+            for dv_value_data in variable_data.get("VariableValues", []):
+                dv_value_name = dv_value_data.get("Name")
+                if dv_value_name and self.exists_dv_value(dv_value_name):
+                    dv_value = self.get_dv_value(dv_value_name)
+                    # Check if value is already assigned to prevent duplicates
+                    if not dv.has_variable_value(dv_value):
+                         dv.add_variable_value(dv_value)
+
+        # Notify the view
+        self.dv_changed_signal.emit(self.get_dv_printable())
+        self.dv_values_changed_signal.emit(self.get_dv_values_printable())
+
+    def import_speakers(self, filepath: str, replace: bool) -> None:
+        """
+        Imports Speakers and their assigned IV values from a JSON file.
+
+        Args:
+            filepath (str): The path to the JSON file containing the Speaker data.
+            replace (bool): If True, all existing speakers will be deleted before importing.
+                            If False, new speakers will be added.
+        """
+        try:
+            data = file_utils.load_json_file(filepath)
+        except Exception as e:
+            self.error_occurred_signal.emit(f"Failed to load Speaker file: {e}")
+            return
+
+        if replace:
+            # Clear all existing speakers
+            for speaker_name in list(self.speakers.keys()):
+                self.remove_speaker(speaker_name)
+
+        for speaker_data in data.get("Speakers", []):
+            speaker_name = speaker_data.get("Name")
+            if not speaker_name:
+                continue
+
+            # In extend mode, skip if speaker already exists
+            if not replace and self.exists_speaker(speaker_name):
+                logging.info(f"Skipping existing speaker: {speaker_name}")
+                continue
+
+            color = speaker_data.get("Color")
+            self.add_speaker(speaker_name, color=color)
+
+            # Assign IV values to the newly created speaker
+            for iv_name, iv_value_name in speaker_data.get("Variables", {}).items():
+                # Ensure the IV and its value exist before assigning
+                if self.exists_iv(iv_name) and self.get_iv(iv_name).has_variable_value(iv_value_name):
+                    self.assign_iv_value_to_speaker(speaker_name, iv_name, iv_value_name)
+                else:
+                    logging.warning(f"Could not assign IV '{iv_name}' with value '{iv_value_name}' to speaker '{speaker_name}' because it does not exist.")
+
+        # Notify the view
+        self.speaker_changed_signal.emit(self.get_speakers_printable())
+        self.iv_changed_signal.emit(self.get_iv_printable())
 
     def exists_speaker(self, speaker_name: str) -> bool:
         """Checks, if a speaker with the same name already exists

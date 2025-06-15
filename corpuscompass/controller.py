@@ -888,8 +888,62 @@ class Controller(QObject):
         further import-settings.
         """
         self.view.create_import_metadata_dialog()
+
+        dialog = self.view.import_metadata_dialog
+        dialog.btn_import_ivfile.clicked.connect(self.on_import_iv_file_selected)
+        dialog.btn_import_dvfile.clicked.connect(self.on_import_dv_file_selected)
+        dialog.btn_import_speakerfile.clicked.connect(self.on_import_speaker_file_selected)
+        dialog.accepted.connect(self.on_import_metadata_accepted)
+
         self.view.import_metadata_dialog.exec()
         self.view.delete_import_metadata_dialog()
+
+    def on_import_iv_file_selected(self):
+        """Opens a file dialog to select an IV JSON file."""
+        dialog = self.view.import_metadata_dialog
+        filepath, _ = QFileDialog.getOpenFileName(dialog, "Import Independent Variables", "", "JSON Files (*.json)")
+        if filepath:
+            dialog.iv_filepath = filepath
+            dialog.label_seliv.setText(f"Selected file: {os.path.basename(filepath)}")
+
+    def on_import_dv_file_selected(self):
+        """Opens a file dialog to select a DV JSON file."""
+        dialog = self.view.import_metadata_dialog
+        filepath, _ = QFileDialog.getOpenFileName(dialog, "Import Dependent Variables", "", "JSON Files (*.json)")
+        if filepath:
+            dialog.dv_filepath = filepath
+            dialog.label_seldv.setText(f"Selected file: {os.path.basename(filepath)}")
+
+    def on_import_speaker_file_selected(self):
+        """Opens a file dialog to select a Speaker JSON file."""
+        dialog = self.view.import_metadata_dialog
+        filepath, _ = QFileDialog.getOpenFileName(dialog, "Import Speakers", "", "JSON Files (*.json)")
+        if filepath:
+            dialog.speaker_filepath = filepath
+            dialog.label_selspeaker.setText(f"Selected file: {os.path.basename(filepath)}")
+
+    def on_import_metadata_accepted(self):
+        """Handles the logic when the user confirms the import dialog."""
+        dialog = self.view.import_metadata_dialog
+        
+        # Import IVs if a file was selected
+        if dialog.iv_filepath:
+            # TODO: Add logic to check radio buttons for 'extend' vs 'replace'
+            # For now, we'll just call a placeholder in the model
+            # self.model.current_project.import_ivs(dialog.iv_filepath, replace=dialog.radiobtn_repiv.isChecked())
+            logging.info(f"IV import requested for: {dialog.iv_filepath}")
+
+        # Import DVs if a file was selected
+        if dialog.dv_filepath:
+            # self.model.current_project.import_dvs(dialog.dv_filepath, replace=dialog.radiobtn_repdv.isChecked())
+            logging.info(f"DV import requested for: {dialog.dv_filepath}")
+        
+        # Import Speakers if a file was selected
+        if dialog.speaker_filepath:
+            # self.model.current_project.import_speakers(dialog.speaker_filepath, replace=dialog.radiobtn_repsp.isChecked())
+            logging.info(f"Speaker import requested for: {dialog.speaker_filepath}")
+        
+        
 
     def on_export_metadata_button_clicked(self):
         """
