@@ -882,7 +882,7 @@ class Controller(QObject):
 
     def on_import_metadata_button_clicked(self):
         """
-        Is called when the user clicks the "export metadata" button in the
+        Is called when the user clicks the "import metadata" button in the
         variable-management tab. Opens a dialog that allows importing
         IVs, DVs, and speakers from JSON-files, as well as controlling
         further import-settings.
@@ -936,22 +936,54 @@ class Controller(QObject):
         """Handles the logic when the user confirms the import dialog."""
         dialog = self.view.import_metadata_dialog
 
-        # Import IVs if a file was selected
+        # 1. Get the state of the model BEFORE the import.
+        iv_count_before = len(self.model.current_project.independent_variables)
+        dv_count_before = len(self.model.current_project.dependent_variables)
+        speaker_count_before = len(self.model.current_project.speakers)
+
+        # 2. Perform the import operations.
         if dialog.iv_filepath:
-            # TODO: Add logic to check radio buttons for 'extend' vs 'replace'
-            # For now, we'll just call a placeholder in the model
-            # self.model.current_project.import_ivs(dialog.iv_filepath, replace=dialog.radiobtn_repiv.isChecked())
-            logging.info(f"IV import requested for: {dialog.iv_filepath}")
+            self.model.current_project.import_ivs(
+                dialog.iv_filepath, replace=dialog.radiobtn_repiv.isChecked()
+            )
 
-        # Import DVs if a file was selected
         if dialog.dv_filepath:
-            # self.model.current_project.import_dvs(dialog.dv_filepath, replace=dialog.radiobtn_repdv.isChecked())
-            logging.info(f"DV import requested for: {dialog.dv_filepath}")
+            self.model.current_project.import_dvs(
+                dialog.dv_filepath, replace=dialog.radiobtn_repdv.isChecked()
+            )
 
-        # Import Speakers if a file was selected
         if dialog.speaker_filepath:
-            # self.model.current_project.import_speakers(dialog.speaker_filepath, replace=dialog.radiobtn_repsp.isChecked())
-            logging.info(f"Speaker import requested for: {dialog.speaker_filepath}")
+            self.model.current_project.import_speakers(
+                dialog.speaker_filepath, replace=dialog.radiobtn_repsp.isChecked()
+            )
+
+        # 3. Get the state of the model AFTER the import.
+        iv_count_after = len(self.model.current_project.independent_variables)
+        dv_count_after = len(self.model.current_project.dependent_variables)
+        speaker_count_after = len(self.model.current_project.speakers)
+
+        # 4. Check which imports, if any, were ineffective.
+        ineffective_imports = []
+        if dialog.iv_filepath and iv_count_before == iv_count_after and not dialog.radiobtn_repiv.isChecked():
+            ineffective_imports.append("Independent Variables")
+        
+        if dialog.dv_filepath and dv_count_before == dv_count_after and not dialog.radiobtn_repdv.isChecked():
+            ineffective_imports.append("Dependent Variables")
+
+        if dialog.speaker_filepath and speaker_count_before == speaker_count_after and not dialog.radiobtn_repsp.isChecked():
+            ineffective_imports.append("Speakers")
+
+        # 5. If there were ineffective imports, notify the user.
+        if ineffective_imports:
+            failed_items_str = " and ".join(ineffective_imports)
+            error_message = (
+                f"Import Warning: No new items were added for {failed_items_str}.\n\n"
+                "This can happen if:\n"
+                "- The file was empty or incorrectly formatted (Most likely).\n"
+                "- The file contained only duplicate entries which were skipped.\n"
+                "- The 'replace' option was not used on a file with existing data."
+            )
+            self.view.display_error_message(error_message)
 
     def on_export_metadata_button_clicked(self):
         """

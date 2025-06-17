@@ -88,7 +88,47 @@
             <item>
              <widget class="QLabel" name="label_seliv">
               <property name="text">
-               <string>Selected file: Test_IVs.json</string>
+               <string>Selected file: -</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_help_iv">
+              <property name="maximumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="toolTip">
+                <string><![CDATA[<html><head/><body><p><span style=" font-weight:700;">Expected JSON Structure for IVs:</span></p>
+<pre><code>{
+    "Variables": [
+        {
+            "Name": "IV_Name_1",
+            "VariableValues": [
+                VariableValue_1,
+                VariableValue_2
+                ...
+            ]
+        },
+        {
+            "Name": "IV_Name_2",
+            "VariableValues": [
+                VariableValue_1,
+                VariableValue_2
+                ...
+            ]
+        }, 
+        ...
+    ]
+}</code></pre></body></html>]]></string>
+              </property>
+              <property name="pixmap">
+               <pixmap resource="resources.qrc">:/images/images/Help_Icon.svg</pixmap>
+              </property>
+              <property name="scaledContents">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -160,6 +200,47 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QLabel" name="label_help_dv">
+              <property name="maximumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string><![CDATA[<html><head/><body><p><span style=" font-weight:700;">Expected JSON Structure for DVs:</span></p>
+<pre><code>{
+    "Variables": [
+        {
+            "Name": "DV_Name_1",
+            "VariableValues": [
+                "Value1",
+                "Value2"
+                ...
+            ]
+        },
+        {
+            "Name": "DV_Name_2",
+            "VariableValues": [
+                "Value1",
+                "Value2"
+                ...
+            ]
+        }
+    ]
+}</code></pre>
+<p>Note: 'VariableValues' at the root is a flat list of ALL possible DV values, while the nested 'VariableValues' assigns them to specific DVs.</p>
+</body></html>]]></string>
+              </property>
+              <property name="pixmap">
+               <pixmap resource="resources.qrc">:/images/images/Help_Icon.svg</pixmap>
+              </property>
+              <property name="scaledContents">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -228,6 +309,38 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QLabel" name="label_help_speaker">
+              <property name="maximumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string><![CDATA[<html><head/><body><p><span style=" font-weight:700;">Expected JSON Structure for Speakers:</span></p>
+<pre><code>{
+    "Speakers": [
+        {
+            "Name": "SpeakerName1",
+            "Color": "#00ff00",
+            "Variables": {
+                "IV_Name_1": "Value1",
+                "IV_Name_2": "Value3"
+            }
+        }
+    ]
+}</code></pre></body></html>]]></string>
+
+              </property>
+              <property name="pixmap">
+               <pixmap resource="resources.qrc">:/images/images/Help_Icon.svg</pixmap>
+              </property>
+              <property name="scaledContents">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -260,11 +373,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>TODO: 
-1.Check if imported files are correct (e.g. no duplicate DV Variants, ...)
- 2. Think about what to do with importing DVs (and Speakers) as they are automatically detected from the corpus as of right now --&gt; Maybe deactivate import-feature for now completely this only gets important when annotation is possible to do in the software
-3. Generic warning dialog for replacing metadata that previous settings are lost and maybe exporting old data before is smart if needed
-4. Maybe import from folder (names need to be correct)</string>
+         <!-- <string><b>Note:</b> This feature is experimental. Ensure your JSON files match the expected structure as shown in the tooltips. For best results, use files that were previously exported from CorpusCompass.</string> -->
         </property>
         <property name="wordWrap">
          <bool>true</bool>

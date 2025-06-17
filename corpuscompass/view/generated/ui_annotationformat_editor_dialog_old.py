@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'annotationformat_editor_dialog.ui'
+## Form generated from reading UI file 'annotationformat_editor_dialog_old.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.9.0
 ##
@@ -15,12 +15,12 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComboBox,
-    QDialog, QFrame, QGridLayout, QGroupBox,
-    QHBoxLayout, QHeaderView, QLabel, QListView,
-    QListWidget, QListWidgetItem, QPushButton, QRadioButton,
-    QSizePolicy, QSpacerItem, QTableWidget, QTableWidgetItem,
-    QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QCheckBox,
+    QComboBox, QDialog, QDialogButtonBox, QFrame,
+    QGridLayout, QGroupBox, QHBoxLayout, QHeaderView,
+    QLabel, QListView, QListWidget, QListWidgetItem,
+    QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
+    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 import resources_rc
 
 class Ui_EditorAnnotationformatDialog(object):
@@ -368,16 +368,15 @@ class Ui_EditorAnnotationformatDialog(object):
         self.listwidget_annotformat_symbolcontainer.setSizePolicy(sizePolicy1)
         self.listwidget_annotformat_symbolcontainer.setMinimumSize(QSize(0, 75))
         self.listwidget_annotformat_symbolcontainer.setMaximumSize(QSize(16777215, 100))
-        self.listwidget_annotformat_symbolcontainer.setStyleSheet(u"QListWidget::item {\n"
-"    margin: 6px; /* Adjust margin to increase/decrease the size of items */\n"
-"}")
+        self.listwidget_annotformat_symbolcontainer.setStyleSheet(u"")
         self.listwidget_annotformat_symbolcontainer.setDragEnabled(True)
         self.listwidget_annotformat_symbolcontainer.setDragDropMode(QAbstractItemView.DragOnly)
         self.listwidget_annotformat_symbolcontainer.setDefaultDropAction(Qt.CopyAction)
         self.listwidget_annotformat_symbolcontainer.setFlow(QListView.LeftToRight)
         self.listwidget_annotformat_symbolcontainer.setProperty(u"isWrapping", True)
         self.listwidget_annotformat_symbolcontainer.setSpacing(3)
-        self.listwidget_annotformat_symbolcontainer.setItemAlignment(Qt.AlignAbsolute|Qt.AlignBaseline|Qt.AlignBottom|Qt.AlignCenter|Qt.AlignHCenter|Qt.AlignJustify|Qt.AlignVCenter)
+        self.listwidget_annotformat_symbolcontainer.setViewMode(QListView.ListMode)
+        self.listwidget_annotformat_symbolcontainer.setUniformItemSizes(False)
 
         self.gridLayout_2.addWidget(self.listwidget_annotformat_symbolcontainer, 8, 1, 1, 1)
 
@@ -483,6 +482,8 @@ class Ui_EditorAnnotationformatDialog(object):
         self.gridLayout.addWidget(self.label_ivselect, 1, 0, 1, 1)
 
         self.comboBox_selectformat = QComboBox(self.widget)
+        self.comboBox_selectformat.addItem("")
+        self.comboBox_selectformat.addItem("")
         self.comboBox_selectformat.setObjectName(u"comboBox_selectformat")
         self.comboBox_selectformat.setMinimumSize(QSize(173, 25))
         self.comboBox_selectformat.setStyleSheet(u"QComboBox {\n"
@@ -557,26 +558,19 @@ class Ui_EditorAnnotationformatDialog(object):
 
         self.verticalLayout_2.addWidget(self.widget_annotdial_overall, 0, Qt.AlignTop)
 
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.btn_save = QPushButton(EditorAnnotationformatDialog)
-        self.btn_save.setObjectName(u"btn_save")
+        self.buttonBox = QDialogButtonBox(EditorAnnotationformatDialog)
+        self.buttonBox.setObjectName(u"buttonBox")
+        self.buttonBox.setOrientation(Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Save)
 
-        self.horizontalLayout_2.addWidget(self.btn_save)
-
-        self.btn_cancel = QPushButton(EditorAnnotationformatDialog)
-        self.btn_cancel.setObjectName(u"btn_cancel")
-
-        self.horizontalLayout_2.addWidget(self.btn_cancel)
-
-
-        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
+        self.verticalLayout_2.addWidget(self.buttonBox)
 
 
         self.retranslateUi(EditorAnnotationformatDialog)
+        self.buttonBox.accepted.connect(EditorAnnotationformatDialog.accept)
+        self.buttonBox.rejected.connect(EditorAnnotationformatDialog.reject)
         self.radbtn_annotdial_customstyle.toggled.connect(self.widget_specificationcontents.setVisible)
         self.radbtn_annotdial_othersoft.toggled.connect(self.groupBox_softwarebtns.setVisible)
-        self.btn_cancel.clicked.connect(EditorAnnotationformatDialog.reject)
 
         QMetaObject.connectSlotsByName(EditorAnnotationformatDialog)
     # setupUi
@@ -630,11 +624,12 @@ class Ui_EditorAnnotationformatDialog(object):
         self.radbtn_annotdial_colorbased.setText(QCoreApplication.translate("EditorAnnotationformatDialog", u"Color-based annotation ", None))
         self.radbtn_annotdial_othersoft.setText(QCoreApplication.translate("EditorAnnotationformatDialog", u"Select annotation format from other software", None))
         self.label_ivselect.setText(QCoreApplication.translate("EditorAnnotationformatDialog", u"Select annotationformat to edit:", None))
+        self.comboBox_selectformat.setItemText(0, QCoreApplication.translate("EditorAnnotationformatDialog", u"[token.identifier]", None))
+        self.comboBox_selectformat.setItemText(1, QCoreApplication.translate("EditorAnnotationformatDialog", u"[&token.identifier]", None))
+
         self.comboBox_selectformat.setCurrentText("")
         self.comboBox_selectformat.setPlaceholderText(QCoreApplication.translate("EditorAnnotationformatDialog", u"Select Annotation Format...", None))
         self.btn_delete_annotformat.setText("")
         self.label_header.setText(QCoreApplication.translate("EditorAnnotationformatDialog", u"Annotation Format - Editor", None))
-        self.btn_save.setText(QCoreApplication.translate("EditorAnnotationformatDialog", u"Save", None))
-        self.btn_cancel.setText(QCoreApplication.translate("EditorAnnotationformatDialog", u"Cancel", None))
     # retranslateUi
 
