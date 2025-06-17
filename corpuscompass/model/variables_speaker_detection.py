@@ -10,7 +10,7 @@ class SpeakerFormats(Enum):
     """Enum that contains the currently supported Speaker Formats"""
 
     STANDARD = "STANDARD"
-    PRAAT = "PRAAT"
+    PRAAT = "PRAA"
     ELAN = "ELAN"
     FLEX = "FLEX"
     CUSTOM = "CUSTOM"
@@ -273,17 +273,40 @@ class AnnotationDetector:
         data = []
         counter = 0
         for detected_annotation in detected_annotations:
-            counter += 1
-            data.append(
-                (
-                    detected_annotation.group("token"),
-                    detected_annotation.group("identifier"),
-                    detected_annotation.span()[0],
-                    detected_annotation.span()[1],
+            # Capture the full identifier block first
+            full_identifier = detected_annotation.group("identifier")
+            token= detected_annotation.group("token")
+
+            # Split the identifier block by the last delimiter to separate the true identifier from the token
+            # This handles cases like [$identifier.token]
+            if annot_sep in full_identifier:
+                parts = full_identifier.rsplit(annot_sep)
+
+                for part in parts:
+                    data.append(
+                        (
+                            token,  # Use the correctly parsed token
+                            part,  # Use the correctly parsed and split identifiers
+                            detected_annotation.span()[0],
+                            detected_annotation.span()[1],
+                        )
+                    )
+                    counter += 1
+
+            else:
+                data.append(
+                    (
+                        token,  # Use the correctly parsed token
+                        full_identifier,  # Use the correctly parsed and split identifiers
+                        detected_annotation.span()[0],
+                        detected_annotation.span()[1],
+                    )
                 )
-            )
+                counter += 1
+
             if max_amount and counter >= max_amount:
                 break
+
         detected_annot_df = pd.DataFrame(
             data, columns=["token", "identifier", "annotation_start", "annotation_end"]
         )
@@ -413,21 +436,23 @@ class AnnotationDetector:
         Returns:
             (raw) str: The regular expression for the annotation
         """
+        # Escape the entire user format string
         escaped_format_str = self.add_backslash_to_re_characters(annotation_str)
+        # Un-escape the keywords
         escaped_format_str = escaped_format_str.replace("\\t\\o\\k\\e\\n", "token")
         escaped_format_str = escaped_format_str.replace(
             "\\i\\d\\e\\n\\t\\i\\f\\i\\e\\r", "identifier"
         )
 
-        token_re = r"(?P<token>\w+)"
-        
-        # Check if a separator is defined. If so, create a pattern that allows multiple identifiers.
-        if multiple_identifier_separator:
-            escaped_sep = re.escape(multiple_identifier_separator)
-            identifier_re = fr"(?P<identifier>.+?(?:{escaped_sep}.+?)*)"
-        else:
-            identifier_re = r"(?P<identifier>.+?)"
+        # Define robust capture groups
+        # Identifier: non-greedily capture everything up to the final delimiter.
+        identifier_re = r"(?P<identifier>.+?)"
 
+        # Token: capture everything that is NOT the closing bracket ']'
+        token_re = r"(?P<token>[^\].]+)"
+
+        # Replace keywords in the correct order based on their appearance in the format string.
+        # This handles formats like '[$identifier.token]' and '[token.identifier$]'
         if annotation_str.find("token") < annotation_str.find("identifier"):
             final_re = escaped_format_str.replace("token", token_re)
             final_re = final_re.replace("identifier", identifier_re)
@@ -471,6 +496,11 @@ class AnnotationDetector:
         annotation_re = self.get_regex_from_annotation_format(
             annotation_str, token, identifier, multiple_identifier_separator
         )
+
+        # The separator is stored but not used for regex generation.
+        # It's used for splitting the result in detect_annotations_in_file.
+        if not multiple_identifier_separator:
+            multiple_identifier_separator = ""
 
         self.annotation_formats[annotation_str] = (
             annotation_re,

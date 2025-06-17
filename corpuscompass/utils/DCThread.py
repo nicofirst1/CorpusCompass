@@ -1,4 +1,5 @@
 import itertools
+import logging
 import re
 import threading
 import traceback
@@ -585,6 +586,9 @@ class DCThread(QtCore.QThread):
 class CustomThread(QtCore.QThread):
     """Runs a method in a separate thread and emits a signal with the result when done."""
 
+    # Add a new signal to carry error messages
+    error_occurred = QtCore.Signal(str)
+
     def __init__(
         self, method2run: callable, signal: QtCore.Signal = None, *args, **kwargs
     ):
@@ -602,7 +606,18 @@ class CustomThread(QtCore.QThread):
 
     def run(self):
         """Runs the method and emits the signal with the result when done."""
-        result = self.method2run(*self.args, **self.kwargs)
-        if self.signal:
-            self.signal.emit(result)
-        self.finished.emit()
+        try:
+            result = self.method2run(*self.args, **self.kwargs)
+            if self.signal:
+                self.signal.emit(result)
+        except Exception:
+            # Format the error message with a full traceback
+            error_message = f"An error occurred in a background thread:\n\n{traceback.format_exc()}"
+            
+            # Log the error to the file
+            logging.critical(error_message)
+
+            # Emit the error signal to the main thread so the user can be notified
+            self.error_occurred.emit(error_message)
+        finally:
+            self.finished.emit()

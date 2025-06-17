@@ -1,3 +1,5 @@
+import logging
+import traceback
 from PySide6.QtCore import Signal, QThread
 from corpuscompass.utils.file_utils import decode_txt_file
 from typing import List
@@ -151,6 +153,7 @@ class FileLoader(QThread):
 
     loading_file_finished = Signal(File)
     loading_file_failed = Signal(Exception)
+    error_occurred = Signal(str)
 
     def __init__(
         self,
@@ -164,10 +167,16 @@ class FileLoader(QThread):
         self.files_to_reload = files_to_reload
 
     def run(self) -> List | None:
-        if self.file_paths:
-            return self.load_files_from_paths()
-        elif self.files_to_reload:
-            return self.reload_files()
+        try: # Add try block
+            if self.file_paths:
+                return self.load_files_from_paths()
+            elif self.files_to_reload:
+                return self.reload_files()
+        except Exception: # Add except block
+            error_message = f"Failed to load files:\n\n{traceback.format_exc()}"
+            logging.critical(error_message)
+            self.error_occurred.emit(error_message)
+
 
     def reload_files(self) -> None | List[File]:
         """Reloads the files in the files_to_reload list. If the file is loaded successfully

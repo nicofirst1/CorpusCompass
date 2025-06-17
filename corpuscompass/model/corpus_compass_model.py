@@ -887,6 +887,7 @@ class Project(QObject):
             # Connect signals
             self.file_loader.loading_file_finished.connect(self.add_file)
             self.file_loader.finished.connect(self.load_files_finished)
+            self.file_loader.error_occurred.connect(self.error_occurred_signal.emit)
 
             # Start loading files in a separate thread
             self.file_loader.start()
@@ -1823,6 +1824,7 @@ class Project(QObject):
             method2run=target, signal=result_signal, *args, **kwargs
         )
         worker_thread.finished.connect(lambda: self.remove_worker_thread(worker_thread))
+        worker_thread.error_occurred.connect(self.error_occurred_signal.emit)
         self.worker_threads.append(worker_thread)
         worker_thread.start()
 
