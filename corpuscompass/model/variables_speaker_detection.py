@@ -288,7 +288,7 @@ class AnnotationDetector:
             data, columns=["token", "identifier", "annotation_start", "annotation_end"]
         )
         # Put the identifiers in a list (can be multiple)
-        if annot_sep != "":
+        if annot_sep:
             detected_annot_df["identifier"] = detected_annot_df["identifier"].str.split(
                 annot_sep
             )
@@ -413,22 +413,21 @@ class AnnotationDetector:
         Returns:
             (raw) str: The regular expression for the annotation
         """
-        # Escape any special regex characters in the format string, but leave the keywords 'token' and 'identifier' as they are.
         escaped_format_str = self.add_backslash_to_re_characters(annotation_str)
         escaped_format_str = escaped_format_str.replace("\\t\\o\\k\\e\\n", "token")
         escaped_format_str = escaped_format_str.replace(
             "\\i\\d\\e\\n\\t\\i\\f\\i\\e\\r", "identifier"
         )
 
-        # Define robust regex patterns for the token and identifier.
-        # The key is to make the identifier reluctant (non-greedy) and define the token precisely.
-        # identifier: `.+?` matches any character, but as few as possible.
-        # token: `\w+` matches word characters.
-        # This combination forces the identifier to stop at the last delimiter before a valid word token.
-        identifier_re = r"(?P<identifier>.+?)"
         token_re = r"(?P<token>\w+)"
+        
+        # Check if a separator is defined. If so, create a pattern that allows multiple identifiers.
+        if multiple_identifier_separator:
+            escaped_sep = re.escape(multiple_identifier_separator)
+            identifier_re = fr"(?P<identifier>.+?(?:{escaped_sep}.+?)*)"
+        else:
+            identifier_re = r"(?P<identifier>.+?)"
 
-        # Replace the keywords in the escaped format string with our robust regex patterns.
         if annotation_str.find("token") < annotation_str.find("identifier"):
             final_re = escaped_format_str.replace("token", token_re)
             final_re = final_re.replace("identifier", identifier_re)
@@ -472,9 +471,6 @@ class AnnotationDetector:
         annotation_re = self.get_regex_from_annotation_format(
             annotation_str, token, identifier, multiple_identifier_separator
         )
-
-        if not multiple_identifier_separator:
-            multiple_identifier_separator = ""
 
         self.annotation_formats[annotation_str] = (
             annotation_re,
