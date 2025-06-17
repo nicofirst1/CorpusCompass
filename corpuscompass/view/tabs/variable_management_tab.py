@@ -85,18 +85,20 @@ class VariableManagementTab(LazySignalTab, Ui_VariableManagementTab):
 
         # Use a QButtonGroup to manage the navigation buttons
         self.nav_button_group = QButtonGroup(self)
-        self.nav_button_group.setExclusive(True) # Ensures only one can be "checked" at a time
+        self.nav_button_group.setExclusive(
+            True
+        )  # Ensures only one can be "checked" at a time
 
         # Add buttons to the group with a unique ID for each
         self.nav_button_group.addButton(self.btn_open_iv, 0)
         self.nav_button_group.addButton(self.btn_open_dv, 1)
         self.nav_button_group.addButton(self.btn_open_speakers, 2)
-        
+
         # Connect the group's signal to the switch_tab slot
         self.nav_button_group.idClicked.connect(self.switch_tab)
         # --- End of New Code ---
-        
-        self.switch_tab(0) # Set the initial tab
+
+        self.switch_tab(0)  # Set the initial tab
         # show/hide elements
 
         self.label_corpuswaschanged.hide()
@@ -131,7 +133,6 @@ class VariableManagementTab(LazySignalTab, Ui_VariableManagementTab):
         Switches the tab to the specified tab.
         """
         self.stackedWidget.setCurrentIndex(tab_id)
-
 
     def update_detected_data(self):
         """

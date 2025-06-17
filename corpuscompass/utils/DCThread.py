@@ -612,8 +612,10 @@ class CustomThread(QtCore.QThread):
                 self.signal.emit(result)
         except Exception:
             # Format the error message with a full traceback
-            error_message = f"An error occurred in a background thread:\n\n{traceback.format_exc()}"
-            
+            error_message = (
+                f"An error occurred in a background thread:\n\n{traceback.format_exc()}"
+            )
+
             # Log the error to the file
             logging.critical(error_message)
 

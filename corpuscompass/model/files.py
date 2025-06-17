@@ -167,16 +167,15 @@ class FileLoader(QThread):
         self.files_to_reload = files_to_reload
 
     def run(self) -> List | None:
-        try: # Add try block
+        try:  # Add try block
             if self.file_paths:
                 return self.load_files_from_paths()
             elif self.files_to_reload:
                 return self.reload_files()
-        except Exception: # Add except block
+        except Exception:  # Add except block
             error_message = f"Failed to load files:\n\n{traceback.format_exc()}"
             logging.critical(error_message)
             self.error_occurred.emit(error_message)
-
 
     def reload_files(self) -> None | List[File]:
         """Reloads the files in the files_to_reload list. If the file is loaded successfully

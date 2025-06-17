@@ -552,7 +552,7 @@ class Project(QObject):
                     dv_value = self.get_dv_value(dv_value_name)
                     # Check if value is already assigned to prevent duplicates
                     if not dv.has_variable_value(dv_value):
-                         dv.add_variable_value(dv_value)
+                        dv.add_variable_value(dv_value)
 
         # Notify the view
         self.dv_changed_signal.emit(self.get_dv_printable())
@@ -594,10 +594,16 @@ class Project(QObject):
             # Assign IV values to the newly created speaker
             for iv_name, iv_value_name in speaker_data.get("Variables", {}).items():
                 # Ensure the IV and its value exist before assigning
-                if self.exists_iv(iv_name) and self.get_iv(iv_name).has_variable_value(iv_value_name):
-                    self.assign_iv_value_to_speaker(speaker_name, iv_name, iv_value_name)
+                if self.exists_iv(iv_name) and self.get_iv(iv_name).has_variable_value(
+                    iv_value_name
+                ):
+                    self.assign_iv_value_to_speaker(
+                        speaker_name, iv_name, iv_value_name
+                    )
                 else:
-                    logging.warning(f"Could not assign IV '{iv_name}' with value '{iv_value_name}' to speaker '{speaker_name}' because it does not exist.")
+                    logging.warning(
+                        f"Could not assign IV '{iv_name}' with value '{iv_value_name}' to speaker '{speaker_name}' because it does not exist."
+                    )
 
         # Notify the view
         self.speaker_changed_signal.emit(self.get_speakers_printable())

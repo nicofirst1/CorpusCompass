@@ -275,7 +275,7 @@ class AnnotationDetector:
         for detected_annotation in detected_annotations:
             # Capture the full identifier block first
             full_identifier = detected_annotation.group("identifier")
-            token= detected_annotation.group("token")
+            token = detected_annotation.group("token")
 
             # Split the identifier block by the last delimiter to separate the true identifier from the token
             # This handles cases like [$identifier.token]

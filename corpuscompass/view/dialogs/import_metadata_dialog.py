@@ -6,11 +6,13 @@ from PySide6.QtWidgets import (
     QDialog,
 )
 
+
 class ImportMetadataDialog(QDialog, Ui_ImportMetadataDialog):
     """
     Class for a the help-dialog that explains the idea and process
     of specifying an annotation format.
     """
+
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self.setupUi(self)
