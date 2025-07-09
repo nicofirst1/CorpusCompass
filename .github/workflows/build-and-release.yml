@@ -49,14 +49,16 @@ jobs:
           source build.sh
           build_windows
       
-      - name: Package build output
+      - name: Package macOS build
+        if: matrix.os == 'macos-latest'
         shell: bash
-        run: |
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            zip -r CorpusCompass-macOS.zip release/mac/CorpusCompass.app
-          elif [ "$RUNNER_OS" == "Windows" ]; then
-            Compress-Archive -Path release/win/CorpusCompass -DestinationPath CorpusCompass-Windows.zip
-          fi
+        run: zip -r CorpusCompass-macOS.zip release/mac/CorpusCompass.app
+      
+      # This step ONLY runs on the Windows runner and uses the default PowerShell
+      - name: Package Windows build
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        run: Compress-Archive -Path release/win/CorpusCompass -DestinationPath CorpusCompass-Windows.zip
         
       - name: Upload artifact
         uses: actions/upload-artifact@v4
