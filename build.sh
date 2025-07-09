@@ -19,7 +19,6 @@ RES_DIR="$VIEW_DIR/res"
 GEN_DIR="$VIEW_DIR/generated"
 MAIN_FILE="$ROOT_DIR/main.py"
 
-set -e  # Exit immediately on error
 
 #######################################
 # Compiles Qt resources (resources.qrc → resources_rc.py).
@@ -45,45 +44,50 @@ function compile_ui_files() {
   echo "Done compiling UI files."
 }
 
+# A common preparation step for both builds.
+function prepare_build() {
+    echo "--> Preparing build environment..."
+    compile_resources
+    # If you need to compile UI files, uncomment the next line
+    compile_ui_files
+    echo "    Preparation complete."
+}
+
 #######################################
 # Builds on macOS using PyInstaller, producing a .app in release/mac/.
 #######################################
+
 function build_mac() {
-  echo "Building for macOS..."
+  prepare_build
+  echo "--> Building for macOS..."
   poetry run pyinstaller \
     --clean \
     --name "CorpusCompass" \
     --onedir \
     --windowed \
     --noconfirm \
-    --log-level DEBUG \
     --icon="includes/icon.icns" \
     --distpath "release/mac" \
     --workpath "build/mac" \
-    "$MAIN_FILE"
-
-  echo "macOS build finished."
-  echo "You can find the app folder at: release/mac/CorpusCompass.app"
+    corpuscompass/main.py
+  echo "    macOS build finished in release/mac/"
 }
 
-#######################################
-# Builds on Windows using PyInstaller, producing a one-file .exe in release/win/.
-#######################################
 function build_windows() {
-  echo "Building for Windows (one-file exe)..."
+  prepare_build
+  echo "--> Building for Windows..."
   poetry run pyinstaller \
+    --clean \
+    --name "CorpusCompass" \
     --onedir \
     --windowed \
-    --name "CorpusCompass" \
+    --noconfirm \
     --icon="includes/icon.ico" \
     --distpath "release/win" \
     --workpath "build/win" \
-    "$MAIN_FILE"
-
-  echo "Windows build finished."
-  echo "You can find the .exe at: release/win/CorpusCompass.exe"
+    corpuscompass/main.py
+  echo "    Windows build finished in release/win/"
 }
-
 #######################################
 # Asks user whether to copy the final build to the Desktop.
 # This will try to copy to ~/Desktop/ for Windows or macOS.
@@ -138,7 +142,3 @@ function main() {
   echo "All done! Build artifacts are in the 'release' folder."
 }
 
-#######################################
-# Invoke main
-#######################################
-main

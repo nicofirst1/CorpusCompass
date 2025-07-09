@@ -1,8 +1,5 @@
-# .github/workflows/build-and-release.yml
+name: Build and Release
 
-name: Build and Release with Build Script
-
-# This workflow triggers when you push a new tag like "v1.0", "v1.2.3", etc.
 on:
   push:
     tags:
@@ -10,75 +7,70 @@ on:
 
 jobs:
   build:
-    # We will run this job on both Windows and macOS in parallel
     strategy:
       matrix:
         os: [windows-latest, macos-latest]
-
-    runs-on: ${{ matrix.os }} # Use the OS from the matrix
+    runs-on: ${{ matrix.os }}
 
     steps:
-      # 1. Checks out a copy of your repository on the build machine.
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # 2. Sets up the Python environment.
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 3. Installs Poetry.
       - name: Install Poetry
         uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
       
-      # 4. Make the build script executable (required on macOS/Linux runners).
+      - name: Install dependencies with Poetry
+        run: poetry install --no-root
+        
       - name: Make build script executable
         run: chmod +x build.sh
 
-      # 5. Run the build script! This will install dependencies, compile
-      #    resources, and run PyInstaller, placing the output in the 'release' folder.
-      - name: Run build script
-        run: ./build.sh
-
-      # 6. Compress the output directory into a zip file for easy distribution.
-      - name: Package macOS build
+      - name: Build macOS Application
         if: matrix.os == 'macos-latest'
-        # On macOS, the output is a .app directory. We zip it.
-        run: zip -r CorpusCompass-macOS.zip release/mac/CorpusCompass.app
-      
-      - name: Package Windows build
-        if: matrix.os == 'windows-latest'
-        # On Windows, we use the built-in compression tool to zip the output folder.
-        run: Compress-Archive -Path release/win/CorpusCompass -DestinationPath CorpusCompass-Windows.zip
+        shell: bash
+        run: |
+          source build.sh
+          build_mac
 
-      # 7. Upload the zipped application as an artifact, making it available for the release job.
+      - name: Build Windows Executable
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          source build.sh
+          build_windows
+      
+      - name: Package build output
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            zip -r CorpusCompass-macOS.zip release/mac/CorpusCompass.app
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            Compress-Archive -Path release/win/CorpusCompass -DestinationPath CorpusCompass-Windows.zip
+          fi
+        
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: CorpusCompass-${{ matrix.os }}
-          path: ./*.zip # Upload the zip file we just created
+          path: ./*.zip
 
   release:
-    # This job only runs after the 'build' job has successfully completed for all OSs.
     needs: build
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Download all the artifacts (.zip files) from the build jobs.
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts/
 
-      # 2. This action creates the release on GitHub and uploads the zipped files.
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          # Automatically generate release notes from your commit history since the last tag.
           generate_release_notes: true
-          # Find all the .zip files in the artifacts directory and upload them.
           files: artifacts/**/*.zip
