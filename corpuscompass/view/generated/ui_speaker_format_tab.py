@@ -16,9 +16,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QGridLayout,
-    QHeaderView, QLabel, QLayout, QPushButton,
-    QRadioButton, QSizePolicy, QSpacerItem, QTableWidget,
-    QTableWidgetItem, QVBoxLayout, QWidget)
+    QHeaderView, QLabel, QLayout, QLineEdit,
+    QPushButton, QRadioButton, QSizePolicy, QSpacerItem,
+    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 import resources_rc
 import resources_rc
 import resources_rc
@@ -216,6 +216,35 @@ class Ui_SpeakerIdTab(object):
 
         self.gridLayout.addItem(self.horizontalSpacer_3, 4, 1, 1, 1)
 
+        self.radbtn_sp_custom = QRadioButton(self.widget_4)
+        self.radbtn_sp_custom.setObjectName(u"radbtn_sp_custom")
+        sizePolicy4.setHeightForWidth(self.radbtn_sp_custom.sizePolicy().hasHeightForWidth())
+        self.radbtn_sp_custom.setSizePolicy(sizePolicy4)
+        self.radbtn_sp_custom.setFont(font3)
+        self.radbtn_sp_custom.setIconSize(QSize(16, 16))
+
+        self.gridLayout.addWidget(self.radbtn_sp_custom, 6, 0, 1, 1)
+
+        self.label_sp_help_custom = QLabel(self.widget_4)
+        self.label_sp_help_custom.setObjectName(u"label_sp_help_custom")
+        sizePolicy5.setHeightForWidth(self.label_sp_help_custom.sizePolicy().hasHeightForWidth())
+        self.label_sp_help_custom.setSizePolicy(sizePolicy5)
+        self.label_sp_help_custom.setMaximumSize(QSize(24, 24))
+        self.label_sp_help_custom.setPixmap(QPixmap(u":/images/images/Help_Icon.svg"))
+        self.label_sp_help_custom.setScaledContents(True)
+
+        self.gridLayout.addWidget(self.label_sp_help_custom, 6, 2, 1, 1)
+
+        self.lineEdit_sp_custom = QLineEdit(self.widget_4)
+        self.lineEdit_sp_custom.setObjectName(u"lineEdit_sp_custom")
+        sizePolicy1.setHeightForWidth(self.lineEdit_sp_custom.sizePolicy().hasHeightForWidth())
+        self.lineEdit_sp_custom.setSizePolicy(sizePolicy1)
+        font4 = QFont()
+        font4.setPointSize(14)
+        self.lineEdit_sp_custom.setFont(font4)
+
+        self.gridLayout.addWidget(self.lineEdit_sp_custom, 7, 0, 1, 3)
+
 
         self.verticalLayout_4.addWidget(self.widget_4)
 
@@ -235,10 +264,10 @@ class Ui_SpeakerIdTab(object):
         self.label_sp_detectedspeakerstitle.setObjectName(u"label_sp_detectedspeakerstitle")
         sizePolicy2.setHeightForWidth(self.label_sp_detectedspeakerstitle.sizePolicy().hasHeightForWidth())
         self.label_sp_detectedspeakerstitle.setSizePolicy(sizePolicy2)
-        font4 = QFont()
-        font4.setPointSize(16)
-        font4.setBold(True)
-        self.label_sp_detectedspeakerstitle.setFont(font4)
+        font5 = QFont()
+        font5.setPointSize(16)
+        font5.setBold(True)
+        self.label_sp_detectedspeakerstitle.setFont(font5)
         self.label_sp_detectedspeakerstitle.setAlignment(Qt.AlignHCenter|Qt.AlignTop)
 
         self.verticalLayout_3.addWidget(self.label_sp_detectedspeakerstitle)
@@ -249,12 +278,12 @@ class Ui_SpeakerIdTab(object):
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.btn_expand_wordinfo = QPushButton(self.widget_sp_reactivefeedbackcontents)
         self.btn_expand_wordinfo.setObjectName(u"btn_expand_wordinfo")
-        font5 = QFont()
-        font5.setFamilies([u"Segoe UI"])
-        font5.setPointSize(20)
-        font5.setBold(False)
-        font5.setItalic(False)
-        self.btn_expand_wordinfo.setFont(font5)
+        font6 = QFont()
+        font6.setFamilies([u"Segoe UI"])
+        font6.setPointSize(20)
+        font6.setBold(False)
+        font6.setItalic(False)
+        self.btn_expand_wordinfo.setFont(font6)
         self.btn_expand_wordinfo.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btn_expand_wordinfo.setStyleSheet(u"QPushButton {\n"
 "    background-color: white;\n"
@@ -295,7 +324,7 @@ class Ui_SpeakerIdTab(object):
         sizePolicy7.setHeightForWidth(self.btn_expand_speakerinfo.sizePolicy().hasHeightForWidth())
         self.btn_expand_speakerinfo.setSizePolicy(sizePolicy7)
         self.btn_expand_speakerinfo.setMinimumSize(QSize(27, 29))
-        self.btn_expand_speakerinfo.setFont(font5)
+        self.btn_expand_speakerinfo.setFont(font6)
         self.btn_expand_speakerinfo.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btn_expand_speakerinfo.setStyleSheet(u"QPushButton {\n"
 "    background-color: white;\n"
@@ -331,31 +360,31 @@ class Ui_SpeakerIdTab(object):
         self.label_8.setObjectName(u"label_8")
         sizePolicy2.setHeightForWidth(self.label_8.sizePolicy().hasHeightForWidth())
         self.label_8.setSizePolicy(sizePolicy2)
-        font6 = QFont()
-        font6.setPointSize(14)
-        font6.setItalic(True)
-        self.label_8.setFont(font6)
+        font7 = QFont()
+        font7.setPointSize(14)
+        font7.setItalic(True)
+        self.label_8.setFont(font7)
 
         self.gridLayout_2.addWidget(self.label_8, 3, 3, 1, 1)
 
         self.label_distinctspeakercount = QLabel(self.widget_sp_reactivefeedbackcontents)
         self.label_distinctspeakercount.setObjectName(u"label_distinctspeakercount")
-        font7 = QFont()
-        font7.setPointSize(14)
-        font7.setBold(True)
-        self.label_distinctspeakercount.setFont(font7)
+        font8 = QFont()
+        font8.setPointSize(14)
+        font8.setBold(True)
+        self.label_distinctspeakercount.setFont(font8)
 
         self.gridLayout_2.addWidget(self.label_distinctspeakercount, 1, 5, 1, 1)
 
         self.label_unassignedwordcount = QLabel(self.widget_sp_reactivefeedbackcontents)
         self.label_unassignedwordcount.setObjectName(u"label_unassignedwordcount")
-        self.label_unassignedwordcount.setFont(font7)
+        self.label_unassignedwordcount.setFont(font8)
 
         self.gridLayout_2.addWidget(self.label_unassignedwordcount, 3, 5, 1, 1)
 
         self.label_9 = QLabel(self.widget_sp_reactivefeedbackcontents)
         self.label_9.setObjectName(u"label_9")
-        self.label_9.setFont(font6)
+        self.label_9.setFont(font7)
 
         self.gridLayout_2.addWidget(self.label_9, 1, 3, 1, 1)
 
@@ -370,14 +399,14 @@ class Ui_SpeakerIdTab(object):
         self.tableWidget_distinctspeakers = QTableWidget(self.widget_sp_reactivefeedbackcontents)
         if (self.tableWidget_distinctspeakers.columnCount() < 2):
             self.tableWidget_distinctspeakers.setColumnCount(2)
-        font8 = QFont()
-        font8.setPointSize(12)
-        font8.setBold(True)
+        font9 = QFont()
+        font9.setPointSize(12)
+        font9.setBold(True)
         __qtablewidgetitem = QTableWidgetItem()
-        __qtablewidgetitem.setFont(font8);
+        __qtablewidgetitem.setFont(font9);
         self.tableWidget_distinctspeakers.setHorizontalHeaderItem(0, __qtablewidgetitem)
         __qtablewidgetitem1 = QTableWidgetItem()
-        __qtablewidgetitem1.setFont(font8);
+        __qtablewidgetitem1.setFont(font9);
         self.tableWidget_distinctspeakers.setHorizontalHeaderItem(1, __qtablewidgetitem1)
         self.tableWidget_distinctspeakers.setObjectName(u"tableWidget_distinctspeakers")
         self.tableWidget_distinctspeakers.setFrameShape(QFrame.NoFrame)
@@ -394,10 +423,10 @@ class Ui_SpeakerIdTab(object):
         if (self.tableWidget_unassignedwords.columnCount() < 2):
             self.tableWidget_unassignedwords.setColumnCount(2)
         __qtablewidgetitem2 = QTableWidgetItem()
-        __qtablewidgetitem2.setFont(font8);
+        __qtablewidgetitem2.setFont(font9);
         self.tableWidget_unassignedwords.setHorizontalHeaderItem(0, __qtablewidgetitem2)
         __qtablewidgetitem3 = QTableWidgetItem()
-        __qtablewidgetitem3.setFont(font8);
+        __qtablewidgetitem3.setFont(font9);
         self.tableWidget_unassignedwords.setHorizontalHeaderItem(1, __qtablewidgetitem3)
         self.tableWidget_unassignedwords.setObjectName(u"tableWidget_unassignedwords")
         self.tableWidget_unassignedwords.setFrameShape(QFrame.NoFrame)
@@ -506,13 +535,38 @@ class Ui_SpeakerIdTab(object):
         self.label_sp_helppraat.setText("")
         self.radbtn_sp_elan.setText(QCoreApplication.translate("SpeakerIdTab", u"ELAN", None))
 #if QT_CONFIG(tooltip)
-        self.label_sp_helpstandard.setToolTip(QCoreApplication.translate("SpeakerIdTab", u"<html><head/><body><p><span style=\" font-size:11pt; font-weight:700; font-style:italic;\">Example of the Standard-Format:</span></p><p>&quot;A&quot;: Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text</p><p>&quot;B&quot;: NewParagraph-Text NewParagraph-Text NewParagraph-Text NewParagraph-Text NewParagraph-Text</p><p>&quot;A&quot;: NewParagraph-Text</p><p>&quot;C&quot;: NewParagraph-Text</p><p><br/></p></body></html>", None))
+        self.label_sp_helpstandard.setToolTip(QCoreApplication.translate("SpeakerIdTab", u"Example of the Standard-Format:\n"
+"            \"A\": Paragraph-Text...\n"
+"            \"B\": NewParagraph-Text...\n"
+"            \"A\": NewParagraph-Text...\n"
+"            \"C\": NewParagraph-Text...", None))
 #endif // QT_CONFIG(tooltip)
         self.label_sp_helpstandard.setText("")
         self.label_sp_helpflex.setText("")
         self.label_sp_helpelan.setText("")
         self.radbtn_sp_standard.setText(QCoreApplication.translate("SpeakerIdTab", u"CorpusCompass-Standard", None))
         self.radbtn_sp_praat.setText(QCoreApplication.translate("SpeakerIdTab", u"Praat", None))
+        self.radbtn_sp_custom.setText(QCoreApplication.translate("SpeakerIdTab", u"Custom", None))
+#if QT_CONFIG(tooltip)
+        self.label_sp_help_custom.setToolTip(QCoreApplication.translate("SpeakerIdTab", u"Your custom regular expression MUST contain a named capturing group called 'name'.\n"
+"            This tells the program which part of the match is the speaker's name.\n"
+"\n"
+"            The syntax is: (?P<name>...)\n"
+"\n"
+"            Example 1:\n"
+"            If your format is \"SPEAKER1:\", the regex could be:\n"
+"            (?P<name>\\w+):\n"
+"            - (?P<name>...) captures the name.\n"
+"            - \\w+ matches one or more letters/numbers.\n"
+"            - : matches the literal colon.\n"
+"\n"
+"            Example 2:\n"
+"            If your format is \"Speaker - John Doe\", the regex could be:\n"
+"            Speaker - (?P<name>[\\w\\s]+)\n"
+"            - [\\w\\s]+ matches letters, numbers, and spaces.", None))
+#endif // QT_CONFIG(tooltip)
+        self.lineEdit_sp_custom.setPlaceholderText(QCoreApplication.translate("SpeakerIdTab", u"Enter custom regex, e.g. (?P<name>\\w+):", None))
+        self.lineEdit_sp_custom.setText(QCoreApplication.translate("SpeakerIdTab", u"^(?P<name>[\\w]+)", None))
         self.label_sp_detectedspeakerstitle.setText(QCoreApplication.translate("SpeakerIdTab", u"Detected speakers\n"
 "for selected format", None))
         self.btn_expand_wordinfo.setText(QCoreApplication.translate("SpeakerIdTab", u"\u25b6", None))

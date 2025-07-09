@@ -16,7 +16,6 @@ GEN_DIR="$VIEW_DIR/generated"
 MAIN_FILE="$ROOT_DIR/main.py"
 
 
-set -e
 
 # --- Functions ---
 

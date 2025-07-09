@@ -86,7 +86,7 @@ class SpeakerDetector(QObject):
         # Search for speakers in every file provided
         for file in files:
             # Method returns all matches for speakers in the text
-            detected_speakers = re.finditer(re_speaker, file.content)
+            detected_speakers = re.finditer(re_speaker, file.content, re.MULTILINE)
 
             # Put the matches and additional info in a dataframe
             data = [

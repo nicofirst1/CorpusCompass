@@ -1,0 +1,7 @@
+Speaker1  this is what speaker 1 said
+Speaker2! this is a fancy speaker with a symbol which should not be included
+44Speak this starts with a number
+
+Spaker333     this has a lot of space
+Spk : this one has double punk
+spkt    this one tab

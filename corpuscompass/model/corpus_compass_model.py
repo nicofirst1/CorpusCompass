@@ -1958,6 +1958,7 @@ class Project(QObject):
             "proj_name": self.proj_name,
             "proj_description": self.proj_description,
             "speaker_format": self.get_speaker_format(),
+            "custom_speaker_format": self.speaker_detector.custom_format,
             "annotation_format": self.get_annotation_formats(),
             "independent_variables_filepath": os.path.join(
                 self.proj_directory, "independent_variables.json"
@@ -2088,6 +2089,7 @@ class Project(QObject):
         proj_name = project_dict["proj_name"]
         proj_description = project_dict["proj_description"]
         proj_speaker_format = project_dict["speaker_format"]
+        proj_custom_speaker_format = project_dict.get("custom_speaker_format")
         proj_annotation_formats = project_dict["annotation_format"]
 
         # Load the independent variables
@@ -2190,7 +2192,9 @@ class Project(QObject):
         project.speakers = speakers
         project.speakers_in_files = detected_speakers
         project.annotations_in_files = detected_annotations
-        project.set_speaker_format(proj_speaker_format)
+        project.set_speaker_format(
+            proj_speaker_format, custom_format=proj_custom_speaker_format
+        )
         for annotation_format, annotation_data in proj_annotation_formats.items():
             project.add_annotation_format(
                 annotation_str=annotation_format,

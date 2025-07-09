@@ -49,7 +49,14 @@ class SpeakerIdentificationTab(LazySignalTab, Ui_SpeakerIdTab):
         self.radbtn_sp_elan.toggled.connect(
             lambda: controller.on_speaker_format_changed(self.radbtn_sp_elan)
         )
+        self.radbtn_sp_custom.toggled.connect(
+            lambda: controller.on_speaker_format_changed(self.radbtn_sp_custom)
+        )
 
+        self.lineEdit_sp_custom.textChanged.connect(
+            controller.on_custom_speaker_regex_changed
+        )
+    
     def __init__(self, parent: "CorpusCompassView") -> None:
         super().__init__(parent)
         self.setupUi(self)
@@ -58,6 +65,13 @@ class SpeakerIdentificationTab(LazySignalTab, Ui_SpeakerIdTab):
         # show/hide elements
         self.tableWidget_distinctspeakers.hide()
         self.tableWidget_unassignedwords.hide()
+        self.lineEdit_sp_custom.hide()
+
+        # Connect toggled signals for radio buttons to manage line edit visibility
+        for btn in [self.radbtn_sp_standard, self.radbtn_sp_praat, self.radbtn_sp_elan, self.radbtn_sp_flex, self.radbtn_sp_custom]:
+            btn.toggled.connect(self.on_format_selection_changed)
+
+        self.on_format_selection_changed() # Set initial state
 
         # self.add_speaker_table_row("Speaker 1", 10)
         # self.add_speaker_table_row("Speaker 2", 5)
@@ -76,6 +90,14 @@ class SpeakerIdentificationTab(LazySignalTab, Ui_SpeakerIdTab):
                 column, QHeaderView.ResizeMode.Fixed
             )
 
+    def on_format_selection_changed(self):
+        """
+        Shows or hides the custom regex line edit based on whether the 'Custom'
+        radio button is selected.
+        """
+        self.lineEdit_sp_custom.setVisible(self.radbtn_sp_custom.isChecked())
+            
+
     def get_selected_format(self) -> str:
         """
         Returns the selected speaker format. Currently supported formats are
@@ -92,6 +114,8 @@ class SpeakerIdentificationTab(LazySignalTab, Ui_SpeakerIdTab):
             return "ELAN"
         if self.radbtn_sp_flex.isChecked():
             return "FLEX"
+        if self.radbtn_sp_custom.isChecked():
+            return "CUSTOM"
 
     def update_labels(self, speaker_count: int, word_count: int):
         """

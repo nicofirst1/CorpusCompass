@@ -258,12 +258,27 @@ class Controller(QObject):
         Saves settings and returns back to homescreen.
         """
         speaker_format = self.view.speaker_tab.get_selected_format()
-        self.model.current_project.set_speaker_format(speaker_format)
+        custom_regex = None
+        if speaker_format == "CUSTOM":
+            custom_regex = self.view.speaker_tab.lineEdit_sp_custom.text()
+            if not custom_regex:
+                self.on_error_occurred("Custom speaker regex cannot be empty.")
+                return
+
+        self.model.current_project.set_speaker_format(speaker_format, custom_format=custom_regex)
         self.model.current_project.save_project_metadata()
         self.model.current_project.detect_speakers(
             is_synchronous=False, save_detected_speakers=True
         )
         self.view.switch_to_tab(Tab.HOME_TAB)
+
+    def on_custom_speaker_regex_changed(self):
+        """
+        Is called when the user changes the custom speaker regex.
+        Updates the speaker preview if the custom format is selected.
+        """
+        if self.view.speaker_tab.radbtn_sp_custom.isChecked():
+            self.update_speaker_preview()
 
     def on_speaker_format_changed(self, button: QRadioButton):
         """Is called, when the user changes the speaker format by selecting a radio button.
@@ -276,8 +291,20 @@ class Controller(QObject):
         """Causes the model to create a new speaker preview. This data is then
         send to the controller via the "on_speaker_preview_changed"-Signal
         """
-        speaker_format = self.view.speaker_tab.get_selected_format()
-        self.model.current_project.get_speaker_preview(speaker_format)
+        from corpuscompass.model.variables_speaker_detection import SpeakerFormats
+        
+        speaker_format_str = self.view.speaker_tab.get_selected_format()
+        speaker_format_enum = SpeakerFormats(speaker_format_str)
+
+        custom_regex = None
+        if speaker_format_enum == SpeakerFormats.CUSTOM:
+            custom_regex = self.view.speaker_tab.lineEdit_sp_custom.text()
+
+        # Temporarily set the format on the detector for the preview.
+        self.model.current_project.speaker_detector.set_speaker_format(speaker_format_enum, custom_regex)
+
+        # The get_speaker_preview method in the model will now use the temporarily set format.
+        self.model.current_project.get_speaker_preview(speaker_format=speaker_format_enum)
 
     def on_speaker_cancel_button_clicked(self):
         """

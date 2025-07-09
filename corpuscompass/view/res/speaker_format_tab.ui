@@ -219,8 +219,12 @@ QPushButton:default {
             </sizepolicy>
            </property>
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt; font-weight:700; font-style:italic;&quot;&gt;Example of the Standard-Format:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&amp;quot;A&amp;quot;: Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text Paragraph-Text&lt;/p&gt;&lt;p&gt;&amp;quot;B&amp;quot;: NewParagraph-Text NewParagraph-Text NewParagraph-Text NewParagraph-Text NewParagraph-Text&lt;/p&gt;&lt;p&gt;&amp;quot;A&amp;quot;: NewParagraph-Text&lt;/p&gt;&lt;p&gt;&amp;quot;C&amp;quot;: NewParagraph-Text&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
+            <string>Example of the Standard-Format:
+            "A": Paragraph-Text...
+            "B": NewParagraph-Text...
+            "A": NewParagraph-Text...
+            "C": NewParagraph-Text...</string>
+            </property>
            <property name="text">
             <string/>
            </property>
@@ -341,6 +345,92 @@ QPushButton:default {
             </size>
            </property>
           </spacer>
+         </item> 
+        <item row="6" column="0">
+          <widget class="QRadioButton" name="radbtn_sp_custom">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>22</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Custom</string>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>16</width>
+             <height>16</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="2">
+          <widget class="QLabel" name="label_sp_help_custom">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>24</width>
+             <height>24</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Your custom regular expression MUST contain a named capturing group called 'name'.
+            This tells the program which part of the match is the speaker's name.
+
+            The syntax is: (?P&lt;name&gt;...)
+
+            Example 1:
+            If your format is "SPEAKER1:", the regex could be:
+            (?P&lt;name&gt;\w+):
+            - (?P&lt;name&gt;...) captures the name.
+            - \w+ matches one or more letters/numbers.
+            - : matches the literal colon.
+
+            Example 2:
+            If your format is "Speaker - John Doe", the regex could be:
+            Speaker - (?P&lt;name&gt;[\w\s]+)
+            - [\w\s]+ matches letters, numbers, and spaces.</string>
+           </property>
+           <property name="pixmap">
+            <pixmap resource="resources.qrc">:/images/images/Help_Icon.svg</pixmap>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0" colspan="3">
+          <widget class="QLineEdit" name="lineEdit_sp_custom">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="placeholderText">
+            <string>Enter custom regex, e.g. (?P&lt;name&gt;\w+):</string>
+           </property>
+           <property name="text">
+            <string>^(?P&lt;name&gt;[\w]+)</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -401,7 +491,7 @@ for selected format</string>
     background-color: white;
     border: 1px solid white;
 	color: grey;
-	font: 20pt &quot;Segoe UI&quot;;
+	font: 20pt "Segoe UI";
 	min-height: 25px;
 	max-height: 25px;
 	min-width: 25px;
@@ -467,7 +557,7 @@ QPushButton::menu-indicator {
     background-color: white;
     border: 1px solid white;
 	color: grey;
-	font: 20pt &quot;Segoe UI&quot;;
+	font: 20pt "Segoe UI";
 	min-height: 25px;
 	max-height: 25px;
 	min-width: 25px;
