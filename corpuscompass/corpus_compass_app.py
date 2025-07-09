@@ -9,6 +9,7 @@ from corpuscompass.model import CorpusCompassModel
 from corpuscompass.controller import Controller
 from corpuscompass.utils.exception_handling import setup_exception_handling
 import logging
+from pathlib import Path
 
 
 class CorpusCompassApp(QApplication):
@@ -24,6 +25,30 @@ class CorpusCompassApp(QApplication):
 
     def __init__(self, sys_argv, write_to_logfile: bool = False):
         super(CorpusCompassApp, self).__init__(sys_argv)
+        
+        if write_to_logfile:
+            # Set up the logging file for logging all messages
+            log_dir = Path.home() / "CorpusCompassLogs"
+            log_dir.mkdir(exist_ok=True)
+            log_file = log_dir / "corpus_compass.log"
+
+            logging.basicConfig(
+                filename=log_file,
+                filemode="a", # Append to the log file
+                format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S",
+                level=logging.INFO, # Log INFO level and above
+            )
+            # Also add a stream handler to see logs in the console during development
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(logging.INFO)
+            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+            console_handler.setFormatter(formatter)
+            logging.getLogger().addHandler(console_handler)
+
+            logging.info("CorpusCompass application started.")
+        
+
         # Initialize model
         self.model = CorpusCompassModel()
 
@@ -32,16 +57,6 @@ class CorpusCompassApp(QApplication):
 
         # Initialize the controller
         self.controller = Controller(self.model, self.view)
-
-        if write_to_logfile:
-            # Set up the logging file for logging unhandled exceptions
-            logging.basicConfig(
-                filename="log.txt",
-                filemode="a",
-                format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
-                datefmt="%H:%M:%S",
-                level=logging.DEBUG,
-            )
 
         # Redirect uncaught exceptions to be logged in a file.
         setup_exception_handling()

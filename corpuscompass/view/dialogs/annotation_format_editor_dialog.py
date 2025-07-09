@@ -75,6 +75,8 @@ class AnnotationFormatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
 
         # set initial properties
         self.add_init_token_identifier()
+        self.checkbox_annotdial_multipleannot.setChecked(False)
+        self.on_multiple_annot_checked()
 
     def add_init_token_identifier(self):
         """
@@ -613,7 +615,10 @@ class AnnotationFormatEditorDialog(QDialog, Ui_EditorAnnotationformatDialog):
             self.btn_resetseparator.setEnabled(False)
 
         # if the dialog is called for edit, the checking of a checkbox needs to be stored in the corresponding temporary data structure
-        if self.comboBox_selectformat.isVisible():
+        if (
+            self.comboBox_selectformat.isVisible()
+            and self.comboBox_selectformat.currentText()
+        ):
             self.current_format_checkboxes_temp[
                 self.comboBox_selectformat.currentText()
             ] = self.checkbox_annotdial_multipleannot.isChecked()

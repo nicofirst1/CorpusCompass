@@ -1162,7 +1162,7 @@ class Project(QObject):
         return self.annotations_in_files.copy()
 
     def get_annotation_preview(
-        self, annotation_format: str, is_synchronous: bool = False
+        self, annotation_format: str, separator: str, is_synchronous: bool = False
     ) -> None | pd.DataFrame:
         """Detects for a given annotation format the annotations in the corpora files.
         This is done in a asynchronous way, the results are sent to the frontend using
@@ -1174,7 +1174,7 @@ class Project(QObject):
         max_amount_of_annotations = (
             10  # TODO: Put this in a config file, no magic numbers
         )
-        annotation_format_dict = {annotation_format: (annotation_re, "")}
+        annotation_format_dict = {annotation_format: (annotation_re, separator)}
 
         if not is_synchronous:  # Start a separate thread for detection annotation
             if (

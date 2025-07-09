@@ -464,12 +464,15 @@ class Controller(QObject):
         Is called when the user clicks the "test annotation format" button in the annotation format section.
         Starts the detection process of the annotation format for just the current input format and displays the results in the table in the dialog.
         """
-        preview_data = self.model.current_project.get_detected_annotations()
         current_format_as_string = (
             self.view.annotationformat_editor_dialog.get_current_format_as_string()
         )
+        current_separator_symbols = (
+            self.view.annotationformat_editor_dialog.fetch_current_separator_symbols()
+        )
+        separator_string = "".join(current_separator_symbols)
         self.model.current_project.get_annotation_preview(
-            current_format_as_string, is_synchronous=False
+            current_format_as_string, separator_string, is_synchronous=False
         )
 
     def on_annotation_preview_changed(self, preview_data: pd.DataFrame) -> None:
@@ -964,13 +967,25 @@ class Controller(QObject):
 
         # 4. Check which imports, if any, were ineffective.
         ineffective_imports = []
-        if dialog.iv_filepath and iv_count_before == iv_count_after and not dialog.radiobtn_repiv.isChecked():
+        if (
+            dialog.iv_filepath
+            and iv_count_before == iv_count_after
+            and not dialog.radiobtn_repiv.isChecked()
+        ):
             ineffective_imports.append("Independent Variables")
-        
-        if dialog.dv_filepath and dv_count_before == dv_count_after and not dialog.radiobtn_repdv.isChecked():
+
+        if (
+            dialog.dv_filepath
+            and dv_count_before == dv_count_after
+            and not dialog.radiobtn_repdv.isChecked()
+        ):
             ineffective_imports.append("Dependent Variables")
 
-        if dialog.speaker_filepath and speaker_count_before == speaker_count_after and not dialog.radiobtn_repsp.isChecked():
+        if (
+            dialog.speaker_filepath
+            and speaker_count_before == speaker_count_after
+            and not dialog.radiobtn_repsp.isChecked()
+        ):
             ineffective_imports.append("Speakers")
 
         # 5. If there were ineffective imports, notify the user.
