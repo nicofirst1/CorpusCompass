@@ -13,10 +13,11 @@
 #   ./build.sh
 #
 
-VIEW_DIR="corpuscompass/view"
+ROOT_DIR="corpuscompass"
+VIEW_DIR="$ROOT_DIR/view"
 RES_DIR="$VIEW_DIR/res"
 GEN_DIR="$VIEW_DIR/generated"
-
+MAIN_FILE="$ROOT_DIR/main.py"
 
 set -e  # Exit immediately on error
 
@@ -59,7 +60,7 @@ function build_mac() {
     --icon="includes/icon.icns" \
     --distpath "release/mac" \
     --workpath "build/mac" \
-    corpuscompass/main.py
+    "$MAIN_FILE"
 
   echo "macOS build finished."
   echo "You can find the app folder at: release/mac/CorpusCompass.app"
@@ -77,7 +78,7 @@ function build_windows() {
     --icon="includes/icon.ico" \
     --distpath "release/win" \
     --workpath "build/win" \
-    main.py
+    "$MAIN_FILE"
 
   echo "Windows build finished."
   echo "You can find the .exe at: release/win/CorpusCompass.exe"
@@ -119,7 +120,7 @@ function main() {
 
   compile_resources
   # If you want to compile UI files automatically, uncomment:
-  # compile_ui_files
+  #compile_ui_files
 
   # Detect OS, build accordingly
   if [[ "$OSTYPE" == "darwin"* ]]; then
