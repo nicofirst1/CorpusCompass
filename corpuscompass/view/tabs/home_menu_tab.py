@@ -49,6 +49,9 @@ class HomeMenuTab(LazySignalTab, Ui_HomeMenuTab):
 
         # Connect Signals from the main view to Slots
         self.view.proj_name_changed.connect(self.on_proj_name_changed)
+        # Hide the settings button
+        self.btn_settings.hide()
+
 
     def on_proj_name_changed(self, proj_name: str) -> None:
         """
