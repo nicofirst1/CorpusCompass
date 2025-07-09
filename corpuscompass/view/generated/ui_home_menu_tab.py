@@ -30,21 +30,22 @@ class Ui_HomeMenuTab(object):
 "}\n"
 "\n"
 "QPushButton {\n"
-"    background-color:rgb(154, 217, 234) ;\n"
+"    background-color:rgb(242, 180, 130) ;\n"
 "	color: white;\n"
 "    min-width: 80px;\n"
 "	min-height: 40px;\n"
 "	border-style: solid;\n"
-"	border-color: rgb(154, 217, 234);\n"
-"	border-width: 5px;\n"
+"	border-color:rgb(208, 105, 22);\n"
+"	border-width: 2px;\n"
 "	border-radius: 10px;\n"
 "}\n"
 "\n"
-"QPushButton:pressed {\n"
-"	background-color:rgb(134, 189, 203) ;\n"
-"	border-color: rgb(134, 189, 203);\n"
+"QPushButton:hover {\n"
+"	background-color:rgb(208, 105, 22);\n"
+"	border-color: rgb(162, 81, 17);\n"
 "	color: rgb(245, 245, 245);\n"
-"}")
+"}\n"
+"")
         self.gridLayout_2 = QGridLayout(HomeMenuTab)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
         self.widget_analysebuttoncontainer = QWidget(HomeMenuTab)
@@ -76,20 +77,23 @@ class Ui_HomeMenuTab(object):
         self.btn_home_analysecorpus.setFont(font1)
         self.btn_home_analysecorpus.setStyleSheet(u"QPushButton {\n"
 "	color: white;\n"
-"	background-color: rgb(0, 170, 0);\n"
+"	background-color: rgb(43, 58, 66);\n"
+"    border-width: 2px;\n"
+"    border-color: rgb(30, 41, 46);\n"
 "    min-width: 250px;\n"
 "	min-height: 80px;\n"
 "	border-style: solid;\n"
-"	border-color: rgb(0, 125, 0);\n"
-"	border-width: 2px;\n"
 "	border-radius: 10px;\n"
-"   margin-top: 10px; \n"
-"   margin-bottom: 10px;\n"
+"    margin-top: 10px; \n"
+"    margin-bottom: 10px;\n"
 "}\n"
 "\n"
-"QPushButton:pressed {\n"
-"	background-color: rgb(0, 134, 0);\n"
+"QPushButton:hover {\n"
+"	background-color:rgb(70, 95, 108);\n"
+"	border-color: rgb(30, 41, 46);\n"
+"	color: rgb(245, 245, 245);\n"
 "}\n"
+"\n"
 "\n"
 "QPushButton:disabled{\n"
 "  background-color: rgb(121, 121, 121);\n"
@@ -212,7 +216,7 @@ class Ui_HomeMenuTab(object):
         self.scrollArea_buttons.setWidgetResizable(True)
         self.scrollAreaWidgetContents_3 = QWidget()
         self.scrollAreaWidgetContents_3.setObjectName(u"scrollAreaWidgetContents_3")
-        self.scrollAreaWidgetContents_3.setGeometry(QRect(0, 0, 600, 892))
+        self.scrollAreaWidgetContents_3.setGeometry(QRect(0, 0, 589, 928))
         self.verticalLayout_5 = QVBoxLayout(self.scrollAreaWidgetContents_3)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.horizontalLayout_2 = QHBoxLayout()
@@ -252,7 +256,7 @@ class Ui_HomeMenuTab(object):
         self.btn_closeproject.setObjectName(u"btn_closeproject")
         self.btn_closeproject.setFont(font)
         self.btn_closeproject.setStyleSheet(u"QPushButton {\n"
-"	background-color: rgb(255, 92, 92);\n"
+"	background-color: rgb(242 ,66, 8);\n"
 "    border: 2px solid black;\n"
 "	color: black;\n"
 "	min-height: 50px;\n"
@@ -262,12 +266,12 @@ class Ui_HomeMenuTab(object):
 "}\n"
 "\n"
 "QPushButton:hover {\n"
-"	background-color: rgb(255, 50, 50);\n"
+"	background-color: rgb(145, 0, 40);\n"
 "    color: dark grey; \n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
-"	background-color: rgb(255, 120, 120);\n"
+"	background-color: rgb(145, 0, 40);\n"
 "}\n"
 "\n"
 "\n"
@@ -338,7 +342,8 @@ class Ui_HomeMenuTab(object):
         font3.setBold(True)
         self.btn_home_managecorpus_sect.setFont(font3)
         self.btn_home_managecorpus_sect.setStyleSheet(u"QPushButton:disabled{\n"
-"  background-color: rgb(121, 121, 121);\n"
+"  background-color: rgb(242, 180, 130);\n"
+"\n"
 "}")
 
         self.verticalLayout_5.addWidget(self.btn_home_managecorpus_sect, 0, Qt.AlignTop)

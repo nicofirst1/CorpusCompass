@@ -16,21 +16,22 @@
 }
 
 QPushButton {
-    background-color:rgb(154, 217, 234) ;
+    background-color:rgb(242, 180, 130) ;
 	color: white;
     min-width: 80px;
 	min-height: 40px;
 	border-style: solid;
-	border-color: rgb(154, 217, 234);
-	border-width: 5px;
+	border-color:rgb(208, 105, 22);
+	border-width: 2px;
 	border-radius: 10px;
 }
 
-QPushButton:pressed {
-	background-color:rgb(134, 189, 203) ;
-	border-color: rgb(134, 189, 203);
+QPushButton:hover {
+	background-color:rgb(208, 105, 22);
+	border-color: rgb(162, 81, 17);
 	color: rgb(245, 245, 245);
-}</string>
+}
+</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="2" column="1" alignment="Qt::AlignBottom">
@@ -75,20 +76,23 @@ QPushButton:pressed {
         <property name="styleSheet">
          <string notr="true">QPushButton {
 	color: white;
-	background-color: rgb(0, 170, 0);
+	background-color: rgb(43, 58, 66);
+    border-width: 2px;
+    border-color: rgb(30, 41, 46);
     min-width: 250px;
 	min-height: 80px;
 	border-style: solid;
-	border-color: rgb(0, 125, 0);
-	border-width: 2px;
 	border-radius: 10px;
-   margin-top: 10px; 
-   margin-bottom: 10px;
+    margin-top: 10px; 
+    margin-bottom: 10px;
 }
 
-QPushButton:pressed {
-	background-color: rgb(0, 134, 0);
+QPushButton:hover {
+	background-color:rgb(70, 95, 108);
+	border-color: rgb(30, 41, 46);
+	color: rgb(245, 245, 245);
 }
+
 
 QPushButton:disabled{
   background-color: rgb(121, 121, 121);
@@ -250,8 +254,8 @@ QPushButton::menu-indicator {
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>600</width>
-           <height>892</height>
+           <width>589</width>
+           <height>928</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -308,7 +312,7 @@ QPushButton::menu-indicator {
                  </property>
                  <property name="styleSheet">
                   <string notr="true">QPushButton {
-	background-color: rgb(255, 92, 92);
+	background-color: rgb(242 ,66, 8);
     border: 2px solid black;
 	color: black;
 	min-height: 50px;
@@ -318,12 +322,12 @@ QPushButton::menu-indicator {
 }
 
 QPushButton:hover {
-	background-color: rgb(255, 50, 50);
+	background-color: rgb(145, 0, 40);
     color: dark grey; 
 }
 
 QPushButton:pressed {
-	background-color: rgb(255, 120, 120);
+	background-color: rgb(145, 0, 40);
 }
 
 
@@ -424,7 +428,8 @@ QPushButton::menu-indicator {
             </property>
             <property name="styleSheet">
              <string notr="true">QPushButton:disabled{
-  background-color: rgb(121, 121, 121);
+  background-color: rgb(242, 180, 130);
+
 }</string>
             </property>
             <property name="text">

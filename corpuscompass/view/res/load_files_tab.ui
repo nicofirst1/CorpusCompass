@@ -16,19 +16,25 @@
 }
 
 QPushButton {
-    background-color:rgb(154, 217, 234) ;
+    background-color:rgb(242, 180, 130) ;
 	color: white;
     min-width: 80px;
 	min-height: 40px;
 	border-style: solid;
-	border-color: rgb(154, 217, 234);
-	border-width: 5px;
+	border-color: rgb(242, 180, 130);
+	border-width: 2px;
 	border-radius: 10px;
 }
 
 QPushButton:pressed {
-	background-color:rgb(134, 189, 203) ;
-	border-color: rgb(134, 189, 203);
+	background-color:rgb(162, 81, 17) ;
+	border-color: rgb(162, 81, 17);
+	color: rgb(245, 245, 245);
+}
+
+QPushButton:hover {
+	background-color:rgb(208, 105, 22);
+	border-color: rgb(162, 81, 17);
 	color: rgb(245, 245, 245);
 }
 
@@ -113,7 +119,7 @@ QTableWidget {
 }
 
 QTableWidget::item:selected {
-    background-color: rgba(50, 50, 225, 0.1); /* Change the background color and opacity */
+    background-color: rgba(50, 50, 225, 0.1); 
 	color:black;
 }
 
@@ -129,7 +135,7 @@ QAbstractItemView::indicator:hover {
 
 QAbstractItemView::indicator:checked:hover {
     /* Adjust the appearance of the checked checkbox when hovering */
-    background-color: rgb(255, 166, 167); /* Example: change background color of checked checkbox when hovering */
+    background-color: rgb(155, 154, 154); /* Example: change background color of checked checkbox when hovering */
 
 }
 
@@ -261,20 +267,25 @@ Files</string>
          <property name="styleSheet">
           <string notr="true">QPushButton {
 	color: white;
-	background-color: rgb(0, 170, 0);
+	background-color: rgb(43, 58, 66);
 	border-style: solid;
-	border-color: rgb(0, 125, 0);
-	border-width: 2px;
 	border-radius: 10px;
-}
+    border-width: 2px;
+    border-color: rgb(30, 41, 46);
+    }
 
-QPushButton:pressed {
-	background-color: rgb(0, 134, 0);
-}
 
-QPushButton:disabled{
-  background-color: rgb(121, 121, 121);
-}</string>
+    QPushButton:hover {
+        background-color:rgb(30, 41, 46);
+        border-color: rgb(20, 31, 36);
+    }
+
+
+
+    QPushButton:disabled{
+    background-color: rgb(121, 121, 121);
+    }
+</string>
          </property>
          <property name="text">
           <string>Save</string>

@@ -49,6 +49,7 @@ class CorpusCompassApp(QApplication):
 
             logging.info("CorpusCompass application started.")
 
+        
         app_style = CustomProxyStyle()
         self.setStyle(app_style)
 
