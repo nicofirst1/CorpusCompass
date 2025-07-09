@@ -25,7 +25,7 @@ class CorpusCompassApp(QApplication):
 
     def __init__(self, sys_argv, write_to_logfile: bool = False):
         super(CorpusCompassApp, self).__init__(sys_argv)
-        
+
         if write_to_logfile:
             # Set up the logging file for logging all messages
             log_dir = Path.home() / "CorpusCompassLogs"
@@ -34,20 +34,19 @@ class CorpusCompassApp(QApplication):
 
             logging.basicConfig(
                 filename=log_file,
-                filemode="a", # Append to the log file
+                filemode="a",  # Append to the log file
                 format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                 datefmt="%Y-%m-%d %H:%M:%S",
-                level=logging.INFO, # Log INFO level and above
+                level=logging.INFO,  # Log INFO level and above
             )
             # Also add a stream handler to see logs in the console during development
             console_handler = logging.StreamHandler()
             console_handler.setLevel(logging.INFO)
-            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+            formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
             console_handler.setFormatter(formatter)
             logging.getLogger().addHandler(console_handler)
 
             logging.info("CorpusCompass application started.")
-        
 
         # Initialize model
         self.model = CorpusCompassModel()

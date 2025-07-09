@@ -262,11 +262,11 @@ class AnnotationDetector:
         for detected_annotation in detected_annotations:
             if max_amount and counter >= max_amount:
                 break
-            
+
             # Using .get() with a default value is safer in case a group is not found
             token = detected_annotation.groupdict().get("token", "")
             identifier = detected_annotation.groupdict().get("identifier", "")
-            
+
             data.append(
                 (
                     token,
@@ -279,32 +279,43 @@ class AnnotationDetector:
 
         # If no data was found, return an empty DataFrame with the correct columns
         if not data:
-            return pd.DataFrame(columns=["token", "identifier", "annotation_start", "annotation_end", "annotation_string", "file_name", "file_version"])
+            return pd.DataFrame(
+                columns=[
+                    "token",
+                    "identifier",
+                    "annotation_start",
+                    "annotation_end",
+                    "annotation_string",
+                    "file_name",
+                    "file_version",
+                ]
+            )
 
         # Create the DataFrame
         detected_annot_df = pd.DataFrame(
             data, columns=["token", "identifier", "annotation_start", "annotation_end"]
         )
-        
+
         # Split the identifier string into a list of identifiers if a separator is defined
         if annot_sep:
             # Create a regex pattern from the separator characters. Escape special regex characters.
             split_pattern = f"[{re.escape(annot_sep)}]"
             detected_annot_df["identifier"] = detected_annot_df["identifier"].apply(
-                lambda x: [s for s in re.split(split_pattern, x) if s] # filter out empty strings
+                lambda x: [
+                    s for s in re.split(split_pattern, x) if s
+                ]  # filter out empty strings
             )
         else:
             detected_annot_df["identifier"] = detected_annot_df["identifier"].apply(
                 lambda x: [x]
             )
-            
+
         # Add additional information to the dataframe
         detected_annot_df["annotation_string"] = annot_str
         detected_annot_df["file_name"] = file.name
         detected_annot_df["file_version"] = file.version
 
         return detected_annot_df
-
 
     def get_annotation_format(self, annotation_format_str: str) -> Tuple[str, str]:
         """Returns the regular expression and the separator for multiple identifiers

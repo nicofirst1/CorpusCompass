@@ -52,7 +52,6 @@ class HomeMenuTab(LazySignalTab, Ui_HomeMenuTab):
         # Hide the settings button
         self.btn_settings.hide()
 
-
     def on_proj_name_changed(self, proj_name: str) -> None:
         """
         Updates the displayed project name

@@ -86,6 +86,7 @@ class CorpusCompassView(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)
 
+       
         # Initialize Tabs
         self.start_screen_tab = StartScreenTab(self)
         self.home_menu_tab = HomeMenuTab(self)

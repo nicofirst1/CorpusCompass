@@ -65,9 +65,9 @@ class SettingValue:
     @value.setter
     def value(self, value):
         if self.choices is not None:
-            assert value in self.choices, (
-                f"Value {value} not in the choices {self.choices}"
-            )
+            assert (
+                value in self.choices
+            ), f"Value {value} not in the choices {self.choices}"
         self._value = value
 
 
