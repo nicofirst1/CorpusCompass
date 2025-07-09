@@ -26,7 +26,7 @@ MAIN_FILE="$ROOT_DIR/main.py"
 #######################################
 function compile_resources() {
   echo "Compiling Qt resources..."
-  poetry run pyside6-rcc corpuscompass/view/res/resources.qrc -o resources_rc.py
+  poetry run pyside6-rcc "$RES_DIR/resources.qrc" -o resources_rc.py
   echo "Done compiling Qt resources."
 }
 
@@ -50,6 +50,8 @@ function prepare_build() {
     compile_resources
     # If you need to compile UI files, uncomment the next line
     compile_ui_files
+
+    mkdir -p "release/mac" "release/win" "build/mac" "build/win"
     echo "    Preparation complete."
 }
 
@@ -69,7 +71,8 @@ function build_mac() {
     --icon="includes/icon.icns" \
     --distpath "release/mac" \
     --workpath "build/mac" \
-    corpuscompass/main.py
+    "$MAIN_FILE"
+
   echo "    macOS build finished in release/mac/"
 }
 
@@ -85,7 +88,9 @@ function build_windows() {
     --icon="includes/icon.ico" \
     --distpath "release/win" \
     --workpath "build/win" \
-    corpuscompass/main.py
+    "$MAIN_FILE"
+
+
   echo "    Windows build finished in release/win/"
 }
 #######################################

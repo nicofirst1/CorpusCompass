@@ -28,7 +28,9 @@ jobs:
         run: poetry install --no-root
         
       - name: Make build script executable
-        run: chmod +x build.sh
+        run: | 
+          chmod +x build.sh
+          prepare_build
 
       - name: Build macOS Application
         if: matrix.os == 'macos-latest'
