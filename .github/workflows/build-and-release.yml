@@ -28,6 +28,7 @@ jobs:
           virtualenvs-in-project: true
       
       - name: Install dependencies with Poetry
+        shell: bash
         run: poetry install --no-interaction --no-root
         
       - name: Make build script executable
