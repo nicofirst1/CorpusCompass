@@ -1,18 +1,14 @@
 #!/usr/bin/env bash
-#
-# build.sh
-# A modular Bash script that builds CorpusCompass as a standalone application
-# on either macOS or Windows (Git Bash / MSYS). It:
-#   1) Installs dependencies with Poetry
-#   2) Compiles Qt resources (and optionally UI files)
-#   3) Uses PyInstaller to produce a single .app (macOS) or .exe (Windows)
-#   4) Asks user if they'd like to place the final build on the Desktop
-#
-# Usage:
-#   chmod +x build.sh
-#   ./build.sh
-#
 
+
+# --- Guard against direct execution ---
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "This script is not a standalone executable. It should be sourced."
+    exit 1
+fi
+
+
+# --- Configuration ---
 ROOT_DIR="corpuscompass"
 VIEW_DIR="$ROOT_DIR/view"
 RES_DIR="$VIEW_DIR/res"
@@ -20,12 +16,16 @@ GEN_DIR="$VIEW_DIR/generated"
 MAIN_FILE="$ROOT_DIR/main.py"
 
 
+set -e
+
+# --- Functions ---
+
 #######################################
 # Compiles Qt resources (resources.qrc → resources_rc.py).
 # Adjust the command or filenames if yours differ.
 #######################################
 function compile_resources() {
-  echo "Compiling Qt resources..."
+  echo "--> Compiling Qt resources..."
   poetry run pyside6-rcc "$RES_DIR/resources.qrc" -o resources_rc.py
   echo "Done compiling Qt resources."
 }
