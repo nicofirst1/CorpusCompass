@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "corpuscompass"
-version = "2.0.1"
+version = "2.0.5"
 description = "A desktop application for managing and analyzing annotated corpora."
 authors = ["Nicolo' Brandizzi <nicolo.brandizzi@iais.fraunhofer.de>"]
 license = "MIT"
